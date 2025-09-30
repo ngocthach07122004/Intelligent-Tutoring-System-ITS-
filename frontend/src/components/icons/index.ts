@@ -1,0 +1,25 @@
+import { InfoIcon } from "./collections/InfoIcon";
+
+export { EyeIcon } from "./collections/EyeIcon";
+export { MailIcon } from "./collections/MailIcon";
+export { LockIcon } from "./collections/LockIcon";
+export { GoogleIcon } from "./collections/GoogleIcon";
+export { MicrosoftIcon } from "./collections/MicrosoftIcon";
+export { LogoIcon } from "./collections/LogoIcon";
+export { SpinnerIcon } from "./collections/SpinnerIcon";
+export { UserIcon } from "./collections/UserIcon";
+export { AlertIcon } from "./collections/AlertIcon";
+export { HomeIcon } from "./collections/HomeIcon";
+export { UsersIcon } from "./collections/UsersIcon";
+export { SettingsIcon } from "./collections/SettingsIcon";
+export { PlusIcon } from "./collections/PlusIcon";
+export { MessageSquareIcon } from "./collections/MessageSquareIcon";
+export { MenuIcon } from "./collections/MenuIcon";
+export { GithubIcon } from "./collections/GithubIcon";
+export { XIcon } from "./collections/XIcon";
+export { FeedbackIcon } from "./collections/FeedbackIcon";
+export { ChevronLeftIcon } from "./collections/ChevronLeftIcon";
+export { CalendarIcon } from "./collections/CalendarIcon";
+export { InfoIcon } from "./collections/InfoIcon";
+export {  MoonIcon } from "./collections/MoonIcon"
+export {  SunIcon } from "./collections/SunIcon"
