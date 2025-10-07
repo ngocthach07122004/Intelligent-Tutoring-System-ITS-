@@ -23,5 +23,5 @@ export default function HeaderWrapper() {
 
   if (pathname === '/') return null;
 
-  return <header className="bg-gray-800 text-white p-4">Default Header</header>;
+  return <header className="bg-gray-800 text-white p-4">Default Header</header>; 
 }

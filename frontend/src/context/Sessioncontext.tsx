@@ -34,7 +34,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
             try {
                 const infoRes = await getAuthenticatedInfo(); // Use the API function
                 if (infoRes.status !== 200) {
-                    router.push("/auth/login");                 
+                    // router.push("/auth/login");                 
                     setStatus("unauthenticated");
                     return;
                 }
@@ -45,7 +45,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
             } catch (error) {
                 console.error("Error fetching user info:", error);
                 if (pathName !== "/auth/login" && pathName !== "/auth/signup") {
-                    router.push("/auth/login");                 
+                    // router.push("/auth/login");                 
                     setStatus("unauthenticated");
                     return;
                 }             

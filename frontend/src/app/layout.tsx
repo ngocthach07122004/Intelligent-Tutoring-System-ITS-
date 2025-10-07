@@ -4,6 +4,8 @@ import "./globals.css";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { SessionProvider } from "@/context/Sessioncontext";
 import HeaderWrapper from "@/components/layouts/HeaderWrapper";
+import Footer from "@/components/layouts/Footer";
+import Header from "@/components/layouts/Header"
 
 const inter = Inter({
   variable: "--font-inter",
@@ -34,7 +36,9 @@ export default function RootLayout({
         <SessionProvider>
           <ThemeProvider>
             <div className="size-full bg-background"></div>
+            <Header/>
             {children}
+            <Footer/>
           </ThemeProvider>
         </SessionProvider>
       </body>
