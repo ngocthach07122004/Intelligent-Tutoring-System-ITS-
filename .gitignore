@@ -1,0 +1,13 @@
+# Ignore build and dependency folders
+frontend/.next/
+frontend/node_modules/
+
+# Ignore environment variables
+frontend/.env.local
+
+# Ignore TypeScript environment definition file
+frontend/next-env.d.ts
+
+# Ignore macOS system files
+.DS_Store
+frontend/.DS_Store
