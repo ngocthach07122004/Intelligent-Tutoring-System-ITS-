@@ -147,17 +147,17 @@ export const SignUpForm = () => {
           </CustomButton>
         </div>
       </form>
-      <p className="items-center p-6 inline-bloc bg-muted rounded-b-xl border-t pt-6 text-xs text-muted-foreground">
+      <p className="items-center p-6 inline-bloc bg-white rounded-b-xl border-t pt-6 text-xs text-white">
         By signing up, you agree to our{" "}
-        <a href="#" className="font-medium text-foreground underline">
+        <a href="#" className="font-medium text-blue-600 hover:text-blue-800 underline decoration-[#1e1e2f]">
           Terms of Use
         </a>{" "}
         and{" "}
-        <a href="#" className="font-medium text-foreground underline">
+        <a href="#" className="font-medium text-blue-600 hover:text-blue-800 underline decoration-[#1e1e2f]">
           Privacy Policy
         </a>
         . Need help?{" "}
-        <a href="#" className="font-medium text-foreground underline">
+        <a href="#" className="font-medium text-blue-600 hover:text-blue-800 underline decoration-[#1e1e2f]">
           Get in touch
         </a>
         .

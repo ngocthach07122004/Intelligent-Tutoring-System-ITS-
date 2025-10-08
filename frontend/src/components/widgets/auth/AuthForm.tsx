@@ -83,7 +83,7 @@ export const AuthForm = () => {
         {/* Submit Button */}
         <CustomButton
           type="submit"
-          className="w-full !bg-primary text-primary-foreground"
+          className="w-full text-primary-foreground hover:bg-[#1e1e2f] hover:text-white transition-all duration-300 ease-in-out transform active:scale-95"
           spinnerIcon={loading}
           disabled={loading || isDisabled}
         >
@@ -104,7 +104,7 @@ export const AuthForm = () => {
             Google
           </CustomButton>
           <CustomButton
-            className="!text-foreground w-full border border-gray-300 hover:bg-accent"
+            className="w-full border border-gray-300 hover:bg-accent"
             onClick={() => console.log("Microsoft login")}
           >
             <MicrosoftIcon className="mr-2" />
@@ -114,7 +114,7 @@ export const AuthForm = () => {
       </form>
       <p className="items-center p-6 pt-0 flex justify-center gap-1 text-sm text-muted-foreground">
         Don’t have an account?{" "}
-        <a href="/auth/signup" className="underline font-semibold text-foreground">
+        <a href="/auth/signup" className="underline font-semibold text-gray-700">
           Sign up
         </a>
       </p>
