@@ -32,6 +32,7 @@ export default function Sidebar() {
   // Navigation configuration array
   const navigationLinks = [
     { title: "Home", route: "/dashboard/home", icon: <HomeIcon size={18} /> },
+    { title: "Student Management", route: "/student-management", icon: <UsersIcon size={18} /> },
     { title: "Contacts", route: "/dashboard/contacts", icon: <UsersIcon size={18} /> },
     { title: "Settings", route: "/dashboard/settings", icon: <SettingsIcon size={18} /> },
   ];
@@ -111,8 +112,8 @@ export default function Sidebar() {
             <div className="w-[18px] h-[18px] relative shrink-0">
               <Image
                 className="rounded-md object-cover"
-                alt="Airbnb"
-                src="https://demo.achromatic.dev/api/contact-images/d1f1feea-13d0-467b-9ee6-e9e1d3dd05c1?v=51bbe674c4608776218704a0bdc00a18082affe42b946db6d3c80cb579f1829e"
+                alt="User Avatar"
+                src="/user.jpg"
                 fill
               />
             </div>

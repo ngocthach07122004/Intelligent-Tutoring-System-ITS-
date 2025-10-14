@@ -28,7 +28,7 @@ export const TextField = ({
   const [errorMessages, setErrorMessages] = useState<string | null>(null); // State to store error messages
   const isPasswordField = type === "password";
   const inputType = isPasswordField && showPassword ? "text" : type; // Toggle between "text" and "password"
-  const inputClassNames = `flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ${
+  const inputClassNames = `flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm shadow-sm text-gray-900 placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1e1e2f] focus-visible:border-transparent ${
     icon ? "pl-10" : ""
   }`;
 
@@ -55,7 +55,7 @@ export const TextField = ({
       {/* Input field with optional icon */}
       <div className="relative inline-block h-9 w-full">
         {icon && (
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
             {icon}
           </span>
         )}
@@ -72,10 +72,10 @@ export const TextField = ({
 
         {/* Password visibility toggle button */}
         {isPasswordField && (
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
             <button
               type="button"
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium hover:bg-gray-100 hover:text-gray-700"
               aria-label="Toggle password visibility"
               onClick={() => setShowPassword((prev) => !prev)} // Toggle password visibility
             >

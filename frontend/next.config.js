@@ -1,7 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ["demo.achromatic.dev"], // Add the hostname here
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'demo.achromatic.dev',
+        port: '',
+        pathname: '/**',
+      },
+    ],
   },
 };
 

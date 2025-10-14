@@ -101,8 +101,8 @@ export default function MobileSidebar() {
             <div className="flex items-center gap-3 w-full">
               <Image
                 className="rounded-md"
-                alt="Airbnb"
-                src="https://demo.achromatic.dev/api/contact-images/d1f1feea-13d0-467b-9ee6-e9e1d3dd05c1?v=51bbe674c4608776218704a0bdc00a18082affe42b946db6d3c80cb579f1829e"
+                alt="User Avatar"
+                src="/user.jpg"
                 width={18}
                 height={18}
               />
