@@ -11,8 +11,8 @@ interface ConditionalLayoutProps {
 export default function ConditionalLayout({ children }: ConditionalLayoutProps) {
   const pathname = usePathname();
   
-  // Không hiển thị header và footer cho trang student-management
-  const hideHeaderFooter = pathname === "/dashboard/student-management";
+  // Ẩn header và footer cho tất cả các trang dashboard
+  const hideHeaderFooter = pathname?.startsWith("/dashboard");
 
   return (
     <>

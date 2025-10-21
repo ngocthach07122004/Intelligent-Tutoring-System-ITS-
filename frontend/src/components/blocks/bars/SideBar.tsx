@@ -13,6 +13,7 @@ import {
   LogoIcon,
   MenuIcon, // Import MenuIcon
 } from "../../icons";
+import { BookOpen, FileText, BarChart3 } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -33,9 +34,9 @@ export default function Sidebar() {
   const navigationLinks = [
     { title: "Home", route: "/dashboard/home", icon: <HomeIcon size={18} /> },
     { title: "Student Management", route: "/dashboard/student-management", icon: <UsersIcon size={18} /> },
-    { title: "Courses", route: "/dashboard/courses", icon: "📚" },
-    { title: "Documents", route: "/dashboard/documents", icon: "📄" },
-    { title: "Performance", route: "/dashboard/performance", icon: "📊" },
+    { title: "Courses", route: "/dashboard/courses", icon: "courses" },
+    { title: "Documents", route: "/dashboard/documents", icon: "documents" },
+    { title: "Performance", route: "/dashboard/performance", icon: "performance" },
     { title: "Contacts", route: "/dashboard/contacts", icon: <UsersIcon size={18} /> },
     { title: "Settings", route: "/dashboard/settings", icon: <SettingsIcon size={18} /> },
   ];
@@ -89,6 +90,9 @@ export default function Sidebar() {
             )}
           >
             {typeof link.icon === 'string' ? (
+              link.icon === 'courses' ? <BookOpen size={18} /> :
+              link.icon === 'documents' ? <FileText size={18} /> :
+              link.icon === 'performance' ? <BarChart3 size={18} /> :
               <span className="text-lg">{link.icon}</span>
             ) : (
               link.icon
