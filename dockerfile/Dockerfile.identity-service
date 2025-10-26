@@ -1,0 +1,33 @@
+# ================================
+# Stage 1: Build ứng dụng
+# ================================
+FROM maven:3.9.9-eclipse-temurin-21 AS builder
+
+# Đặt thư mục làm việc
+WORKDIR /app
+
+# Copy file pom.xml của identity-service và pom cha (nếu cần)
+COPY ../backend/java-service/pom.xml ./pom.xml
+
+# Copy source code của identity-service
+COPY ../backend/java-service/identity-service ./identity-service
+
+# Build ứng dụng
+WORKDIR /app/identity-service
+RUN mvn clean package -DskipTests
+
+# ================================
+# Stage 2: Runtime
+# ================================
+FROM eclipse-temurin:21-jdk-jammy
+
+WORKDIR /app
+
+# Copy file JAR từ stage build
+COPY --from=builder /app/identity-service/target/identity-service-*.jar app.jar
+
+# Biến môi trường
+ENV SPRING_PROFILES_ACTIVE=docker
+EXPOSE 8082
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
