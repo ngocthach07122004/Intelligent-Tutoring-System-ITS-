@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: dashboard-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5437/dashboardDb}
+    username: ${SPRING_DATASOURCE_USERNAME:dashboardUser}
+    password: ${SPRING_DATASOURCE_PASSWORD:12345678}
+#    url: jdbc:postgresql://localhost:5437/dashboardDb
+#    username: dashboardUser
+#    password: 12345678
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+       defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka/}
+#      defaultZone: http://localhost:8761/eureka/
+
+server:
+   port: ${SERVER_PORT:8085}
+#  port: 8085
+
+custom:
+  datasource:
+     host: ${DB_HOST:postgres_dashboard}
+     port: ${DB_POST:5437}
+     dbName: ${DB_NAME:dashboardDb}
+     user: ${SPRING_DATASOURCE_USERNAME:dashboardUser}
+     pass: ${SPRING_DATASOURCE_PASSWORD:12345678}
+#    host: postgres_dashboard
+#    port: 5437
+#    dbName: dashboardDb
+#    user: dashboardUser
+#    pass: 12345678
