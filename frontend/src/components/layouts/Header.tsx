@@ -4,6 +4,11 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function HeaderWrapper() {
+    const pathname = usePathname();
+    if (pathname.startsWith('/dashboard')) {
+        return null;
+    }
+
     return (
         <header className="fixed top-0 left-0 z-[50] w-full bg-[#1e1e2f] text-white p-4 shadow-lg">
             <div className="flex justify-between items-center px-6">
@@ -17,11 +22,11 @@ export default function HeaderWrapper() {
                         <a href="/homepage" className="hover:underline">
                         Trang chủ
                         </a>
-                        <a href="/about" className="hover:underline">
-                        Giới thiệu
+                        <a href="/chat" className="hover:underline">
+                        Chat
                         </a>
-                        <a href="/contact" className="hover:underline">
-                        Liên hệ
+                        <a href="/forum" className="hover:underline">
+                        Forum
                         </a>
                         <a href="/aboutus" className="hover:underline">
                         About Us
