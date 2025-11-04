@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: user-profile-service
+  datasource:
+     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5435/userProfileDb}
+     username: ${SPRING_DATASOURCE_USERNAME:userProfileUser}
+     password: ${SPRING_DATASOURCE_PASSWORD:12345678}
+#    url: jdbc:postgresql://localhost:5435/userProfileDb
+#    username: userProfileUser
+#    password: 12345678
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+       defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka/}
+#      defaultZone: http://localhost:8761/eureka/
+
+server:
+   port: ${SERVER_PORT:8083}
+#  port: 8083
+
+custom:
+  datasource:
+     host: ${DB_HOST:localhost}
+     port: ${DB_POST:5435}
+     dbName: ${DB_NAME:userProfileDb}
+     user: ${SPRING_DATASOURCE_USERNAME:userProfileUser}
+     pass: ${SPRING_DATASOURCE_PASSWORD:12345678}
+#    host: localhost
+#    port: 5435
+#    dbName: userProfileDb
+#    user: userProfileUser
+#    pass: 12345678
