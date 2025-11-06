@@ -36,54 +36,83 @@ export default function App() {
   const [selectedServerId, setSelectedServerId] = useState<string>('home');
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [selectedChannelId, setSelectedChannelId] = useState<string | null>(null);
+  const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
 
   const handleSelectServer = (serverId: string) => {
     setSelectedServerId(serverId);
+    setSelectedChatId(null);
+    setSelectedChannelId(null);
+    setIsMobileChatOpen(false);
+  };
+
+  const handleSelectChat = (chatId: string) => {
+    setSelectedChatId(chatId);
+    setIsMobileChatOpen(true); // ✅ ẩn sidebar, chỉ hiện chat window
+  };
+
+  const handleSelectChannel = (channelId: string) => {
+    setSelectedChannelId(channelId);
+    setIsMobileChatOpen(true); // ✅ ẩn sidebar, chỉ hiện chat window
+  };
+
+  const handleBack = () => {
+    // ✅ Quay lại sidebar khi nhấn nút Back trong ChatWindow (mobile)
+    setIsMobileChatOpen(false);
     setSelectedChatId(null);
     setSelectedChannelId(null);
   };
 
   return (
     <div className="flex h-[calc(100vh-4rem)] w-full bg-gray-900 text-gray-100 font-sans overflow-hidden mt-16">
-      <ServerSidebar
-        servers={mockServers}
-        selectedServerId={selectedServerId}
-        onSelectServer={handleSelectServer}
-      />
+      <div className={`${isMobileChatOpen ? 'hidden' : 'block'} md:block`}>
+        <ServerSidebar
+          servers={mockServers}
+          selectedServerId={selectedServerId}
+          onSelectServer={handleSelectServer}
+        />
+      </div>
 
+      {/* Khi chọn Home */}
       {/* Khi chọn Home */}
       {selectedServerId === 'home' ? (
         <div className="flex flex-1">
-          <DirectMessagesList
-            selectedChatId={selectedChatId}
-            onSelectChat={setSelectedChatId}
-          />
-          {selectedChatId ? (
-            <ChatWindow chatId={selectedChatId} chatType="direct" onBack={() => setSelectedChatId(null)} />
-          ) : (
-            <div className="flex-1 bg-gray-700 flex items-center justify-center text-gray-400">
-              Chọn một người để bắt đầu trò chuyện 💬
-            </div>
-          )}
+          <div className={`${isMobileChatOpen ? 'hidden' : 'block'} md:block w-full md:w-72`}>
+            <DirectMessagesList
+              selectedChatId={selectedChatId}
+              onSelectChat={handleSelectChat}
+            />
+          </div>
+          <div className={`${isMobileChatOpen ? 'flex' : 'hidden'} md:flex flex-1`}>
+            {selectedChatId ? (
+              <ChatWindow
+                chatId={selectedChatId}
+                chatType="direct"
+                onBack={handleBack}
+              />
+            ) : (
+              <div className="flex-1 bg-gray-700 flex items-center justify-center text-gray-400">
+                Chọn một người để bắt đầu trò chuyện 💬
+              </div>
+            )}
+          </div>
         </div>
       ) : (
         <div className="flex flex-1">
-          {/* Sidebar kênh */}
-          <ServerChannelSidebar
-            serverName={mockServers.find(s => s.id === selectedServerId)?.name || ''}
-            channels={mockChannels[selectedServerId] || []}
-            selectedChannelId={selectedChannelId}
-            onSelectChannel={setSelectedChannelId}
-          />
-
-          {/* Nội dung kênh */}
-          <div className="flex-1 flex flex-col">
+          <div className={`${isMobileChatOpen ? 'hidden' : 'block'} md:block w-full md:w-72`}>
+            <ServerChannelSidebar
+              serverName={mockServers.find(s => s.id === selectedServerId)?.name || ''}
+              channels={mockChannels[selectedServerId] || []}
+              selectedChannelId={selectedChannelId}
+              onSelectChannel={handleSelectChannel}
+            />
+          </div>
+          <div className={`${isMobileChatOpen ? 'flex' : 'hidden'} md:flex flex-1 flex-col`}>
             {selectedChannelId ? (
               <ChatWindow
                 chatId={selectedChannelId}
                 chatType="channel"
                 chatName={mockChannels[selectedServerId].find(c => c.id === selectedChannelId)?.name}
-                onBack={() => setSelectedChannelId(null)}
+                onBack={handleBack}
               />
             ) : (
               <div className="flex-1 bg-gray-700 flex items-center justify-center text-gray-400">

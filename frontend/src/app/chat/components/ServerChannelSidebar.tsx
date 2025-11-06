@@ -14,7 +14,7 @@ export default function ServerChannelSidebar({
   onSelectChannel,
 }: ServerChannelSidebarProps) {
   return (
-    <div className="w-72 bg-gray-800 border-r border-gray-700 px-4 py-6 flex flex-col">
+    <div className="w-full md:w-72 bg-gray-800 border-r border-gray-700 px-4 py-6 flex flex-col h-full">
       {/* Tiêu đề server */}
       <div className="flex items-center justify-between mb-6 border-b border-gray-700 pb-4 -mx-4 px-4">
         <h2 className="text-lg font-semibold text-white truncate px-1">{serverName}</h2>

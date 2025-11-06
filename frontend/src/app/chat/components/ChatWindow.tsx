@@ -89,6 +89,13 @@ export default function ChatWindow({ chatId, chatType, chatName, onBack }: ChatW
     <div className="flex-1 flex flex-col bg-gray-700">
       {/* Header */}
       <div className="flex items-center px-4 py-4 border-b border-gray-600 bg-gray-800 ">
+        <button
+          onClick={onBack}
+          className="md:hidden mr-3 text-gray-300 hover:text-white transition"
+        >
+          <ArrowLeft size={22} />
+        </button>
+
         {chatType === 'direct' ? (
           // 🧍 Chat cá nhân
           <div className="flex items-center space-x-2 py-1 transform translate-y-[3px]">

@@ -30,7 +30,7 @@ export default function DirectMessagesList({
   const [friendName, setFriendName] = useState('');
 
   return (
-    <div className="w-72 bg-gray-800 border-r border-gray-700 p-4 py-6 overflow-y-auto relative">
+    <div className="w-full md:w-72 bg-gray-800 border-r border-gray-700 p-4 py-6 overflow-y-auto relative h-full">
       {/* Header + Nút cộng */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold">💬 Trò chuyện trực tiếp</h2>
