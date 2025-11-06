@@ -1,0 +1,42 @@
+# =========================
+# Stage 1: Build the JAR
+# =========================
+FROM eclipse-temurin:21-jdk AS builder
+
+WORKDIR /build
+
+# --- Copy Maven Wrapper & module pom ---
+COPY backend/java-service/course-service/mvnw .
+COPY backend/java-service/course-service/.mvn .mvn
+COPY backend/java-service/course-service/pom.xml pom.xml
+
+# --- Copy POM cha (multi-module root POM) ---
+COPY backend/java-service/pom.xml ../pom.xml
+
+RUN chmod +x mvnw
+
+# --- Preload dependencies (faster build) ---
+RUN ./mvnw dependency:go-offline -B -ntp
+
+# --- Copy source code ---
+COPY backend/java-service/course-service/src src
+
+# --- Build application ---
+RUN ./mvnw clean package -DskipTests -B -ntp
+
+# --- Copy output jar ---
+RUN cp target/*SNAPSHOT.jar app.jar
+
+
+# =========================
+# Stage 2: Run the app
+# =========================
+FROM eclipse-temurin:21-jre
+
+WORKDIR /app
+COPY --from=builder /build/app.jar app.jar
+
+ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+
+EXPOSE 8084
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

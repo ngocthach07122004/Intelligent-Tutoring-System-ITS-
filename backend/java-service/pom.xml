@@ -23,7 +23,13 @@
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
     </properties>
     <modules>
+<!--        <module>discovery-eureka-server</module>-->
+<!--        <module>api-gateway</module>-->
         <module>identity-service</module>
+        <module>user-profile-service</module>
+        <module>course-service</module>
+        <module>dashboard-service</module>
+
     </modules>
 <!--    <dependencies>-->
 <!--        <dependency>-->

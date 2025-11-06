@@ -8,6 +8,9 @@
         <option value="$PROJECT_DIR$/backend/java-service/api-gateway/pom.xml" />
         <option value="$PROJECT_DIR$/backend/java-service/identity-service/pom.xml" />
         <option value="$PROJECT_DIR$/backend/java-service/pom.xml" />
+        <option value="$PROJECT_DIR$/backend/java-service/user-profile-service/pom.xml" />
+        <option value="$PROJECT_DIR$/backend/java-service/dashboard-service/pom.xml" />
+        <option value="$PROJECT_DIR$/backend/java-service/course-service/pom.xml" />
       </list>
     </option>
   </component>

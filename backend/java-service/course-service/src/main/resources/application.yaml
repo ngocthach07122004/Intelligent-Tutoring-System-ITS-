@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: course-service
+  datasource:
+     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5436/courseDb}
+     username: ${SPRING_DATASOURCE_USERNAME:courseUser}
+     password: ${SPRING_DATASOURCE_PASSWORD:12345678}
+#    url: jdbc:postgresql://localhost:5436/courseDb
+#    username: courseUser
+#    password: 12345678
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+       defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka/}
+#      defaultZone: http://localhost:8761/eureka/
+
+server:
+   port: ${SERVER_PORT:8084}
+#  port: 8084
+
+custom:
+  datasource:
+    host: ${DB_HOST:postgres_course}
+    port: ${DB_POST:5436}
+    dbName: ${DB_NAME:courseDb}
+    user: ${SPRING_DATASOURCE_USERNAME:courseUser}
+    pass: ${SPRING_DATASOURCE_PASSWORD:12345678}
+#    host: postgres_course
+#    port: 5436
+#    dbName: courseDb
+#    user: courseUser
+#    pass: 12345678

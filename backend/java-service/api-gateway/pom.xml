@@ -9,6 +9,12 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>ITS.com.vn</groupId>
+<!--    <parent>-->
+<!--        <groupId>ITS.com.vn</groupId>-->
+<!--        <artifactId>my-parent</artifactId>-->
+<!--        <version>0.0.1-SNAPSHOT</version>-->
+<!--    </parent>-->
+
 	<artifactId>api-gateway</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>api-gateway</name>
