@@ -130,7 +130,7 @@ export const LearningAnalytics = () => {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* GPA Card */}
-        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border-l-4 border-gray-900">
+        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">GPA Hiện tại</p>
@@ -146,13 +146,13 @@ export const LearningAnalytics = () => {
               </div>
             </div>
             <div className="p-3 bg-gray-100 rounded-lg">
-              <BarChart3 className="w-10 h-10 text-gray-700" />
+              <BarChart3 className="w-8 h-8 text-gray-700" />
             </div>
           </div>
         </div>
 
         {/* Attendance Card */}
-        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border-l-4 border-gray-700">
+        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Tỷ lệ tham gia</p>
@@ -162,13 +162,13 @@ export const LearningAnalytics = () => {
               <p className="text-sm text-gray-700 font-medium">Rất tốt</p>
             </div>
             <div className="p-3 bg-gray-100 rounded-lg">
-              <CheckCircle2 className="w-10 h-10 text-gray-700" />
+              <CheckCircle2 className="w-8 h-8 text-gray-700" />
             </div>
           </div>
         </div>
 
         {/* Assignment Completion */}
-        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border-l-4 border-gray-600">
+        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Hoàn thành BT</p>
@@ -178,13 +178,13 @@ export const LearningAnalytics = () => {
               <p className="text-sm text-gray-700 font-medium">Xuất sắc</p>
             </div>
             <div className="p-3 bg-gray-100 rounded-lg">
-              <FileCheck className="w-10 h-10 text-gray-700" />
+              <FileCheck className="w-8 h-8 text-gray-700" />
             </div>
           </div>
         </div>
 
         {/* Study Time */}
-        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border-l-4 border-gray-500">
+        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Thời gian học/tuần</p>
@@ -194,7 +194,7 @@ export const LearningAnalytics = () => {
               <p className="text-sm text-gray-700 font-medium">Đều đặn</p>
             </div>
             <div className="p-3 bg-gray-100 rounded-lg">
-              <Clock className="w-10 h-10 text-gray-700" />
+              <Clock className="w-8 h-8 text-gray-700" />
             </div>
           </div>
         </div>

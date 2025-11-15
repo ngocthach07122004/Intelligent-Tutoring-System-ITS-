@@ -163,7 +163,7 @@ export const StudentManagementDashboard = () => {
               className={`py-4 px-2 border-b-2 font-semibold text-sm transition-all duration-200 ${
                 activeTab === 'profile'
                   ? 'border-gray-900 text-gray-900'
-                  : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300'
+                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
               }`}
             >
               Hồ sơ học sinh
@@ -173,7 +173,7 @@ export const StudentManagementDashboard = () => {
               className={`py-4 px-2 border-b-2 font-semibold text-sm transition-all duration-200 ${
                 activeTab === 'analytics'
                   ? 'border-gray-900 text-gray-900'
-                  : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300'
+                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
               }`}
             >
               Phân tích học tập
@@ -183,7 +183,7 @@ export const StudentManagementDashboard = () => {
               className={`py-4 px-2 border-b-2 font-semibold text-sm transition-all duration-200 ${
                 activeTab === 'subjects'
                   ? 'border-gray-900 text-gray-900'
-                  : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300'
+                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
               }`}
             >
               Môn học ({mockSubjects.length})
@@ -193,7 +193,7 @@ export const StudentManagementDashboard = () => {
               className={`py-4 px-2 border-b-2 font-semibold text-sm transition-all duration-200 ${
                 activeTab === 'achievements'
                   ? 'border-gray-900 text-gray-900'
-                  : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300'
+                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
               }`}
             >
               Thành tích ({mockAchievements.filter(a => a.isEarned).length}/{mockAchievements.length})
@@ -220,10 +220,8 @@ export const StudentManagementDashboard = () => {
           {activeTab === 'subjects' && (
             <div className="max-w-7xl mx-auto px-6">
               <div className="mb-6">
-                <h1 className="text-3xl font-bold text-gray-800 mb-2">Môn học</h1>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Môn học</h1>
                 <p className="text-gray-600">Theo dõi tiến độ và kết quả học tập từng môn</p>
-                
-
               </div>
               
               {/* Subject Statistics */}
@@ -301,10 +299,8 @@ export const StudentManagementDashboard = () => {
           {activeTab === 'achievements' && (
             <div className="max-w-7xl mx-auto px-6">
               <div className="mb-6">
-                <h1 className="text-3xl font-bold text-gray-800 mb-2">Hệ thống thành tích</h1>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Hệ thống thành tích</h1>
                 <p className="text-gray-600">Các huy hiệu và thành tích đã đạt được trong quá trình học tập</p>
-                
-
                 
                 {/* Achievement Overview */}
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -348,7 +344,7 @@ export const StudentManagementDashboard = () => {
               
               {/* Featured Achievement Badges - Hiển thị AchievementBadge riêng lẻ */}
               <div className="mb-8">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">Thành tích nổi bật</h2>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Thành tích nổi bật</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {(() => {
                     // Lấy thành tích hiếm đã đạt được trước

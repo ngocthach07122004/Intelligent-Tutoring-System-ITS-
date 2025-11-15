@@ -1,6 +1,6 @@
 "use client";
 
-import { X, BookOpen, Clock, Award, Users, Calendar, CheckCircle2, PlayCircle, FileText, Download, Star } from "lucide-react";
+import { ArrowLeft, BookOpen, Clock, Award, Users, Calendar, CheckCircle2, PlayCircle, FileText, Download, Star } from "lucide-react";
 
 interface CourseModule {
   id: string;
@@ -133,66 +133,56 @@ export const CourseDetailModal = ({ course, onClose }: CourseDetailModalProps) =
   );
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
-      ></div>
+    <div className="fixed inset-0 bg-gray-50 z-50 overflow-y-auto">
+      <div className="max-w-7xl mx-auto p-6">
+        {/* Back Button */}
+        <button
+          onClick={onClose}
+          className="flex items-center gap-2 text-gray-700 hover:text-gray-900 font-medium mb-6 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Quay lại
+        </button>
 
-      {/* Modal */}
-      <div className="absolute inset-0 flex items-center justify-center p-4">
-        <div className="relative bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden">
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 z-10 p-2 bg-white/90 hover:bg-white rounded-full shadow-lg transition-all"
-          >
-            <X className="w-6 h-6 text-gray-600" />
-          </button>
-
-          {/* Scrollable content */}
-          <div className="overflow-y-auto max-h-[90vh]">
-            {/* Hero Section */}
-            <div className="bg-gray-900 text-white p-8">
-              <div className="max-w-4xl">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="px-3 py-1 bg-white/10 rounded-full text-xs font-semibold">
-                    {course.code}
-                  </span>
-                  <span className="px-3 py-1 bg-white/10 rounded-full text-xs font-semibold">
-                    {course.semester}
-                  </span>
-                </div>
-                <h1 className="text-4xl font-bold mb-4">{course.name}</h1>
-                <p className="text-lg text-white/90 mb-6">{courseDetails.fullDescription}</p>
-                
-                {/* Stats */}
-                <div className="flex flex-wrap gap-6 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Star className="w-5 h-5 text-gray-300 fill-gray-300" />
-                    <span className="font-semibold">{courseDetails.ratings.average}</span>
-                    <span className="text-white/80">({courseDetails.ratings.total} đánh giá)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Users className="w-5 h-5" />
-                    <span>{course.students} sinh viên</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-5 h-5" />
-                    <span>{course.schedule}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Award className="w-5 h-5" />
-                    <span>{course.credits} tín chỉ</span>
-                  </div>
-                </div>
+        {/* Hero Section */}
+        <div className="bg-gray-900 text-white rounded-2xl p-8 mb-6">
+          <div className="max-w-4xl">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="px-3 py-1 bg-white/10 rounded-full text-xs font-semibold">
+                {course.code}
+              </span>
+              <span className="px-3 py-1 bg-white/10 rounded-full text-xs font-semibold">
+                {course.semester}
+              </span>
+            </div>
+            <h1 className="text-4xl font-bold mb-4">{course.name}</h1>
+            <p className="text-lg text-white/90 mb-6">{courseDetails.fullDescription}</p>
+            
+            {/* Stats */}
+            <div className="flex flex-wrap gap-6 text-sm">
+              <div className="flex items-center gap-2">
+                <Star className="w-5 h-5 text-gray-300 fill-gray-300" />
+                <span className="font-semibold">{courseDetails.ratings.average}</span>
+                <span className="text-white/80">({courseDetails.ratings.total} đánh giá)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                <span>{course.students} sinh viên</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock className="w-5 h-5" />
+                <span>{course.schedule}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Award className="w-5 h-5" />
+                <span>{course.credits} tín chỉ</span>
               </div>
             </div>
+          </div>
+        </div>
 
-            {/* Main Content */}
-            <div className="p-8">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Left Column - Main Content */}
                 <div className="lg:col-span-2 space-y-8">
                   {/* What you'll learn */}
@@ -404,8 +394,5 @@ export const CourseDetailModal = ({ course, onClose }: CourseDetailModalProps) =
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
   );
 };
