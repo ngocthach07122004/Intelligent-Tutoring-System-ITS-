@@ -111,17 +111,17 @@ export const DocumentManagement = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6 flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent mb-2">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Quản lý Tài liệu
             </h1>
-            <p className="text-slate-600">Tổ chức và quản lý tài liệu học tập của bạn</p>
+            <p className="text-gray-600">Tổ chức và quản lý tài liệu học tập của bạn</p>
           </div>
-          <CustomButton className="bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white flex items-center gap-2 shadow-md">
+          <CustomButton className="bg-gray-900 hover:bg-gray-800 text-white flex items-center gap-2 shadow-md">
             <Plus className="w-4 h-4" />
             Tạo tài liệu mới
           </CustomButton>
@@ -129,70 +129,70 @@ export const DocumentManagement = () => {
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all p-6 border border-slate-200">
+          <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all p-6 border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-600 font-medium">Tổng tài liệu</p>
-                <p className="text-3xl font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent">
+                <p className="text-sm text-gray-600 font-medium">Tổng tài liệu</p>
+                <p className="text-3xl font-bold text-gray-900">
                   {documents.length}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl flex items-center justify-center">
-                <FolderOpen className="w-6 h-6 text-slate-600" />
+              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+                <FolderOpen className="w-6 h-6 text-gray-700" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all p-6 border border-blue-200">
+          <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all p-6 border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-blue-600 font-medium">Ghi chú</p>
-                <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                <p className="text-sm text-gray-700 font-medium">Ghi chú</p>
+                <p className="text-3xl font-bold text-gray-900">
                   {documents.filter(d => d.category === 'note').length}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
-                <FileText className="w-6 h-6 text-blue-600" />
+              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+                <FileText className="w-6 h-6 text-gray-700" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all p-6 border border-orange-200">
+          <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all p-6 border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-orange-600 font-medium">Bài tập</p>
-                <p className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
+                <p className="text-sm text-gray-700 font-medium">Bài tập</p>
+                <p className="text-3xl font-bold text-gray-900">
                   {documents.filter(d => d.category === 'assignment').length}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl flex items-center justify-center">
-                <FileCheck className="w-6 h-6 text-orange-600" />
+              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+                <FileCheck className="w-6 h-6 text-gray-700" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all p-6 border border-rose-200">
+          <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all p-6 border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-rose-600 font-medium">Yêu thích</p>
-                <p className="text-3xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
+                <p className="text-sm text-gray-700 font-medium">Yêu thích</p>
+                <p className="text-3xl font-bold text-gray-900">
                   {documents.filter(d => d.isFavorite).length}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-gradient-to-br from-rose-100 to-rose-200 rounded-xl flex items-center justify-center">
-                <Star className="w-6 h-6 text-rose-600" />
+              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+                <Star className="w-6 h-6 text-gray-700" />
               </div>
             </div>
           </div>
         </div>
 
         {/* Filters & Search */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-6 mb-6 border border-slate-200">
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
           <div className="flex flex-col gap-4">
             {/* Search */}
             <div className="flex gap-4">
               <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
                   placeholder="Tìm kiếm tài liệu, tags..."

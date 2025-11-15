@@ -109,7 +109,7 @@ export const LearningAnalytics = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-700 via-purple-700 to-fuchsia-700 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold text-gray-900">
             Phân tích học tập
           </h1>
           <p className="text-gray-600 mt-1 font-medium">Theo dõi tiến độ và phát triển kỹ năng của bạn</p>
@@ -118,7 +118,7 @@ export const LearningAnalytics = () => {
           <select 
             value={timeFrame}
             onChange={(e) => setTimeFrame(e.target.value as 'semester' | 'year' | 'all')}
-            className="px-4 py-2 border border-indigo-200 rounded-lg bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent font-medium text-gray-700 shadow-sm hover:shadow-md transition-all"
+            className="px-4 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent font-medium text-gray-700 shadow-sm hover:shadow-md transition-all"
           >
             <option value="semester">Học kỳ này</option>
             <option value="year">Năm học</option>
@@ -130,11 +130,11 @@ export const LearningAnalytics = () => {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* GPA Card */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border-l-4 border-indigo-500">
+        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border-l-4 border-gray-900">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">GPA Hiện tại</p>
-              <p className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
+              <p className="text-3xl font-bold text-gray-900">
                 {analyticsData.academicProgress.currentGPA}
               </p>
               <div className={`flex items-center gap-1 text-sm ${getTrendColor(analyticsData.academicProgress.trend)}`}>
@@ -145,56 +145,56 @@ export const LearningAnalytics = () => {
                 </span>
               </div>
             </div>
-            <div className="p-3 bg-gradient-to-br from-indigo-50 to-blue-50 rounded-lg">
-              <BarChart3 className="w-10 h-10 text-indigo-600" />
+            <div className="p-3 bg-gray-100 rounded-lg">
+              <BarChart3 className="w-10 h-10 text-gray-700" />
             </div>
           </div>
         </div>
 
         {/* Attendance Card */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border-l-4 border-green-500">
+        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border-l-4 border-gray-700">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Tỷ lệ tham gia</p>
-              <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+              <p className="text-3xl font-bold text-gray-900">
                 {analyticsData.attendanceRate}%
               </p>
-              <p className="text-sm text-green-600 font-medium">Rất tốt</p>
+              <p className="text-sm text-gray-700 font-medium">Rất tốt</p>
             </div>
-            <div className="p-3 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg">
-              <CheckCircle2 className="w-10 h-10 text-green-600" />
+            <div className="p-3 bg-gray-100 rounded-lg">
+              <CheckCircle2 className="w-10 h-10 text-gray-700" />
             </div>
           </div>
         </div>
 
         {/* Assignment Completion */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border-l-4 border-purple-500">
+        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border-l-4 border-gray-600">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Hoàn thành BT</p>
-              <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent">
+              <p className="text-3xl font-bold text-gray-900">
                 {analyticsData.assignmentCompletion}%
               </p>
-              <p className="text-sm text-purple-600 font-medium">Xuất sắc</p>
+              <p className="text-sm text-gray-700 font-medium">Xuất sắc</p>
             </div>
-            <div className="p-3 bg-gradient-to-br from-purple-50 to-fuchsia-50 rounded-lg">
-              <FileCheck className="w-10 h-10 text-purple-600" />
+            <div className="p-3 bg-gray-100 rounded-lg">
+              <FileCheck className="w-10 h-10 text-gray-700" />
             </div>
           </div>
         </div>
 
         {/* Study Time */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border-l-4 border-orange-500">
+        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border-l-4 border-gray-500">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Thời gian học/tuần</p>
-              <p className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
+              <p className="text-3xl font-bold text-gray-900">
                 {analyticsData.learningTime[analyticsData.learningTime.length - 1]?.hours || 0}h
               </p>
-              <p className="text-sm text-orange-600 font-medium">Đều đặn</p>
+              <p className="text-sm text-gray-700 font-medium">Đều đặn</p>
             </div>
-            <div className="p-3 bg-gradient-to-br from-orange-50 to-amber-50 rounded-lg">
-              <Clock className="w-10 h-10 text-orange-600" />
+            <div className="p-3 bg-gray-100 rounded-lg">
+              <Clock className="w-10 h-10 text-gray-700" />
             </div>
           </div>
         </div>
@@ -203,13 +203,13 @@ export const LearningAnalytics = () => {
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Subject Performance */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-indigo-100">
-          <h3 className="text-xl font-semibold bg-gradient-to-r from-indigo-700 to-blue-700 bg-clip-text text-transparent mb-4">
+        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-200">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">
             Kết quả theo môn học
           </h3>
           <div className="space-y-4">
             {analyticsData.subjectPerformance.map((subject, index) => (
-              <div key={index} className="flex items-center justify-between p-3 rounded-lg hover:bg-indigo-50/50 transition-colors">
+              <div key={index} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
                 <div className="flex items-center space-x-3">
                   <div className={`w-3 h-3 rounded-full ${subject.color}`}></div>
                   <span className="font-medium text-gray-700">{subject.name}</span>
@@ -235,15 +235,15 @@ export const LearningAnalytics = () => {
         </div>
 
         {/* Exam Scores Trend */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-blue-100">
-          <h3 className="text-xl font-semibold bg-gradient-to-r from-blue-700 to-cyan-700 bg-clip-text text-transparent mb-6">
+        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-200">
+          <h3 className="text-xl font-semibold text-gray-900 mb-6">
             Xu hướng điểm kiểm tra
           </h3>
           
           {/* Legend */}
           <div className="flex items-center gap-6 mb-6">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-1 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full"></div>
+              <div className="w-8 h-1 bg-gray-900 rounded-full"></div>
               <span className="text-sm font-medium text-gray-700">Điểm của bạn</span>
             </div>
             <div className="flex items-center gap-2">
@@ -276,12 +276,12 @@ export const LearningAnalytics = () => {
               <svg className="absolute inset-0 w-full h-full" style={{ height: 'calc(100% - 2rem)' }}>
                 <defs>
                   <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" style={{ stopColor: '#6366f1', stopOpacity: 1 }} />
-                    <stop offset="100%" style={{ stopColor: '#3b82f6', stopOpacity: 1 }} />
+                    <stop offset="0%" style={{ stopColor: '#111827', stopOpacity: 1 }} />
+                    <stop offset="100%" style={{ stopColor: '#374151', stopOpacity: 1 }} />
                   </linearGradient>
                   <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" style={{ stopColor: '#6366f1', stopOpacity: 0.2 }} />
-                    <stop offset="100%" style={{ stopColor: '#3b82f6', stopOpacity: 0.05 }} />
+                    <stop offset="0%" style={{ stopColor: '#6b7280', stopOpacity: 0.15 }} />
+                    <stop offset="100%" style={{ stopColor: '#9ca3af', stopOpacity: 0.02 }} />
                   </linearGradient>
                 </defs>
                 
@@ -328,7 +328,7 @@ export const LearningAnalytics = () => {
                       cy={`${100 - (data.score / 10) * 100}%`}
                       r="5"
                       fill="white"
-                      stroke="url(#lineGradient)"
+                      stroke="#111827"
                       strokeWidth="3"
                       className="transition-all hover:r-7"
                     />
@@ -337,7 +337,7 @@ export const LearningAnalytics = () => {
                         cx={`${(100 / (analyticsData.examScores.length - 1)) * index}%`}
                         cy={`${100 - (data.score / 10) * 100}%`}
                         r="8"
-                        fill="#fbbf24"
+                        fill="#4b5563"
                         opacity="0.3"
                         className="animate-ping"
                       />
@@ -387,13 +387,13 @@ export const LearningAnalytics = () => {
           <div className="mt-6 pt-4 border-t border-gray-200 grid grid-cols-3 gap-4">
             <div className="text-center">
               <p className="text-xs text-gray-500 font-medium">Cao nhất</p>
-              <p className="text-lg font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
+              <p className="text-lg font-bold text-gray-900">
                 {Math.max(...analyticsData.examScores.map(d => d.score))}
               </p>
             </div>
             <div className="text-center">
               <p className="text-xs text-gray-500 font-medium">Trung bình</p>
-              <p className="text-lg font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+              <p className="text-lg font-bold text-gray-900">
                 {(analyticsData.examScores.reduce((sum, d) => sum + d.score, 0) / analyticsData.examScores.length).toFixed(1)}
               </p>
             </div>
@@ -403,13 +403,13 @@ export const LearningAnalytics = () => {
                 {analyticsData.examScores[analyticsData.examScores.length - 1].score > 
                  analyticsData.examScores[0].score ? (
                   <>
-                    <TrendingUp className="w-5 h-5 text-green-500" />
-                    <span className="text-sm font-bold text-green-600">Tăng</span>
+                    <TrendingUp className="w-5 h-5 text-gray-700" />
+                    <span className="text-sm font-bold text-gray-700">Tăng</span>
                   </>
                 ) : (
                   <>
-                    <TrendingDown className="w-5 h-5 text-red-500" />
-                    <span className="text-sm font-bold text-red-600">Giảm</span>
+                    <TrendingDown className="w-5 h-5 text-gray-600" />
+                    <span className="text-sm font-bold text-gray-600">Giảm</span>
                   </>
                 )}
               </div>
@@ -421,19 +421,19 @@ export const LearningAnalytics = () => {
       {/* Strengths and Improvements */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Strengths */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-green-100">
+        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-200">
           <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <div className="p-2 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg">
-              <Zap className="w-5 h-5 text-green-600" />
+            <div className="p-2 bg-gray-100 rounded-lg">
+              <Zap className="w-5 h-5 text-gray-700" />
             </div>
-            <span className="bg-gradient-to-r from-green-700 to-emerald-700 bg-clip-text text-transparent">
+            <span className="text-gray-900">
               Điểm mạnh
             </span>
           </h3>
           <div className="space-y-3">
             {analyticsData.strengths.map((strength, index) => (
-              <div key={index} className="flex items-start gap-3 p-3 rounded-lg hover:bg-green-50/50 transition-colors">
-                <div className="w-2 h-2 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
+              <div key={index} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                <div className="w-2 h-2 bg-gray-800 rounded-full mt-2 flex-shrink-0"></div>
                 <p className="text-gray-700">{strength}</p>
               </div>
             ))}
@@ -441,19 +441,19 @@ export const LearningAnalytics = () => {
         </div>
 
         {/* Improvements */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-orange-100">
+        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-200">
           <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <div className="p-2 bg-gradient-to-br from-orange-50 to-amber-50 rounded-lg">
-              <Target className="w-5 h-5 text-orange-600" />
+            <div className="p-2 bg-gray-100 rounded-lg">
+              <Target className="w-5 h-5 text-gray-700" />
             </div>
-            <span className="bg-gradient-to-r from-orange-700 to-amber-700 bg-clip-text text-transparent">
+            <span className="text-gray-900">
               Cần cải thiện
             </span>
           </h3>
           <div className="space-y-3">
             {analyticsData.improvements.map((improvement, index) => (
-              <div key={index} className="flex items-start gap-3 p-3 rounded-lg hover:bg-orange-50/50 transition-colors">
-                <div className="w-2 h-2 bg-gradient-to-br from-orange-500 to-amber-500 rounded-full mt-2 flex-shrink-0"></div>
+              <div key={index} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                <div className="w-2 h-2 bg-gray-600 rounded-full mt-2 flex-shrink-0"></div>
                 <p className="text-gray-700">{improvement}</p>
               </div>
             ))}
@@ -462,8 +462,8 @@ export const LearningAnalytics = () => {
       </div>
 
       {/* Learning Progress Timeline */}
-      <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-purple-100">
-        <h3 className="text-xl font-semibold bg-gradient-to-r from-purple-700 to-fuchsia-700 bg-clip-text text-transparent mb-4">
+      <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-200">
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">
           Tiến độ học tập theo tuần
         </h3>
         <div className="flex items-end justify-between space-x-2 h-40">
@@ -471,12 +471,12 @@ export const LearningAnalytics = () => {
             <div key={index} className="flex flex-col items-center flex-1">
               <div className="relative w-full">
                 <div
-                  className="bg-gradient-to-t from-purple-600 to-fuchsia-500 rounded-t-lg transition-all duration-300 hover:opacity-80 cursor-pointer"
+                  className="bg-gray-800 rounded-t-lg transition-all duration-300 hover:bg-gray-700 cursor-pointer"
                   style={{ height: `${(week.hours / 35) * 120}px` }}
                 ></div>
               </div>
               <div className="mt-2 text-center">
-                <div className="text-sm font-bold bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent">
+                <div className="text-sm font-bold text-gray-900">
                   {week.hours}h
                 </div>
                 <div className="text-xs text-gray-500 font-medium">{week.week}</div>
@@ -484,8 +484,8 @@ export const LearningAnalytics = () => {
             </div>
           ))}
         </div>
-        <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-fuchsia-50 rounded-lg">
-          <p className="text-sm text-center font-medium text-purple-700">
+        <div className="mt-6 p-4 bg-gray-100 rounded-lg">
+          <p className="text-sm text-center font-medium text-gray-700">
             Trung bình: {(analyticsData.learningTime.reduce((sum, week) => sum + week.hours, 0) / analyticsData.learningTime.length).toFixed(1)} giờ/tuần
           </p>
         </div>

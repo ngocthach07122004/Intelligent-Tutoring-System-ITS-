@@ -78,39 +78,39 @@ export const AchievementBadge = ({
     switch (rarity) {
       case 'legendary':
         return {
-          border: 'border-yellow-400',
-          bg: achievement.isEarned ? 'bg-gradient-to-br from-yellow-50 to-orange-50' : 'bg-gray-50',
-          shadow: achievement.isEarned ? 'shadow-lg shadow-yellow-200/50' : 'shadow-md',
-          titleColor: achievement.isEarned ? 'text-yellow-800' : 'text-gray-400',
-          descColor: achievement.isEarned ? 'text-yellow-600' : 'text-gray-400',
-          glow: achievement.isEarned ? 'ring-2 ring-yellow-200' : ''
+          border: 'border-gray-900',
+          bg: achievement.isEarned ? 'bg-gray-900' : 'bg-gray-50',
+          shadow: achievement.isEarned ? 'shadow-lg shadow-gray-400/50' : 'shadow-md',
+          titleColor: achievement.isEarned ? 'text-white' : 'text-gray-400',
+          descColor: achievement.isEarned ? 'text-gray-200' : 'text-gray-400',
+          glow: achievement.isEarned ? 'ring-2 ring-gray-300' : ''
         };
       case 'rare':
         return {
-          border: 'border-purple-400',
-          bg: achievement.isEarned ? 'bg-gradient-to-br from-purple-50 to-pink-50' : 'bg-gray-50',
-          shadow: achievement.isEarned ? 'shadow-lg shadow-purple-200/50' : 'shadow-md',
-          titleColor: achievement.isEarned ? 'text-purple-800' : 'text-gray-400',
-          descColor: achievement.isEarned ? 'text-purple-600' : 'text-gray-400',
-          glow: achievement.isEarned ? 'ring-2 ring-purple-200' : ''
+          border: 'border-gray-800',
+          bg: achievement.isEarned ? 'bg-gray-800' : 'bg-gray-50',
+          shadow: achievement.isEarned ? 'shadow-lg shadow-gray-300/50' : 'shadow-md',
+          titleColor: achievement.isEarned ? 'text-white' : 'text-gray-400',
+          descColor: achievement.isEarned ? 'text-gray-200' : 'text-gray-400',
+          glow: achievement.isEarned ? 'ring-2 ring-gray-300' : ''
         };
       case 'uncommon':
         return {
-          border: 'border-blue-400',
-          bg: achievement.isEarned ? 'bg-gradient-to-br from-blue-50 to-cyan-50' : 'bg-gray-50',
-          shadow: achievement.isEarned ? 'shadow-lg shadow-blue-200/50' : 'shadow-md',
-          titleColor: achievement.isEarned ? 'text-blue-800' : 'text-gray-400',
-          descColor: achievement.isEarned ? 'text-blue-600' : 'text-gray-400',
-          glow: achievement.isEarned ? 'ring-2 ring-blue-200' : ''
+          border: 'border-gray-700',
+          bg: achievement.isEarned ? 'bg-gray-700' : 'bg-gray-50',
+          shadow: achievement.isEarned ? 'shadow-lg shadow-gray-300/50' : 'shadow-md',
+          titleColor: achievement.isEarned ? 'text-white' : 'text-gray-400',
+          descColor: achievement.isEarned ? 'text-gray-200' : 'text-gray-400',
+          glow: achievement.isEarned ? 'ring-2 ring-gray-300' : ''
         };
       default: // common
         return {
-          border: 'border-green-400',
-          bg: achievement.isEarned ? 'bg-gradient-to-br from-green-50 to-emerald-50' : 'bg-gray-50',
-          shadow: achievement.isEarned ? 'shadow-lg shadow-green-200/50' : 'shadow-md',
-          titleColor: achievement.isEarned ? 'text-green-800' : 'text-gray-400',
-          descColor: achievement.isEarned ? 'text-green-600' : 'text-gray-400',
-          glow: achievement.isEarned ? 'ring-2 ring-green-200' : ''
+          border: 'border-gray-600',
+          bg: achievement.isEarned ? 'bg-gray-600' : 'bg-gray-50',
+          shadow: achievement.isEarned ? 'shadow-lg shadow-gray-300/50' : 'shadow-md',
+          titleColor: achievement.isEarned ? 'text-white' : 'text-gray-400',
+          descColor: achievement.isEarned ? 'text-gray-200' : 'text-gray-400',
+          glow: achievement.isEarned ? 'ring-2 ring-gray-300' : ''
         };
     }
   };
@@ -118,15 +118,15 @@ export const AchievementBadge = ({
   const getCategoryStyles = (category: string) => {
     switch (category) {
       case 'academic':
-        return 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800';
+        return 'bg-gray-200 text-gray-800';
       case 'attendance':
-        return 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800';
+        return 'bg-gray-200 text-gray-800';
       case 'participation':
-        return 'bg-gradient-to-r from-purple-100 to-fuchsia-100 text-purple-800';
+        return 'bg-gray-200 text-gray-800';
       case 'leadership':
-        return 'bg-gradient-to-r from-orange-100 to-amber-100 text-orange-800';
+        return 'bg-gray-200 text-gray-800';
       case 'special':
-        return 'bg-gradient-to-r from-pink-100 to-rose-100 text-pink-800';
+        return 'bg-gray-200 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -199,15 +199,15 @@ export const AchievementBadge = ({
 
       {/* Achievement Content */}
       <div className="flex flex-col items-center text-center">
-        {/* Icon with gradient background */}
+        {/* Icon with background */}
         <div className={`${sizeClasses.icon} mb-3 p-4 rounded-full ${
           achievement.isEarned 
-            ? 'bg-gradient-to-br from-yellow-100 to-orange-100' 
+            ? 'bg-white' 
             : 'bg-gray-100'
         }`}>
           <IconComponent className={`w-full h-full ${
             achievement.isEarned 
-              ? 'text-yellow-600' 
+              ? 'text-gray-900' 
               : 'text-gray-400'
           }`} />
         </div>
@@ -231,7 +231,7 @@ export const AchievementBadge = ({
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
               <div
-                className="bg-gradient-to-r from-indigo-600 to-blue-600 h-2.5 rounded-full transition-all duration-300"
+                className="bg-gray-800 h-2.5 rounded-full transition-all duration-300"
                 style={{ width: `${getProgressPercentage()}%` }}
               ></div>
             </div>
