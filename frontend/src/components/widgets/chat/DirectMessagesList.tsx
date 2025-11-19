@@ -30,15 +30,16 @@ export default function DirectMessagesList({
   const [friendName, setFriendName] = useState('');
 
   return (
-    <div className="w-72 bg-gray-800 border-r border-gray-700 p-4 py-6 overflow-y-auto relative">
+    <div className="w-full md:w-72 bg-gray-100 p-4 py-6 overflow-y-auto relative h-full">
       {/* Header + Nút cộng */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">💬 Trò chuyện trực tiếp</h2>
+        <h2 className="text-lg text-gray-500 font-semibold">💬 Trò chuyện trực tiếp</h2>
         <button
           onClick={() => setIsPopupOpen(true)}
-          className="p-1.5 rounded-full bg-gray-700 hover:bg-gray-600 transition"
+          className="p-1.5 rounded-full bg-white transition"
+          title="Thêm bạn mới"
         >
-          <Plus size={18} />
+          <Plus size={18} className="text-gray-500" />
         </button>
       </div>
 
@@ -49,8 +50,8 @@ export default function DirectMessagesList({
             key={chat.id}
             onClick={() => onSelectChat(chat.id)}
             className={`w-full text-left p-2 rounded-lg transition ${selectedChatId === chat.id
-                ? 'bg-gray-700 text-white'
-                : 'hover:bg-gray-700 text-gray-300'
+                ? 'bg-gray-300 text-black'
+                : 'hover:bg-gray-200 text-gray-500'
               }`}
           >
             <div className="flex items-center space-x-2">

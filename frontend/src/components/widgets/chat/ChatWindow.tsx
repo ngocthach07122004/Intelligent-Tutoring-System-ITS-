@@ -86,9 +86,15 @@ export default function ChatWindow({ chatId, chatType, chatName, onBack }: ChatW
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-gray-700">
+    <div className="flex-1 flex flex-col bg-white">
       {/* Header */}
-      <div className="flex items-center px-4 py-4 border-b border-gray-600 bg-gray-800 ">
+      <div className="flex items-center px-4 py-4 border-b border-gray-300 bg-white ">
+        <button
+          onClick={onBack}
+          className="md:hidden mr-3 text-gray-300 hover:text-white transition"
+        >
+          <ArrowLeft size={22} />
+        </button>
         {chatType === 'direct' ? (
           // 🧍 Chat cá nhân
           <div className="flex items-center space-x-2 py-1 transform translate-y-[3px]">
@@ -102,8 +108,8 @@ export default function ChatWindow({ chatId, chatType, chatName, onBack }: ChatW
         ) : (
           // 💬 Chat nhóm (kênh)
           <div className="flex items-center space-x-2 py-1 transform translate-y-[3px]">
-            <Hash size={20} className="text-gray-300" />
-            <h2 className="text-lg font-semibold text-gray-100">{chatName}</h2>
+            <Hash size={20} className="text-black" />
+            <h2 className="text-lg font-semibold text-black">{chatName}</h2>
           </div>
         )}
       </div>
@@ -119,24 +125,24 @@ export default function ChatWindow({ chatId, chatType, chatName, onBack }: ChatW
             />
             <div className="flex flex-col max-w-[75%]">
               <div className="flex items-baseline space-x-2">
-                <span className="font-semibold text-gray-100">{msg.senderName}</span>
-                <span className="text-xs text-gray-400">{msg.time}</span>
+                <span className="font-semibold text-black">{msg.senderName}</span>
+                <span className="text-xs text-black">{msg.time}</span>
               </div>
-              <p className="text-gray-200 leading-relaxed">{msg.text}</p>
+              <p className="text-black leading-relaxed">{msg.text}</p>
             </div>
           </div>
         ))}
       </div>
 
       {/* Nhập tin nhắn */}
-      <div className="p-3 border-t border-gray-600 flex items-center space-x-2 bg-gray-800">
+      <div className="p-3 border-t border-gray-300 flex items-center space-x-2 bg-white">
         <input
           type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
           placeholder="Nhập tin nhắn..."
-          className="flex-1 bg-gray-700 p-2 rounded-md outline-none text-gray-100"
+          className="flex-1 bg-white p-2 rounded-md outline-none text-black"
         />
         <button
           onClick={handleSend}
