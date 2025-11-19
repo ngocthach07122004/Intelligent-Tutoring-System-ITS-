@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import AnswerForm from "./AnswerForm";
 
 interface Answer {
     id: number;
@@ -23,12 +24,26 @@ interface Question {
 
 interface Props {
     question: Question;
-    answers: Answer[];
+    initialAnswers: Answer[];
 }
 
-export default function QuestionDetail({ question, answers }: Props) {
+export default function QuestionDetail({ question, initialAnswers }: Props) {
+    const [answers, setAnswers] = useState<Answer[]>(initialAnswers);
+
+    const handleNewAnswer = (content: string) => {
+        const newAnswer: Answer = {
+            id: answers.length + 1,
+            author: "Current User",
+            content,
+            votes: 0,
+            time: "just now",
+        };
+        setAnswers([newAnswer, ...answers]);
+    };
+
     return (
         <div className="max-w-3xl mx-auto py-10 space-y-8">
+
             {/* Question */}
             <div className="border p-5 rounded-xl bg-white shadow">
                 <h1 className="text-2xl font-bold text-blue-600 mb-4">{question.title}</h1>
@@ -37,10 +52,7 @@ export default function QuestionDetail({ question, answers }: Props) {
 
                 <div className="flex flex-wrap gap-2 mb-3">
                     {question.tags.map((tag) => (
-                        <span
-                            key={tag}
-                            className="px-2 py-1 text-xs bg-gray-200 rounded-md"
-                        >
+                        <span key={tag} className="px-2 py-1 text-xs bg-gray-200 rounded-md">
                             {tag}
                         </span>
                     ))}
@@ -69,6 +81,9 @@ export default function QuestionDetail({ question, answers }: Props) {
                 {answers.length === 0 && (
                     <p className="text-gray-500">Chưa có câu trả lời nào.</p>
                 )}
+
+                {/* Form trả lời */}
+                <AnswerForm onSubmit={handleNewAnswer} />
             </div>
         </div>
     );
