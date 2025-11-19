@@ -1,14 +1,6 @@
 "use client";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-} from "@/components/ui/dropdown-menu"
-import { ChevronDown } from "lucide-react"
 
 const ForumPage = () => {
 
@@ -61,7 +53,6 @@ const ForumPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 5;
 
-    // Tạm thời filter đơn giản
     const filtered = allQuestions.filter((q) => {
         if (filterType === "hot") return q.votes >= 5;
         if (filterType === "unanswered") return !q.answered;
@@ -76,8 +67,6 @@ const ForumPage = () => {
         return 0;
     });
 
-    // Logic phân trang
-    // Logic phân trang
     const totalPages = Math.ceil(sorted.length / pageSize);
     const currentQuestions = sorted.slice(
         (currentPage - 1) * pageSize,
@@ -86,7 +75,7 @@ const ForumPage = () => {
 
 
     return (
-        <div className="max-w-5xl mx-auto p-6 mt-16 space-y-6">
+        <div className="max-w-5xl mx-auto p-6 space-y-6">
             {/* Hàng trên cùng */}
             <div className="flex justify-between items-center mb-4">
                 <h1 className="text-2xl font-bold capitalize">

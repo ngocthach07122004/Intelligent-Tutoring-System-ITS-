@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Home, Plus } from 'lucide-react';
-import { ServerIcon } from './ui/ServerIcon';
+import { ServerIcon } from '@/components/ui/ServerIcon';
 // import { Server } from '../mock/servers';
 
 interface Server {
@@ -43,16 +43,16 @@ export const ServerSidebar: React.FC<ServerSidebarProps> = ({
 
   return (
     <>
-      <div className="w-24 bg-gray-900 h-full flex flex-col items-center py-6 space-y-4 flex-shrink-0">
+      <div className="w-24 bg-white h-full flex flex-col items-center py-6 space-y-4 flex-shrink-0">
         <ServerIcon
           item={{ id: 'home', name: 'Tin nhắn trực tiếp' }}
           isSelected={selectedServerId === 'home'}
           onClick={() => onSelectServer('home')}
         >
-          <Home size={24} />
+          <Home size={24} bg-gray />
         </ServerIcon>
 
-        <div className="w-10 h-0.5 bg-gray-700 rounded-full" />
+        <div className="w-10 h-0.5 bg-gray-500 rounded-full" />
 
         {servers.map((server) => (
           <ServerIcon
@@ -75,7 +75,7 @@ export const ServerSidebar: React.FC<ServerSidebarProps> = ({
 
         <button
           onClick={() => setShowPopup(true)}
-          className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-800 hover:bg-green-600 transition-colors duration-200 text-white text-2xl font-bold"
+          className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-200 hover:bg-blue-500 transition-colors duration-200 text-black hover:text-white text-2xl font-bold"
           title="Tạo nhóm chat mới"
         >
           <Plus size={26} />
