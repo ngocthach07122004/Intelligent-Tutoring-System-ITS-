@@ -1,0 +1,55 @@
+name: Build & Push to Docker Hub
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Build & push Eureka
+      - name: Build Eureka
+        run: |
+          docker build -f dockerfile/Dockerfile.eureka-server -t ${{ secrets.DOCKERHUB_USERNAME }}/its-eureka:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/its-eureka:latest
+
+      # Build & push API Gateway
+      - name: Build API Gateway
+        run: |
+          docker build -f dockerfile/Dockerfile.api-gateway -t ${{ secrets.DOCKERHUB_USERNAME }}/its-api-gateway:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/its-api-gateway:latest
+
+      # Build & push Identity Service
+      - name: Build Identity
+        run: |
+          docker build -f dockerfile/Dockerfile.identity-service -t ${{ secrets.DOCKERHUB_USERNAME }}/its-identity:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/its-identity:latest
+
+      # Build & push Course Service
+      - name: Build Course
+        run: |
+          docker build -f dockerfile/Dockerfile.course-service -t ${{ secrets.DOCKERHUB_USERNAME }}/its-course:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/its-course:latest
+
+      # Build & push Dashboard Service
+      - name: Build Dashboard
+        run: |
+          docker build -f dockerfile/Dockerfile.dashboard-service -t ${{ secrets.DOCKERHUB_USERNAME }}/its-dashboard:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/its-dashboard:latest
+
+      # Build & push User Profile Service
+      - name: Build User Profile
+        run: |
+          docker build -f dockerfile/Dockerfile.user-profile-service -t ${{ secrets.DOCKERHUB_USERNAME }}/its-user-profile:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/its-user-profile:latest
