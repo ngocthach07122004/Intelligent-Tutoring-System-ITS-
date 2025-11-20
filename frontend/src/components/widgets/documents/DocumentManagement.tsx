@@ -18,7 +18,8 @@ import {
   Plus,
   ArrowLeft,
   Download,
-  Share2
+  Share2,
+  X
 } from "lucide-react";
 
 interface Document {
@@ -76,6 +77,15 @@ export const DocumentManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showFavorites, setShowFavorites] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newDocument, setNewDocument] = useState({
+    title: '',
+    content: '',
+    category: 'note' as 'note' | 'assignment' | 'reference' | 'project',
+    course: '',
+    tags: [] as string[],
+    tagInput: ''
+  });
 
   const getCategoryColor = (category: string) => {
     switch (category) {
@@ -125,7 +135,10 @@ export const DocumentManagement = () => {
             </h1>
             <p className="text-gray-600">Tổ chức và quản lý tài liệu học tập của bạn</p>
           </div>
-          <CustomButton className="bg-gray-900 hover:bg-gray-800 text-white flex items-center gap-2 shadow-md">
+          <CustomButton 
+            onClick={() => setShowCreateModal(true)}
+            className="bg-gray-900 hover:bg-gray-800 text-white flex items-center gap-2 shadow-md"
+          >
             <Plus className="w-4 h-4" />
             Tạo tài liệu mới
           </CustomButton>
@@ -369,7 +382,10 @@ export const DocumentManagement = () => {
             <p className="text-gray-600 mb-4">
               Thử thay đổi bộ lọc hoặc tạo tài liệu mới
             </p>
-            <CustomButton className="bg-gray-900 hover:bg-gray-800 text-white flex items-center gap-2 mx-auto shadow-md">
+            <CustomButton 
+              onClick={() => setShowCreateModal(true)}
+              className="bg-gray-900 hover:bg-gray-800 text-white flex items-center gap-2 mx-auto shadow-md"
+            >
               <Plus className="w-4 h-4" />
               Tạo tài liệu mới
             </CustomButton>
@@ -502,6 +518,249 @@ export const DocumentManagement = () => {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Create Document Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center rounded-t-2xl">
+              <h2 className="text-2xl font-bold text-gray-900">Tạo tài liệu mới</h2>
+              <button
+                onClick={() => {
+                  setShowCreateModal(false);
+                  setNewDocument({
+                    title: '',
+                    content: '',
+                    category: 'note',
+                    course: '',
+                    tags: [],
+                    tagInput: ''
+                  });
+                }}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-6">
+              {/* Title */}
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Tiêu đề <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={newDocument.title}
+                  onChange={(e) => setNewDocument({ ...newDocument, title: e.target.value })}
+                  placeholder="Nhập tiêu đề tài liệu..."
+                  className="w-full px-4 py-2.5 bg-white text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                />
+              </div>
+
+              {/* Category */}
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Loại tài liệu <span className="text-red-500">*</span>
+                </label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <button
+                    onClick={() => setNewDocument({ ...newDocument, category: 'note' })}
+                    className={`p-3 rounded-lg border-2 transition-all ${
+                      newDocument.category === 'note'
+                        ? 'border-gray-900 bg-gray-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <FileText className="w-5 h-5 mx-auto mb-1 text-gray-700" />
+                    <span className="text-sm font-medium text-gray-900">Ghi chú</span>
+                  </button>
+                  <button
+                    onClick={() => setNewDocument({ ...newDocument, category: 'assignment' })}
+                    className={`p-3 rounded-lg border-2 transition-all ${
+                      newDocument.category === 'assignment'
+                        ? 'border-gray-900 bg-gray-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <FileCheck className="w-5 h-5 mx-auto mb-1 text-gray-700" />
+                    <span className="text-sm font-medium text-gray-900">Bài tập</span>
+                  </button>
+                  <button
+                    onClick={() => setNewDocument({ ...newDocument, category: 'reference' })}
+                    className={`p-3 rounded-lg border-2 transition-all ${
+                      newDocument.category === 'reference'
+                        ? 'border-gray-900 bg-gray-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <BookOpen className="w-5 h-5 mx-auto mb-1 text-gray-700" />
+                    <span className="text-sm font-medium text-gray-900">Tài liệu</span>
+                  </button>
+                  <button
+                    onClick={() => setNewDocument({ ...newDocument, category: 'project' })}
+                    className={`p-3 rounded-lg border-2 transition-all ${
+                      newDocument.category === 'project'
+                        ? 'border-gray-900 bg-gray-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <FolderOpen className="w-5 h-5 mx-auto mb-1 text-gray-700" />
+                    <span className="text-sm font-medium text-gray-900">Dự án</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Course */}
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Khóa học (tùy chọn)
+                </label>
+                <input
+                  type="text"
+                  value={newDocument.course}
+                  onChange={(e) => setNewDocument({ ...newDocument, course: e.target.value })}
+                  placeholder="Ví dụ: CS101, MATH201..."
+                  className="w-full px-4 py-2.5 bg-white text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                />
+              </div>
+
+              {/* Content */}
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Nội dung <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={newDocument.content}
+                  onChange={(e) => setNewDocument({ ...newDocument, content: e.target.value })}
+                  placeholder="Nhập nội dung tài liệu..."
+                  rows={8}
+                  className="w-full px-4 py-2.5 bg-white text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-none"
+                />
+              </div>
+
+              {/* Tags */}
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Tags
+                </label>
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={newDocument.tagInput}
+                    onChange={(e) => setNewDocument({ ...newDocument, tagInput: e.target.value })}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && newDocument.tagInput.trim()) {
+                        e.preventDefault();
+                        if (!newDocument.tags.includes(newDocument.tagInput.trim())) {
+                          setNewDocument({
+                            ...newDocument,
+                            tags: [...newDocument.tags, newDocument.tagInput.trim()],
+                            tagInput: ''
+                          });
+                        }
+                      }
+                    }}
+                    placeholder="Nhập tag và nhấn Enter..."
+                    className="flex-1 px-4 py-2.5 bg-white text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                  />
+                  <button
+                    onClick={() => {
+                      if (newDocument.tagInput.trim() && !newDocument.tags.includes(newDocument.tagInput.trim())) {
+                        setNewDocument({
+                          ...newDocument,
+                          tags: [...newDocument.tags, newDocument.tagInput.trim()],
+                          tagInput: ''
+                        });
+                      }
+                    }}
+                    className="px-4 py-2.5 bg-gray-900 hover:bg-gray-800 rounded-lg font-medium text-white transition-colors"
+                  >
+                    Thêm
+                  </button>
+                </div>
+                {newDocument.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {newDocument.tags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded-full flex items-center gap-2"
+                      >
+                        <Tag className="w-3 h-3" />
+                        {tag}
+                        <button
+                          onClick={() => {
+                            setNewDocument({
+                              ...newDocument,
+                              tags: newDocument.tags.filter((_, i) => i !== index)
+                            });
+                          }}
+                          className="hover:text-red-600 transition-colors"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-6 flex gap-3 rounded-b-2xl">
+              <button
+                onClick={() => {
+                  setShowCreateModal(false);
+                  setNewDocument({
+                    title: '',
+                    content: '',
+                    category: 'note',
+                    course: '',
+                    tags: [],
+                    tagInput: ''
+                  });
+                }}
+                className="flex-1 px-6 py-2.5 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={() => {
+                  if (newDocument.title.trim() && newDocument.content.trim()) {
+                    const newDoc: Document = {
+                      id: Date.now().toString(),
+                      title: newDocument.title,
+                      content: newDocument.content,
+                      category: newDocument.category,
+                      course: newDocument.course || undefined,
+                      createdAt: new Date().toISOString().split('T')[0],
+                      updatedAt: new Date().toISOString().split('T')[0],
+                      tags: newDocument.tags,
+                      isFavorite: false
+                    };
+                    setDocuments([newDoc, ...documents]);
+                    setShowCreateModal(false);
+                    setNewDocument({
+                      title: '',
+                      content: '',
+                      category: 'note',
+                      course: '',
+                      tags: [],
+                      tagInput: ''
+                    });
+                  }
+                }}
+                disabled={!newDocument.title.trim() || !newDocument.content.trim()}
+                className="flex-1 px-6 py-2.5 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-lg font-medium text-white transition-colors"
+              >
+                Tạo tài liệu
+              </button>
+            </div>
           </div>
         </div>
       )}

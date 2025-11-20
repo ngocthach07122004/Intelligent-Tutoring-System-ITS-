@@ -204,27 +204,73 @@ export const LearningAnalytics = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Subject Performance */}
         <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-200">
-          <h3 className="text-xl font-semibold text-gray-900 mb-4">
-            Kết quả theo môn học
-          </h3>
-          <div className="space-y-4">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-semibold text-gray-900">
+              Kết quả theo môn học
+            </h3>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <BarChart3 className="w-4 h-4" />
+              <span>{analyticsData.subjectPerformance.length} môn</span>
+            </div>
+          </div>
+
+          {/* Summary Stats */}
+          <div className="grid grid-cols-3 gap-3 mb-6">
+            <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+              <div className="text-xs text-gray-600 mb-1">Cao nhất</div>
+              <div className="text-lg font-bold text-gray-900">
+                {Math.max(...analyticsData.subjectPerformance.map(s => s.currentScore)).toFixed(1)}
+              </div>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+              <div className="text-xs text-gray-600 mb-1">Trung bình</div>
+              <div className="text-lg font-bold text-gray-900">
+                {(analyticsData.subjectPerformance.reduce((sum, s) => sum + s.currentScore, 0) / analyticsData.subjectPerformance.length).toFixed(1)}
+              </div>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+              <div className="text-xs text-gray-600 mb-1">Thấp nhất</div>
+              <div className="text-lg font-bold text-gray-900">
+                {Math.min(...analyticsData.subjectPerformance.map(s => s.currentScore)).toFixed(1)}
+              </div>
+            </div>
+          </div>
+
+          {/* Subject Cards */}
+          <div className="space-y-3">
             {analyticsData.subjectPerformance.map((subject, index) => (
-              <div key={index} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                <div className="flex items-center space-x-3">
-                  <div className={`w-3 h-3 rounded-full ${subject.color}`}></div>
-                  <span className="font-medium text-gray-700">{subject.name}</span>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <div className="text-right">
-                    <div className="font-bold text-gray-800">{subject.currentScore}</div>
-                    <div className={`flex items-center gap-1 text-sm ${getTrendColor(subject.trend)}`}>
-                      {getTrendIcon(subject.trend)}
-                      {subject.percentChange > 0 ? '+' : ''}{subject.percentChange.toFixed(1)}%
+              <div 
+                key={index} 
+                className="group bg-gray-50 hover:bg-white border border-gray-200 hover:border-gray-300 rounded-xl p-4 transition-all duration-300 hover:shadow-md"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-lg ${subject.color} bg-opacity-10 flex items-center justify-center`}>
+                      <span className="text-lg font-bold text-gray-900">{subject.name[0]}</span>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-gray-900">{subject.name}</div>
+                      <div className="text-xs text-gray-500">Điểm hiện tại</div>
                     </div>
                   </div>
-                  <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-gray-900">{subject.currentScore}</div>
+                    <div className={`flex items-center gap-1 text-xs font-medium ${getTrendColor(subject.trend)} justify-end`}>
+                      {getTrendIcon(subject.trend)}
+                      <span>{subject.percentChange > 0 ? '+' : ''}{subject.percentChange.toFixed(1)}%</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Progress Bar */}
+                <div className="relative">
+                  <div className="flex justify-between text-xs text-gray-500 mb-1">
+                    <span>Điểm trước: {subject.previousScore}</span>
+                    <span>{((subject.currentScore / 10) * 100).toFixed(0)}%</span>
+                  </div>
+                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                     <div
-                      className={`h-2 rounded-full ${subject.color} transition-all duration-300`}
+                      className={`h-2 rounded-full transition-all duration-500 ease-out ${subject.color}`}
                       style={{ width: `${(subject.currentScore / 10) * 100}%` }}
                     ></div>
                   </div>
@@ -236,19 +282,38 @@ export const LearningAnalytics = () => {
 
         {/* Exam Scores Trend */}
         <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-200">
-          <h3 className="text-xl font-semibold text-gray-900 mb-6">
-            Xu hướng điểm kiểm tra
-          </h3>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-xl font-semibold text-gray-900">
+                Xu hướng điểm kiểm tra
+              </h3>
+              <p className="text-sm text-gray-500 mt-1">
+                So sánh với trung bình lớp
+              </p>
+            </div>
+            <div className="text-right">
+              <div className="text-sm text-gray-500">Điểm gần nhất</div>
+              <div className="text-2xl font-bold text-gray-900">
+                {analyticsData.examScores[analyticsData.examScores.length - 1].score}
+              </div>
+            </div>
+          </div>
           
           {/* Legend */}
-          <div className="flex items-center gap-6 mb-6">
+          <div className="flex items-center gap-6 mb-6 bg-gray-50 rounded-lg p-3 border border-gray-200">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-1 bg-gray-900 rounded-full"></div>
+              <div className="w-3 h-3 rounded-full bg-gray-900"></div>
               <span className="text-sm font-medium text-gray-700">Điểm của bạn</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-1 bg-gray-400 rounded-full"></div>
+              <div className="w-3 h-3 rounded-full border-2 border-gray-400 bg-white"></div>
               <span className="text-sm font-medium text-gray-500">TB lớp</span>
+            </div>
+            <div className="flex items-center gap-2 ml-auto">
+              <Target className="w-4 h-4 text-gray-600" />
+              <span className="text-xs text-gray-600">
+                {analyticsData.examScores.filter(d => d.score > d.average).length}/{analyticsData.examScores.length} trên TB
+              </span>
             </div>
           </div>
 
@@ -277,11 +342,11 @@ export const LearningAnalytics = () => {
                 <defs>
                   <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" style={{ stopColor: '#111827', stopOpacity: 1 }} />
-                    <stop offset="100%" style={{ stopColor: '#374151', stopOpacity: 1 }} />
+                    <stop offset="100%" style={{ stopColor: '#4b5563', stopOpacity: 1 }} />
                   </linearGradient>
                   <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" style={{ stopColor: '#6b7280', stopOpacity: 0.15 }} />
-                    <stop offset="100%" style={{ stopColor: '#9ca3af', stopOpacity: 0.02 }} />
+                    <stop offset="0%" style={{ stopColor: '#374151', stopOpacity: 0.2 }} />
+                    <stop offset="100%" style={{ stopColor: '#9ca3af', stopOpacity: 0.05 }} />
                   </linearGradient>
                 </defs>
                 
@@ -305,6 +370,7 @@ export const LearningAnalytics = () => {
                   points={analyticsData.examScores.map((data, index) => 
                     `${(100 / (analyticsData.examScores.length - 1)) * index}%,${100 - (data.score / 10) * 100}%`
                   ).join(' ')}
+                  className="drop-shadow-md"
                 />
 
                 {/* Average line */}
@@ -323,25 +389,26 @@ export const LearningAnalytics = () => {
                 {/* Data points for student scores */}
                 {analyticsData.examScores.map((data, index) => (
                   <g key={`student-${index}`}>
-                    <circle
-                      cx={`${(100 / (analyticsData.examScores.length - 1)) * index}%`}
-                      cy={`${100 - (data.score / 10) * 100}%`}
-                      r="5"
-                      fill="white"
-                      stroke="#111827"
-                      strokeWidth="3"
-                      className="transition-all hover:r-7"
-                    />
+                    {/* Outer glow for excellent scores */}
                     {data.score >= 9.0 && (
                       <circle
                         cx={`${(100 / (analyticsData.examScores.length - 1)) * index}%`}
                         cy={`${100 - (data.score / 10) * 100}%`}
-                        r="8"
-                        fill="#4b5563"
-                        opacity="0.3"
-                        className="animate-ping"
+                        r="12"
+                        fill="#1f2937"
+                        opacity="0.15"
                       />
                     )}
+                    {/* Main point */}
+                    <circle
+                      cx={`${(100 / (analyticsData.examScores.length - 1)) * index}%`}
+                      cy={`${100 - (data.score / 10) * 100}%`}
+                      r="6"
+                      fill="white"
+                      stroke="#111827"
+                      strokeWidth="3"
+                      className="transition-all hover:r-8 cursor-pointer drop-shadow-lg"
+                    />
                   </g>
                 ))}
 
@@ -355,6 +422,7 @@ export const LearningAnalytics = () => {
                     fill="white"
                     stroke="#9ca3af"
                     strokeWidth="2"
+                    className="transition-all hover:r-6 cursor-pointer"
                   />
                 ))}
               </svg>
@@ -364,17 +432,40 @@ export const LearningAnalytics = () => {
                 {analyticsData.examScores.map((data, index) => (
                   <div key={index} className="flex-1 flex flex-col items-center justify-end group relative">
                     {/* Hover tooltip */}
-                    <div className="absolute bottom-full mb-12 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none">
-                      <div className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-3 py-2 rounded-lg shadow-lg text-center whitespace-nowrap">
-                        <div className="text-xs font-medium">Điểm của bạn</div>
-                        <div className="text-lg font-bold">{data.score}</div>
-                        <div className="text-xs opacity-75">TB lớp: {data.average}</div>
+                    <div className="absolute bottom-full mb-14 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-10">
+                      <div className="bg-gray-900 text-white px-4 py-3 rounded-xl shadow-xl text-center whitespace-nowrap">
+                        <div className="text-xs text-gray-300 mb-1">{data.month}</div>
+                        <div className="flex items-center gap-3">
+                          <div>
+                            <div className="text-xs text-gray-400">Bạn</div>
+                            <div className="text-xl font-bold">{data.score}</div>
+                          </div>
+                          <div className="w-px h-8 bg-gray-700"></div>
+                          <div>
+                            <div className="text-xs text-gray-400">TB</div>
+                            <div className="text-lg font-semibold text-gray-300">{data.average}</div>
+                          </div>
+                        </div>
+                        <div className={`text-xs mt-2 px-2 py-1 rounded-full ${
+                          data.score > data.average 
+                            ? 'bg-green-900 text-green-200' 
+                            : data.score === data.average 
+                            ? 'bg-gray-800 text-gray-300'
+                            : 'bg-red-900 text-red-200'
+                        }`}>
+                          {data.score > data.average 
+                            ? `+${(data.score - data.average).toFixed(1)} trên TB`
+                            : data.score === data.average
+                            ? 'Bằng TB'
+                            : `${(data.score - data.average).toFixed(1)} dưới TB`
+                          }
+                        </div>
                       </div>
-                      <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-indigo-600 mx-auto"></div>
+                      <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-transparent border-t-gray-900 mx-auto"></div>
                     </div>
 
                     {/* Month label */}
-                    <div className="text-xs font-semibold text-gray-600 mt-4">
+                    <div className="text-xs font-semibold text-gray-600 mt-4 group-hover:text-gray-900 transition-colors">
                       {data.month}
                     </div>
                   </div>
@@ -384,21 +475,27 @@ export const LearningAnalytics = () => {
           </div>
 
           {/* Summary stats */}
-          <div className="mt-6 pt-4 border-t border-gray-200 grid grid-cols-3 gap-4">
-            <div className="text-center">
-              <p className="text-xs text-gray-500 font-medium">Cao nhất</p>
-              <p className="text-lg font-bold text-gray-900">
+          <div className="mt-6 pt-4 border-t border-gray-200 grid grid-cols-4 gap-3">
+            <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 text-center">
+              <p className="text-xs text-gray-500 font-medium mb-1">Cao nhất</p>
+              <p className="text-xl font-bold text-gray-900">
                 {Math.max(...analyticsData.examScores.map(d => d.score))}
               </p>
             </div>
-            <div className="text-center">
-              <p className="text-xs text-gray-500 font-medium">Trung bình</p>
-              <p className="text-lg font-bold text-gray-900">
+            <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 text-center">
+              <p className="text-xs text-gray-500 font-medium mb-1">Trung bình</p>
+              <p className="text-xl font-bold text-gray-900">
                 {(analyticsData.examScores.reduce((sum, d) => sum + d.score, 0) / analyticsData.examScores.length).toFixed(1)}
               </p>
             </div>
-            <div className="text-center">
-              <p className="text-xs text-gray-500 font-medium">Xu hướng</p>
+            <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 text-center">
+              <p className="text-xs text-gray-500 font-medium mb-1">Thấp nhất</p>
+              <p className="text-xl font-bold text-gray-900">
+                {Math.min(...analyticsData.examScores.map(d => d.score))}
+              </p>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 text-center">
+              <p className="text-xs text-gray-500 font-medium mb-1">Xu hướng</p>
               <div className="flex items-center justify-center gap-1">
                 {analyticsData.examScores[analyticsData.examScores.length - 1].score > 
                  analyticsData.examScores[0].score ? (

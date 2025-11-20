@@ -106,86 +106,86 @@ export const PerformanceSummary = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent mb-2">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Tổng hợp Thành tích
           </h1>
-          <p className="text-slate-600">Theo dõi điểm số, xếp hạng và năng lực học tập</p>
+          <p className="text-gray-600">Theo dõi điểm số, xếp hạng và năng lực học tập</p>
         </div>
 
         {/* Overall Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-xl p-6 text-white border border-blue-400">
+          <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all p-6 border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm opacity-90 font-medium">GPA Tổng</p>
-                <p className="text-4xl font-bold">{calculateOverallGPA()}</p>
-                <p className="text-xs mt-1 opacity-75">Trung bình tích lũy</p>
+                <p className="text-sm text-gray-600 font-medium">GPA Tổng</p>
+                <p className="text-4xl font-bold text-gray-900">{calculateOverallGPA()}</p>
+                <p className="text-xs mt-1 text-gray-600">Trung bình tích lũy</p>
               </div>
-              <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                <GraduationCap className="w-8 h-8" />
+              <div className="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center">
+                <GraduationCap className="w-8 h-8 text-gray-700" />
               </div>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl shadow-xl p-6 text-white border border-emerald-400">
+          <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all p-6 border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm opacity-90 font-medium">Tổng tín chỉ</p>
-                <p className="text-4xl font-bold">
+                <p className="text-sm text-gray-600 font-medium">Tổng tín chỉ</p>
+                <p className="text-4xl font-bold text-gray-900">
                   {mockPerformance.reduce((sum, p) => sum + p.totalCredits, 0)}
                 </p>
-                <p className="text-xs mt-1 opacity-75">Credits đã tích lũy</p>
+                <p className="text-xs mt-1 text-gray-600">Credits đã tích lũy</p>
               </div>
-              <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                <BookOpen className="w-8 h-8" />
+              <div className="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center">
+                <BookOpen className="w-8 h-8 text-gray-700" />
               </div>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-purple-500 to-fuchsia-600 rounded-xl shadow-xl p-6 text-white border border-purple-400">
+          <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all p-6 border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm opacity-90 font-medium">Thành tích</p>
-                <p className="text-4xl font-bold">
+                <p className="text-sm text-gray-600 font-medium">Thành tích</p>
+                <p className="text-4xl font-bold text-gray-900">
                   {mockPerformance.reduce((sum, p) => sum + p.achievements, 0)}
                 </p>
-                <p className="text-xs mt-1 opacity-75">Huy hiệu đạt được</p>
+                <p className="text-xs mt-1 text-gray-600">Huy hiệu đạt được</p>
               </div>
-              <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                <Trophy className="w-8 h-8" />
+              <div className="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center">
+                <Trophy className="w-8 h-8 text-gray-700" />
               </div>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl shadow-xl p-6 text-white border border-orange-400">
+          <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all p-6 border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm opacity-90 font-medium">Xếp hạng</p>
-                <p className="text-4xl font-bold">#{currentPerformance.rank}</p>
-                <p className="text-xs mt-1 opacity-75">Trong {currentPerformance.totalStudents} sinh viên</p>
+                <p className="text-sm text-gray-600 font-medium">Xếp hạng</p>
+                <p className="text-4xl font-bold text-gray-900">#{currentPerformance.rank}</p>
+                <p className="text-xs mt-1 text-gray-600">Trong {currentPerformance.totalStudents} sinh viên</p>
               </div>
-              <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                <Star className="w-8 h-8" />
+              <div className="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center">
+                <Star className="w-8 h-8 text-gray-700" />
               </div>
             </div>
           </div>
         </div>
 
         {/* Semester Performance */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg mb-6 border border-slate-200">
-          <div className="p-6 border-b border-slate-100">
+        <div className="bg-white rounded-xl shadow-lg mb-6 border border-gray-200">
+          <div className="p-6 border-b border-gray-200">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+              <h2 className="text-xl font-semibold text-gray-900">
                 Kết quả theo học kỳ
               </h2>
               <select
                 value={selectedSemester}
                 onChange={(e) => setSelectedSemester(e.target.value)}
-                className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800"
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 text-gray-900 bg-white"
               >
                 {mockPerformance.map((perf) => (
                   <option key={perf.semester} value={perf.semester}>
@@ -198,21 +198,21 @@ export const PerformanceSummary = () => {
 
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
-                <p className="text-sm text-slate-600 mb-2 font-medium">GPA học kỳ</p>
-                <p className={`text-4xl font-bold ${getGPAColor(currentPerformance.gpa)}`}>
+              <div className="text-center p-4 bg-gray-50 rounded-xl border border-gray-200">
+                <p className="text-sm text-gray-600 mb-2 font-medium">GPA học kỳ</p>
+                <p className="text-4xl font-bold text-gray-900">
                   {currentPerformance.gpa}
                 </p>
               </div>
-              <div className="text-center p-4 bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl border border-emerald-200">
-                <p className="text-sm text-slate-600 mb-2 font-medium">Điểm danh</p>
-                <p className="text-4xl font-bold text-emerald-600">
+              <div className="text-center p-4 bg-gray-50 rounded-xl border border-gray-200">
+                <p className="text-sm text-gray-600 mb-2 font-medium">Điểm danh</p>
+                <p className="text-4xl font-bold text-gray-900">
                   {currentPerformance.attendance}%
                 </p>
               </div>
-              <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-fuchsia-50 rounded-xl border border-purple-200">
-                <p className="text-sm text-slate-600 mb-2 font-medium">Tín chỉ</p>
-                <p className="text-4xl font-bold text-purple-600">
+              <div className="text-center p-4 bg-gray-50 rounded-xl border border-gray-200">
+                <p className="text-sm text-gray-600 mb-2 font-medium">Tín chỉ</p>
+                <p className="text-4xl font-bold text-gray-900">
                   {currentPerformance.totalCredits}
                 </p>
               </div>
@@ -221,10 +221,10 @@ export const PerformanceSummary = () => {
         </div>
 
         {/* GPA Trend Chart */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-6 mb-6 border border-slate-200">
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
           <div className="flex items-center gap-2 mb-6">
-            <TrendingUp className="w-6 h-6 text-emerald-600" />
-            <h2 className="text-xl font-semibold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+            <TrendingUp className="w-6 h-6 text-gray-700" />
+            <h2 className="text-xl font-semibold text-gray-900">
               Xu hướng GPA
             </h2>
           </div>
@@ -233,14 +233,14 @@ export const PerformanceSummary = () => {
             <div className="flex items-end justify-between h-full">
               {mockPerformance.slice().reverse().map((perf, index) => (
                 <div key={index} className="flex-1 flex flex-col items-center justify-end px-2">
-                  <div className="text-sm font-bold bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent mb-2">
+                  <div className="text-sm font-bold text-gray-900 mb-2">
                     {perf.gpa}
                   </div>
                   <div
-                    className="w-full bg-gradient-to-t from-emerald-600 to-cyan-500 rounded-t-xl transition-all duration-300 hover:opacity-80"
+                    className="w-full bg-gray-800 rounded-t-xl transition-all duration-300 hover:bg-gray-700"
                     style={{ height: `${(perf.gpa / 10) * 100}%` }}
                   ></div>
-                  <div className="text-xs text-slate-600 mt-2 text-center">
+                  <div className="text-xs text-gray-600 mt-2 text-center">
                     {perf.semester.split(' ')[0]}
                   </div>
                 </div>
@@ -250,32 +250,32 @@ export const PerformanceSummary = () => {
         </div>
 
         {/* Skills & Competencies */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-slate-200">
+        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
           <div className="flex items-center gap-2 mb-6">
-            <Target className="w-6 h-6 text-emerald-600" />
-            <h2 className="text-xl font-semibold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+            <Target className="w-6 h-6 text-gray-700" />
+            <h2 className="text-xl font-semibold text-gray-900">
               Năng lực & Kỹ năng
             </h2>
           </div>
           
           {/* Technical Skills */}
           <div className="mb-6">
-            <h3 className="text-lg font-medium text-gray-700 mb-4 flex items-center gap-2">
-              <Zap className="w-5 h-5 text-blue-600" />
+            <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
+              <Zap className="w-5 h-5 text-gray-700" />
               Kỹ năng kỹ thuật
             </h3>
             <div className="space-y-4">
               {mockSkills.filter(s => s.category === 'technical').map((skill, index) => (
                 <div key={index}>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-slate-700">{skill.name}</span>
-                    <span className="text-sm font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                    <span className="text-sm font-medium text-gray-900">{skill.name}</span>
+                    <span className="text-sm font-bold text-gray-900">
                       {skill.level}%
                     </span>
                   </div>
-                  <div className="w-full bg-slate-200 rounded-full h-3">
+                  <div className="w-full bg-gray-200 rounded-full h-3">
                     <div
-                      className={`h-3 rounded-full transition-all duration-500 ${getSkillColor(skill.level)}`}
+                      className="h-3 rounded-full transition-all duration-500 bg-gray-800"
                       style={{ width: `${skill.level}%` }}
                     ></div>
                   </div>
@@ -286,22 +286,22 @@ export const PerformanceSummary = () => {
 
           {/* Soft Skills */}
           <div className="mb-6">
-            <h3 className="text-lg font-medium text-slate-700 mb-4 flex items-center gap-2">
-              <Award className="w-5 h-5 text-emerald-600" />
+            <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
+              <Award className="w-5 h-5 text-gray-700" />
               Kỹ năng mềm
             </h3>
             <div className="space-y-4">
               {mockSkills.filter(s => s.category === 'soft').map((skill, index) => (
                 <div key={index}>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-slate-700">{skill.name}</span>
-                    <span className="text-sm font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
+                    <span className="text-sm font-medium text-gray-900">{skill.name}</span>
+                    <span className="text-sm font-bold text-gray-900">
                       {skill.level}%
                     </span>
                   </div>
-                  <div className="w-full bg-slate-200 rounded-full h-3">
+                  <div className="w-full bg-gray-200 rounded-full h-3">
                     <div
-                      className={`h-3 rounded-full transition-all duration-500 ${getSkillColor(skill.level)}`}
+                      className="h-3 rounded-full transition-all duration-500 bg-gray-800"
                       style={{ width: `${skill.level}%` }}
                     ></div>
                   </div>
@@ -312,22 +312,22 @@ export const PerformanceSummary = () => {
 
           {/* Language Skills */}
           <div>
-            <h3 className="text-lg font-medium text-slate-700 mb-4 flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-purple-600" />
+            <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-gray-700" />
               Ngoại ngữ
             </h3>
             <div className="space-y-4">
               {mockSkills.filter(s => s.category === 'language').map((skill, index) => (
                 <div key={index}>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-slate-700">{skill.name}</span>
-                    <span className="text-sm font-bold bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent">
+                    <span className="text-sm font-medium text-gray-900">{skill.name}</span>
+                    <span className="text-sm font-bold text-gray-900">
                       {skill.level}%
                     </span>
                   </div>
-                  <div className="w-full bg-slate-200 rounded-full h-3">
+                  <div className="w-full bg-gray-200 rounded-full h-3">
                     <div
-                      className={`h-3 rounded-full transition-all duration-500 ${getSkillColor(skill.level)}`}
+                      className="h-3 rounded-full transition-all duration-500 bg-gray-800"
                       style={{ width: `${skill.level}%` }}
                     ></div>
                   </div>

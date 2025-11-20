@@ -4,6 +4,7 @@ import { useState } from "react";
 import { StudentProfile } from "./StudentProfile";
 import { LearningAnalytics } from "./LearningAnalytics";
 import { SubjectCard } from "./SubjectCard";
+import { SubjectDetailModal } from "./SubjectDetailModal";
 import { AchievementGrid, AchievementBadge } from "./AchievementBadge";
 import { BookOpen, BarChart3, CheckCircle2, FileText, Trophy, Zap, Target } from "lucide-react";
 
@@ -139,12 +140,20 @@ const mockAchievements = [
 
 export const StudentManagementDashboard = () => {
   const [activeTab, setActiveTab] = useState<'profile' | 'analytics' | 'subjects' | 'achievements'>('profile');
-
-
+  const [selectedSubject, setSelectedSubject] = useState<typeof mockSubjects[0] | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleSubjectDetails = (subjectId: string) => {
-    console.log("View subject details:", subjectId);
-    // Navigate to subject detail page
+    const subject = mockSubjects.find(s => s.id === subjectId);
+    if (subject) {
+      setSelectedSubject(subject);
+      setIsModalOpen(true);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedSubject(null);
   };
 
   const handleTabClick = (tab: 'profile' | 'analytics' | 'subjects' | 'achievements') => {
@@ -375,6 +384,15 @@ export const StudentManagementDashboard = () => {
           )}
         </div>
       </div>
+
+      {/* Subject Detail Modal */}
+      {selectedSubject && (
+        <SubjectDetailModal
+          subject={selectedSubject}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+        />
+      )}
     </div>
   );
 };
