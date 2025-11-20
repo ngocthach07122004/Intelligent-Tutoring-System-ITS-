@@ -5,10 +5,16 @@
     <option name="originalFiles">
       <list>
         <option value="$PROJECT_DIR$/backend/java-service/discovery-eureka-server/pom.xml" />
+        <option value="$PROJECT_DIR$/backend/java-service/api-gateway/pom.xml" />
+        <option value="$PROJECT_DIR$/backend/java-service/identity-service/pom.xml" />
+        <option value="$PROJECT_DIR$/backend/java-service/pom.xml" />
+        <option value="$PROJECT_DIR$/backend/java-service/user-profile-service/pom.xml" />
+        <option value="$PROJECT_DIR$/backend/java-service/dashboard-service/pom.xml" />
+        <option value="$PROJECT_DIR$/backend/java-service/course-service/pom.xml" />
       </list>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_24" default="true" project-jdk-name="openjdk-24" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_21" default="true" project-jdk-name="homebrew-21" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>

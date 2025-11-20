@@ -1,0 +1,16 @@
+{
+  "realm": "demo-realm",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "identity-service",
+      "secret": "change-me",
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "protocol": "openid-connect",
+      "redirectUris": ["*"]
+    }
+  ],
+  "users": []
+}

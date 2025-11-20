@@ -1,0 +1,32 @@
+FROM eclipse-temurin:21-jdk AS builder
+
+WORKDIR /build
+
+# Copy Maven Wrapper và pom từ module con
+COPY backend/java-service/discovery-eureka-server/mvnw .
+COPY backend/java-service/discovery-eureka-server/.mvn .mvn
+COPY backend/java-service/discovery-eureka-server/pom.xml .
+
+RUN chmod +x mvnw
+
+# Tải dependencies
+RUN ./mvnw dependency:go-offline -B -ntp
+
+# Copy source code
+COPY backend/java-service/discovery-eureka-server/src src
+
+# Build project
+RUN ./mvnw clean package -DskipTests -B -ntp
+
+RUN cp target/*SNAPSHOT.jar app.jar
+
+# ========== Stage 2: Run ==========
+FROM eclipse-temurin:21-jre
+
+WORKDIR /app
+COPY --from=builder /build/app.jar app.jar
+
+ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+
+EXPOSE 8761
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
