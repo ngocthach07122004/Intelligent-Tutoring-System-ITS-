@@ -1,17 +1,10 @@
 "use client";
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-} from "@/components/ui/dropdown-menu"
-import { ChevronDown } from "lucide-react"
+import Link from "next/link";
 
 const ForumPage = () => {
-
     const allQuestions = [
         {
             id: 1,
@@ -37,7 +30,6 @@ const ForumPage = () => {
             comments: 2,
             answered: false,
         },
-        // ➕ thêm nhiều câu hỏi mẫu để test
         ...Array.from({ length: 18 }, (_, i) => ({
             id: i + 3,
             title: `Sample Question ${i + 3}`,
@@ -55,13 +47,14 @@ const ForumPage = () => {
     const [filterType, setFilterType] = useState<
         "all" | "active" | "hot" | "unanswered"
     >("all");
-    const [sortBy, setSortBy] = useState<"votes" | "views" | "newest" | "oldest">(
-        "newest"
-    );
+
+    const [sortBy, setSortBy] = useState<
+        "votes" | "views" | "newest" | "oldest"
+    >("newest");
+
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 5;
 
-    // Tạm thời filter đơn giản
     const filtered = allQuestions.filter((q) => {
         if (filterType === "hot") return q.votes >= 5;
         if (filterType === "unanswered") return !q.answered;
@@ -71,31 +64,31 @@ const ForumPage = () => {
     const sorted = [...filtered].sort((a, b) => {
         if (sortBy === "votes") return b.votes - a.votes;
         if (sortBy === "views") return b.views - a.views;
-        if (sortBy === "newest") return a.id < b.id ? 1 : -1;
+        if (sortBy === "newest") return b.id - a.id;
         if (sortBy === "oldest") return a.id - b.id;
         return 0;
     });
 
-    // Logic phân trang
-    // Logic phân trang
     const totalPages = Math.ceil(sorted.length / pageSize);
     const currentQuestions = sorted.slice(
         (currentPage - 1) * pageSize,
         currentPage * pageSize
     );
 
-
     return (
-        <div className="max-w-5xl mx-auto p-6 mt-16 space-y-6">
-            {/* Hàng trên cùng */}
+        <div className="max-w-5xl mx-auto p-6 space-y-6">
+            {/* Header */}
             <div className="flex justify-between items-center mb-4">
                 <h1 className="text-2xl font-bold capitalize">
                     {filterType === "all" ? "All Questions" : filterType}
                 </h1>
-                <Button className="bg-blue-600 text-white">+ Ask Question</Button>
+
+                {/* chuyển sang trang hỏi câu mới */}
+                <Link href="/dashboard/forum/ask">
+                    <Button className="bg-blue-600 text-white">+ Ask Question</Button>
+                </Link>
             </div>
 
-            {/* Tổng số + filter options */}
             <div className="border-b pb-3">
                 <div className="flex justify-between items-center flex-wrap gap-3">
                     {/* Left: Question count */}
@@ -151,7 +144,7 @@ const ForumPage = () => {
                         className="border border-gray-300 rounded-xl p-5 hover:shadow-md transition bg-white dark:bg-gray-900"
                     >
                         <h2 className="text-lg font-semibold text-blue-600 hover:underline cursor-pointer">
-                            {q.title}
+                            <Link href={`/dashboard/forum/${q.id}`}>{q.title}</Link>
                         </h2>
 
                         <p className="text-gray-700 dark:text-gray-300 mt-2 text-sm">

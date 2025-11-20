@@ -1,11 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ServerSidebar } from './components/ServerSidebar';
-import DirectMessagesList from './components/DirectMessagesList';
-import ChatWindow from './components/ChatWindow';
-import ServerChannelSidebar from './components/ServerChannelSidebar';
-import { Home, Send, Plus, X } from 'lucide-react';
+import { ServerSidebar } from '@/components/widgets/chat/ServerSidebar';
+import DirectMessagesList from '@/components/widgets/chat/DirectMessagesList';
+import ChatWindow from '@/components/widgets/chat/ChatWindow';
+import ServerChannelSidebar from '@/components/widgets/chat/ServerChannelSidebar';
 
 interface Server {
   id: string;
@@ -63,7 +62,7 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] w-full bg-gray-900 text-gray-100 font-sans overflow-hidden mt-16">
+    <div className="flex min-h-screen w-full bg-white text-black font-sans overflow-hidden">
       <div className={`${isMobileChatOpen ? 'hidden' : 'block'} md:block`}>
         <ServerSidebar
           servers={mockServers}
@@ -72,7 +71,6 @@ export default function App() {
         />
       </div>
 
-      {/* Khi chọn Home */}
       {/* Khi chọn Home */}
       {selectedServerId === 'home' ? (
         <div className="flex flex-1">
@@ -90,7 +88,7 @@ export default function App() {
                 onBack={handleBack}
               />
             ) : (
-              <div className="flex-1 bg-gray-700 flex items-center justify-center text-gray-400">
+              <div className="flex-1 bg-white flex items-center justify-center text-gray-500">
                 Chọn một người để bắt đầu trò chuyện 💬
               </div>
             )}
@@ -98,6 +96,7 @@ export default function App() {
         </div>
       ) : (
         <div className="flex flex-1">
+          {/* Sidebar kênh */}
           <div className={`${isMobileChatOpen ? 'hidden' : 'block'} md:block w-full md:w-72`}>
             <ServerChannelSidebar
               serverName={mockServers.find(s => s.id === selectedServerId)?.name || ''}
@@ -115,7 +114,7 @@ export default function App() {
                 onBack={handleBack}
               />
             ) : (
-              <div className="flex-1 bg-gray-700 flex items-center justify-center text-gray-400">
+              <div className="flex-1 bg-white flex items-center justify-center text-gray-400">
                 Chọn một kênh để bắt đầu 💬
               </div>
             )}
