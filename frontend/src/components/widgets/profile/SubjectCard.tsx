@@ -1,5 +1,7 @@
 "use client";
 
+import { Calendar, FileCheck, ClipboardList, Presentation } from "lucide-react";
+
 interface SubjectData {
   id: string;
   name: string;
@@ -135,7 +137,7 @@ export const SubjectCard = ({ subject, onViewDetails }: SubjectCardProps) => {
           <div className={`p-3 rounded-lg ${attendanceStatus.bg}`}>
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-gray-600">Điểm danh</span>
-              <span className="text-lg">📅</span>
+              <Calendar className="w-5 h-5 text-gray-600" />
             </div>
             <div className={`text-lg font-bold ${attendanceStatus.color}`}>
               {subject.attendance}%
@@ -149,7 +151,7 @@ export const SubjectCard = ({ subject, onViewDetails }: SubjectCardProps) => {
           <div className="p-3 rounded-lg bg-blue-50">
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-gray-600">Bài tập</span>
-              <span className="text-lg">📝</span>
+              <FileCheck className="w-5 h-5 text-blue-600" />
             </div>
             <div className="text-lg font-bold text-blue-600">
               {subject.assignments.completed}/{subject.assignments.total}
@@ -175,10 +177,10 @@ export const SubjectCard = ({ subject, onViewDetails }: SubjectCardProps) => {
                 </span>
               </div>
             </div>
-            <div className="text-2xl">
-              {subject.nextAssignment.type === 'exam' && '📋'}
-              {subject.nextAssignment.type === 'assignment' && '📄'}
-              {subject.nextAssignment.type === 'project' && '🎯'}
+            <div className="w-10 h-10 flex items-center justify-center">
+              {subject.nextAssignment.type === 'exam' && <ClipboardList className="w-7 h-7 text-gray-700" />}
+              {subject.nextAssignment.type === 'assignment' && <FileCheck className="w-7 h-7 text-gray-700" />}
+              {subject.nextAssignment.type === 'project' && <Presentation className="w-7 h-7 text-gray-700" />}
             </div>
           </div>
         </div>

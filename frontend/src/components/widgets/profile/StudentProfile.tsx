@@ -53,10 +53,10 @@ export const StudentProfile = () => {
   const [studentData, setStudentData] = useState<StudentData>({
     id: "ST001",
     studentId: "2024001234",
-    name: "Nguyễn Thị Minh Anh",
-    email: "minhanh.nguyen@student.edu.vn",
+    name: "Chung Khả Vy",
+    email: "Vyxinhqua@student.edu.vn",
     phone: "0987654321",
-    dateOfBirth: "2006-03-15",
+    dateOfBirth: "2005-11-11",
     address: "123 Đường Lê Lợi, Quận 1, TP.HCM",
     parentName: "Nguyễn Văn Nam",
     parentPhone: "0901234567",

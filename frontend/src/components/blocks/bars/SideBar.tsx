@@ -8,16 +8,12 @@ import {
   BookOpen,
   FileText,
   BarChart3,
-  UserPlus,
-  MessageSquare,
   ChevronLeft,
   Menu,
   User,
   CreditCard,
   Command,
-  LogOut,
-  Star,
-  Building2
+  LogOut
 } from "lucide-react";
 import { LogoIcon } from "../../icons";
 import {
@@ -112,90 +108,11 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* Favorites */}
-      <div className="mb-6 w-full">
-        <p
-          className={clsx(
-            "text-sm font-semibold text-muted-foreground mb-3 transition-opacity duration-300",
-            { "opacity-0 h-0": !isOpen }
-          )}
-        >
-          Favorites
-        </p>
-        <div className="flex flex-col gap-1">
-          <div className={clsx(
-            "flex hover:cursor-pointer items-center rounded-lg hover:bg-accent hover:text-foreground transition-colors",
-            {
-              "gap-3 px-3 py-2": isOpen,
-              "justify-center py-2": !isOpen,
-            }
-          )}>
-            <Star size={18} className="shrink-0" />
-            <span
-              className={clsx("text-sm font-medium transition-opacity duration-300", {
-                "opacity-0 w-0": !isOpen,
-              })}
-            >
-              Starred Items
-            </span>
-          </div>
-          <div className={clsx(
-            "flex hover:cursor-pointer items-center rounded-lg hover:bg-accent hover:text-foreground transition-colors",
-            {
-              "gap-3 px-3 py-2": isOpen,
-              "justify-center py-2": !isOpen,
-            }
-          )}>
-            <Building2 size={18} className="shrink-0" />
-            <span
-              className={clsx("text-sm font-medium transition-opacity duration-300", {
-                "opacity-0 w-0": !isOpen,
-              })}
-            >
-              Organizations
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* Spacer */}
       <div className="flex-grow"></div>
 
       {/* Actions */}
       <div className="border-t pt-4 flex flex-col gap-1 w-full text-nowrap">
-        <button className={clsx(
-          "rounded-lg flex items-center text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors",
-          {
-            "gap-3 px-3 py-2": isOpen,
-            "justify-center py-2": !isOpen,
-          }
-        )}>
-          <UserPlus size={18} className="shrink-0" />
-          <span
-            className={clsx("transition-opacity duration-300", {
-              "opacity-0 w-0": !isOpen,
-            })}
-          >
-            Invite member
-          </span>
-        </button>
-        <button className={clsx(
-          "rounded-lg flex items-center text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors",
-          {
-            "gap-3 px-3 py-2": isOpen,
-            "justify-center py-2": !isOpen,
-          }
-        )}>
-          <MessageSquare size={18} className="shrink-0" />
-          <span
-            className={clsx("transition-opacity duration-300", {
-              "opacity-0 w-0": !isOpen,
-            })}
-          >
-            Feedback
-          </span>
-        </button>
-
         <Popover>
           <PopoverTrigger asChild>
             <button className="rounded-lg flex items-center gap-3 text-sm hover:bg-accent px-3 py-2 transition-colors w-full">
