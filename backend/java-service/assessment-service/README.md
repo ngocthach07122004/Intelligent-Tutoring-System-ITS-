@@ -1,4 +1,12 @@
 # Assessment Service
+Chưa xong CRUD theo use case MVP. assessment-service có skeleton đầy đủ lớp/entity/controller, nhưng còn nhiều khoảng trống so với flow đã mô tả:
+
+Thiếu endpoint/logic chủ chốt: Không có manual grade (PUT /attempts/{id}/grade), cancel attempt, gradebook filter theo lesson/student (chỉ có course-level), chưa có mapping quiz vào lesson/lesson completion event. Không có danh sách attempt pending review cho teacher. Không emit assessment.exam.graded.
+Grading/attempt còn sơ khai: AttemptServiceImpl chỉ chấm MCQ bằng cách so sánh metadata.correct với response (không parse JSON options/testcases, không time limit/window, không check “already submitted” vs timeout), essay chỉ đánh dấu review nhưng không có quy trình review. Không có xử lý IN_PROGRESS → SUBMITTED → GRADED đầy đủ hoặc tính pass/fail chuẩn (status hardcode “PASSED”). Không kiểm tra chủ sở hữu course/lesson khi tạo exam/pool/question.
+Security/context: Các controller không kiểm tra role/ownership; lấy userId bằng SecurityContextHolder.getContext().getAuthentication().getName() hoặc random fallback (vd. AttemptServiceImpl#getCurrentUserId, GradebookServiceImpl#getCurrentUserId), không parse từ JWT claim sub. Điều này không đáp ứng Student/Teacher/Admin phân quyền.
+Data model lệch nhẹ với plan: ExamConfig đã có lessonId/courseId, nhưng migrations V1/V2 chưa thêm courseId/lessonId mới (V1 có lesson_id, course_id chưa; V2 cần kiểm tra), không có UNIQUE lessonId (1 lesson 1 quiz) hay ràng buộc window/time limit. Không có bảng audit/manual review queue. Không có bảng/logic partial credit rubric áp dụng.
+Validation/health: Health /health ok; nhưng request validation rất ít (metadata schema, time window, points per question, count to pull chưa check). Rate limit/RBAC chưa có. Không có publish event sang RabbitMQ.
+Kết luận: assessment-service chưa hoàn thiện CRUD/flow theo use case MVP; cần bổ sung endpoint và logic start/submit/grade (MCQ tối thiểu), manual review, gradebook, mapping lesson, event emit, kiểm tra role/owner, và chuẩn hóa userId từ JWT.
 
 ## 📝 Overview
 The **Assessment Service** is a specialized domain responsible for managing question banks, generating quizzes/exams, and executing grading logic. It supports complex assessment types like coding challenges and adaptive testing.
@@ -87,8 +95,8 @@ com.its.assessment
 5.  **Finalization**: Status `GRADED` only when ALL questions scored.
 
 ### RabbitMQ Bindings & Events
-| Event | Exchange | Routing Key | Queue (Consumer) | DLX/DLQ |
-|-------|----------|-------------|------------------|---------|
+| Event         | Exchange             | Routing Key              | Queue (Consumer)         | DLX/DLQ                           |
+| ------------- | -------------------- | ------------------------ | ------------------------ | --------------------------------- |
 | `EXAM_GRADED` | `its.topic.exchange` | `assessment.exam.graded` | `q.gamification.xp` (Go) | `its.dlx.exchange` -> `q.dlx.all` |
 | `EXAM_GRADED` | `its.topic.exchange` | `assessment.exam.graded` | `q.profile.skill` (Java) | `its.dlx.exchange` -> `q.dlx.all` |
 
