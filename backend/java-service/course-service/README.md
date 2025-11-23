@@ -1,4 +1,10 @@
 # Course Service
+Hiện có CRUD cơ bản cho Course/Chapter/Lesson (+ health controller) qua các controller/service: CourseController, ChapterController, LessonController (ví dụ backend/java-service/course-service/src/main/java/ITS/com/vn/course_service/service/CourseService.java). Không có API enroll/unenroll, hoàn thành lesson, publish flow với event, hay assignment/quiz binding. Student view/complete lesson và Teacher xem enroll/điểm quiz chưa có.
+Entity/repo chỉ cover Course/Version/Chapter/Lesson/Tag/Prerequisite/...; không có Enrollment, UserLessonProgress, CourseVersion publish snapshot, hay mapping quiz/assignment theo plan. Flyway V2 đã drop user_course_enrollment và prerequisites (old schema) nhưng chưa có bảng progress/enrollment phù hợp use case.
+Endpoint publish/archvie chỉ đổi trạng thái, có TODO emit event, chưa kiểm tra chapter/lesson điều kiện nâng cao; check quyền dựa trên sub parse Long (JWT sub theo plan là UUID) → sẽ fail hoặc sai user-id (CourseController.extractUserIdFromAuth, ChapterController, LessonController).
+Lacking Student flows: không có GET /courses/{id}/enrollments, POST /courses/{id}/enroll, DELETE /courses/{id}/enroll, POST /lessons/{id}/complete, không có prerequisite check, không gắn quiz (Assessment) hay assignment creation endpoint.
+Health: có /api/v1/health controller, actuator đã khai báo trong pom, ok cho basic check.
+Kết luận: course-service chưa “code xong CRUD” cho MVP use case. Mới có CRUD Course/Chapter/Lesson cho giảng viên, thiếu enroll/progress/lesson completion và event integration; cần bổ sung entity/repo/controller/service cho Enrollment/Progress và endpoints theo plan, sửa JWT userId (UUID), và phát sự kiện publish/lesson completed.
 
 ## 📚 Overview
 The **Course Service** manages the curriculum, content delivery, and structural organization of learning materials. It supports advanced features like versioning, tagging, and prerequisites.
@@ -96,12 +102,12 @@ com.its.course
         - Action: Offer **Challenge** (Skip next lesson or advanced content).
 
 ### RabbitMQ Bindings & Events
-| Event | Exchange | Routing Key | Queue (Consumer) | DLX/DLQ |
-|-------|----------|-------------|------------------|---------|
-| `COURSE_PUBLISHED` | `its.topic.exchange` | `course.content.published` | `q.notification.course` (Go) | `its.dlx.exchange` -> `q.dlx.all` |
-| `LESSON_COMPLETED` | `its.topic.exchange` | `course.lesson.completed` | `q.gamification.progress` (Go) | `its.dlx.exchange` -> `q.dlx.all` |
-| `ASSIGNMENT_CREATED`| `its.topic.exchange` | `course.assignment.created`| `q.notification.assignment` (Go)| `its.dlx.exchange` -> `q.dlx.all` |
-| `GROUP_JOINED` (Consume) | `its.topic.exchange` | `profile.group.joined` | `q.course.enrollment` (Java) | `its.dlx.exchange` -> `q.dlx.all` |
+| Event                    | Exchange             | Routing Key                 | Queue (Consumer)                 | DLX/DLQ                           |
+| ------------------------ | -------------------- | --------------------------- | -------------------------------- | --------------------------------- |
+| `COURSE_PUBLISHED`       | `its.topic.exchange` | `course.content.published`  | `q.notification.course` (Go)     | `its.dlx.exchange` -> `q.dlx.all` |
+| `LESSON_COMPLETED`       | `its.topic.exchange` | `course.lesson.completed`   | `q.gamification.progress` (Go)   | `its.dlx.exchange` -> `q.dlx.all` |
+| `ASSIGNMENT_CREATED`     | `its.topic.exchange` | `course.assignment.created` | `q.notification.assignment` (Go) | `its.dlx.exchange` -> `q.dlx.all` |
+| `GROUP_JOINED` (Consume) | `its.topic.exchange` | `profile.group.joined`      | `q.course.enrollment` (Java)     | `its.dlx.exchange` -> `q.dlx.all` |
 
 ### Acceptance Criteria & Flows
 - **Course Publishing**:
