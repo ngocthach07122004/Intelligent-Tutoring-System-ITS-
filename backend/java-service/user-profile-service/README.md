@@ -3,6 +3,8 @@
 ## 👤 Overview
 The **User Profile Service** manages extended user information, learning preferences, and educational background. It serves as the central repository for student and teacher profiles.
 
+> **📋 API Specification**: For detailed endpoint specifications, request/response examples, and validation rules, see [User Profile Service API Plan](../../../plan/user-profile-service-api.md).
+
 ## 🏗 Architecture & Design
 This service follows a **Layered Architecture** (Controller -> Service -> Repository).
 
@@ -101,6 +103,30 @@ erDiagram
 - `VIEW_ANALYTICS`: Requires `LEADER` or `TEACHER`.
 - `EDIT_SETTINGS`: Requires `LEADER`.
 - `POST_ANNOUNCEMENT`: Requires `MEMBER` (if allowed) or `LEADER`.
+
+### API Specifications & Rules
+
+#### 1. Profile Management
+- **Endpoint**: `GET /api/v1/profiles/me`
+- **Endpoint**: `PUT /api/v1/profiles/me`
+    - **Payload**: `{ "bio": "...", "timezone": "Asia/Ho_Chi_Minh", "learningStyle": "VISUAL" }`
+    - **Validation**: `timezone` must be valid ZoneId.
+
+#### 2. Schedule Management
+- **Endpoint**: `GET /api/v1/schedules`
+- **Endpoint**: `POST /api/v1/schedules`
+    - **Payload**: `{ "startTime": "...", "endTime": "...", "recurrenceRule": "FREQ=WEEKLY;..." }`
+    - **Validation**: `recurrenceRule` must follow RFC 5545.
+
+#### 3. Group Management
+- **Endpoints**:
+    - `POST /api/v1/groups`: Create Group (Teacher).
+    - `POST /api/v1/groups/join`: Join via Code (Student).
+    - `DELETE /api/v1/groups/{id}/members/{userId}`: Remove Member (Leader).
+    - `PUT /api/v1/groups/{id}/members/{userId}/role`: Promote/Demote (Leader).
+- **Error Codes**:
+    - `403 FORBIDDEN`: Insufficient permissions (e.g., Member trying to promote).
+    - `404 NOT_FOUND`: Invalid Group ID or User ID.
 
 ## 🔗 Service Dependencies
 - **Identity Service**: Receives user creation events to initialize profiles.

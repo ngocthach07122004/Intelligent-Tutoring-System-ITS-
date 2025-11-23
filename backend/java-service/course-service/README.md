@@ -3,6 +3,8 @@
 ## 📚 Overview
 The **Course Service** manages the curriculum, content delivery, and structural organization of learning materials. It supports advanced features like versioning, tagging, and prerequisites.
 
+> **📋 API Specification**: For detailed endpoint specifications, request/response examples, and validation rules, see [Course Service API Plan](../../../plan/course-service-api.md).
+
 ## 🏗 Architecture & Design
 We use **Domain-Driven Design (DDD)** to model complex interactions.
 
@@ -116,6 +118,40 @@ com.its.course
 1.  `GetCourseDetails(courseId)`: Returns metadata, tags, and instructor info.
 2.  `GetLessonStructure(courseId)`: Returns hierarchical tree (Chapters -> Lessons) for Recommendation Engine.
 3.  `GetCourseProgress(userId, courseId)`: Returns completion % and last accessed lesson.
+    - **Response**: `progress_percent` (int32), `last_lesson_id` (int64), `completed_lesson_ids` (repeated int64).
+
+### API Specifications & Rules
+
+#### 1. Lesson Management
+- **Endpoint**: `GET /api/v1/lessons/{id}`
+- **Response**:
+  ```json
+  {
+    "id": 101,
+    "title": "Intro to Streams",
+    "type": "VIDEO",
+    "asset": { "url": "...", "mime": "video/mp4" },
+    "masteryThreshold": 0.8,
+    "isCompleted": true, // Computed for current user
+    "nextLessonId": 102
+  }
+  ```
+- **Completion Rule**:
+    - **Video**: Watch > 90% duration (Client sends heartbeat).
+    - **Quiz**: Score >= `masteryThreshold`.
+    - **Failure**: Return `422 Unprocessable Entity` (Code: `PREREQ_NOT_MET`) if prereqs not done.
+
+#### 2. Chapter Management
+- **Endpoints**:
+    - `POST /api/v1/courses/{id}/chapters`: Create Chapter.
+    - `PUT /api/v1/courses/{id}/chapters/reorder`: Reorder.
+    - **Payload**: `{ "chapterIds": [1, 3, 2] }`
+
+#### 3. Enrollment & Progress
+- **Endpoint**: `GET /api/v1/courses/{id}/enrollments`
+    - **Role**: `TEACHER` (Owner), `ADMIN`.
+    - **Params**: `?page=0&sort=enrolledAt,desc`.
+- **Publish Rule**: Course must have >= 1 Chapter & >= 1 Lesson to transition `DRAFT` -> `PUBLISHED`.
 
 ### Entity Relationship Diagram (ERD)
 Reflecting **Full Content Model** including Tags, Prerequisites, and Assignments.

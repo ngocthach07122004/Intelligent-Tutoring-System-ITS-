@@ -29,6 +29,7 @@
         <module>user-profile-service</module>
         <module>course-service</module>
         <module>dashboard-service</module>
+        <module>assessment-service</module>
 
     </modules>
 <!--    <dependencies>-->

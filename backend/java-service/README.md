@@ -7,7 +7,8 @@ This repository contains the backend microservices for the **Intelligent Tutorin
 The system follows a **Microservices Architecture** pattern, ensuring scalability, maintainability, and independent deployment of services.
 
 ### Polyglot Architecture & Integration (Java + Go)
-The system leverages **Java (Spring Boot)** for complex business logic and **Go (Golang)** for high-concurrency real-time features (Chat, Notifications).
+The system leverages **Java (Spring Boot)** for complex business logic.
+> **Note**: The **Chat Service** and **Notification Service** (Go), as well as the **Recommendation Engine** (Python), are hosted in separate repositories and are integrated via RabbitMQ/gRPC. This repository focuses on the **Java Microservices**.
 
 #### Integration Pattern
 - **Async Communication**: **RabbitMQ** for event-driven flows (Notifications, Gamification).
@@ -78,7 +79,7 @@ com.its.<service_name>
 - **ISP**: Large interfaces are split (e.g., `UserReader` vs `UserWriter`).
 
 ### RabbitMQ Topology & Event Contracts
-We use a **Topic Exchange** model for flexibility and decoupling.
+We use a **Topic Exchange** model for flexibility.
 
 #### 1. Exchange Configuration
 - **Main Exchange**: `its.topic.exchange` (Type: `topic`, Durable: `true`)
@@ -93,10 +94,13 @@ We use a **Topic Exchange** model for flexibility and decoupling.
 | `PASSWORD_RESET_REQ` | `identity.password.reset` | `q.notification.otp` | Identity | Notification (Go) | Send OTP Email |
 | `COURSE_PUBLISHED` | `course.content.published` | `q.notification.course` | Course | Notification (Go) | Notify Followers |
 | `LESSON_COMPLETED` | `course.lesson.completed` | `q.gamification.progress` | Course | Gamification (Go) | Update Leaderboard |
+| `LESSON_COMPLETED` | `course.lesson.completed` | `q.dashboard.analytics` | Course | Dashboard (Java) | Update Risk Profile |
 | `ASSIGNMENT_CREATED`| `course.assignment.created`| `q.notification.assignment` | Course | Notification (Go) | Notify Students |
 | `EXAM_GRADED` | `assessment.exam.graded` | `q.gamification.xp` | Assessment | Gamification (Go) | Award XP/Badges |
 | `EXAM_GRADED` | `assessment.exam.graded` | `q.profile.skill` | Assessment | Profile (Java) | Update Skill Level |
+| `EXAM_GRADED` | `assessment.exam.graded` | `q.dashboard.analytics` | Assessment | Dashboard (Java) | Update Risk Profile |
 | `GROUP_JOINED` | `profile.group.joined` | `q.course.enrollment` | Profile | Course (Java) | Auto-enroll in Group Courses |
+| `EMAIL_VERIFY` | `identity.email.verify` | `q.notification.verify` | Identity | Notification (Go) | Send Verification Email |
 
 #### 3. Consumer Reliability
 - **Idempotency**: Consumers **MUST** check `X-Idempotency-Key` (UUID) in Redis (`processed_event:<uuid>`, TTL: 24h).
@@ -107,6 +111,10 @@ We use a **Topic Exchange** model for flexibility and decoupling.
 
 ### gRPC Service Contracts
 Internal communication uses **Protobuf v3**.
+
+#### Proto Files & Generation
+- **Location**: `src/main/proto` (within each service or a shared module).
+- **Generation**: Run `mvn clean compile` to generate Java stubs via `protobuf-maven-plugin`.
 
 #### 1. Course Service (`course.proto`)
 - **GetCourseProgress**
@@ -165,26 +173,138 @@ Internal communication uses **Protobuf v3**.
     - Loads Student Dashboard < 500ms via gRPC.
     - Accurately flags "At-Risk" students based on logic.
 
-## 🧩 Functional Modules & Requirements Mapping
+## 🚀 Prerequisites & How to Run
+### Global Requirements
+- **Java**: JDK 21
+- **Maven**: 3.9+
+- **Databases**: PostgreSQL 16, Redis 7
+- **Message Broker**: RabbitMQ 3.12 (Management Plugin enabled)
+- **Auth**: Keycloak 23 (Running on port 8080)
+- **Service Registry**: Eureka Server (Running on port 8761)
 
-### 1. Registration & Authentication (`identity-service`)
-- **Features**: Register/Login (Email/Password), OAuth2, Role-based Access Control (RBAC).
-- **Roles**: Student, Teacher, Admin.
+### Quick Start
+1. **Start Infrastructure**: `docker-compose up -d` (Postgres, RabbitMQ, Redis, Keycloak, Zipkin).
+2. **Start Discovery Server**:
+   ```bash
+   cd backend/java-service/discovery-eureka-server
+   mvn spring-boot:run
+   ```
+3. **Start Core Services**: Run `mvn spring-boot:run` in each service directory (Identity, Profile, Course, etc.).
 
-### 2. User Profile (`user-profile-service`)
-- **Features**: Manage personal info (name, age, interests), learning goals, diagnostic tests.
+### Service Communication Flows
+The system uses a hybrid communication model to balance consistency and performance.
 
-### 3. Content Management (`course-service`)
-- **Features**: Create/Edit courses, lessons (video, text, slides), versioning, tagging.
+#### 1. Synchronous (gRPC) - "Read-Heavy / Real-Time"
+Used when immediate data is required for a UI response.
+-   **Dashboard Aggregation**: The `dashboard-service` acts as an aggregator. When a user loads their dashboard:
+    -   Calls `course-service` (gRPC) to get current progress and next lesson.
+    -   Calls `assessment-service` (gRPC) to get recent exam scores and skill mastery.
+    -   Calls `user-profile-service` (gRPC) to get timezone and learning preferences.
+    -   *Fallback*: If a service is down, the dashboard returns partial data (e.g., empty skill chart) rather than crashing.
 
-### 4. Assessments (`course-service` or `assessment-service`)
-- **Features**: Quizzes (MCQ, Coding), Auto-grading, Gradebook.
+#### 2. Asynchronous (RabbitMQ) - "Write-Heavy / Side Effects"
+Used for decoupling core logic from side effects.
+-   **User Onboarding**: `identity-service` (Register) -> Event `USER_REGISTERED` -> `user-profile-service` (Create Profile) + `notification-service` (Send Welcome Email).
+-   **Group Enrollment**: `user-profile-service` (Join Group) -> Event `GROUP_JOINED` -> `course-service` (Auto-Enroll in Group Courses).
+-   **Progress Tracking**: `course-service` (Complete Lesson) -> Event `LESSON_COMPLETED` -> `gamification-service` (Award Points) + `dashboard-service` (Update Risk Model).
+-   **Grading**: `assessment-service` (Grade Exam) -> Event `EXAM_GRADED` -> `profile-service` (Update Skill Level) + `dashboard-service` (Update Risk Model).
 
-### 5. Adaptive Learning (`recommendation-service`)
-- **Features**: Analyze performance, suggest remediation, personalize learning path.
+## 🗄 Consolidated Data Model (ERD)
+> **Note**: This is a simplified high-level ERD. For detailed schema definitions, please refer to the specific README of each service.
 
-### 6. Dashboard & Reporting (`dashboard-service`)
-- **Features**: Progress tracking, analytics, leaderboards, export reports.
+The following diagram represents the core entities across all microservices and their logical relationships.
+
+```mermaid
+erDiagram
+    %% Identity Service
+    User {
+        UUID id PK
+        string email
+        string role
+        string status
+    }
+
+    %% Profile Service
+    UserProfile {
+        UUID userId PK "FK -> User.id"
+        string timezone
+        string learningStyle
+    }
+    ClassGroup {
+        Long id PK
+        string name
+        string joinCode
+    }
+    GroupMember {
+        Long groupId PK, FK
+        UUID studentId PK, FK
+        string role
+    }
+
+    %% Course Service
+    Course {
+        Long id PK
+        string title
+        string status "DRAFT, PUBLISHED"
+        UUID instructorId
+    }
+    Lesson {
+        Long id PK
+        Long courseId FK
+        string type "VIDEO, TEXT"
+    }
+    UserCourseEnrollment {
+        Long id PK
+        UUID userId
+        Long courseId FK
+    }
+
+    %% Assessment Service
+    ExamConfig {
+        Long id PK
+        string title
+        int timeLimit
+    }
+    Attempt {
+        Long id PK
+        UUID userId
+        Long examId FK
+        float score
+        string status
+    }
+    Question {
+        Long id PK
+        string type "MCQ, CODING"
+        json metadata
+    }
+
+    %% Relationships
+    User ||--|| UserProfile : "1:1"
+    User ||--o{ GroupMember : "joins"
+    ClassGroup ||--o{ GroupMember : "has"
+    
+    User ||--o{ UserCourseEnrollment : "enrolls"
+    Course ||--o{ UserCourseEnrollment : "has_students"
+    Course ||--o{ Lesson : "contains"
+    
+    User ||--o{ Attempt : "takes"
+    ExamConfig ||--o{ Attempt : "instantiates"
+    ExamConfig }|--|{ Question : "includes"
+```
+
+## 📚 Service Documentation References
+For detailed API specifications, internal architecture, and setup guides, refer to the individual service READMEs.
+
+| Service | Directory | Key Features | API Docs |
+|:--------|:----------|:-------------|:---------|
+| **Identity** | [identity-service](./identity-service/README.md) | Auth, JWT, RBAC, Keycloak Integration | (TODO) |
+| **User Profile** | [user-profile-service](./user-profile-service/README.md) | Profiles, Groups, Schedules | (TODO) |
+| **Course** | [course-service](./course-service/README.md) | Curriculum, Lessons, Assignments | (TODO) |
+| **Assessment** | [assessment-service](./assessment-service/README.md) | Exams, Question Bank, Auto-Grading | (TODO) |
+| **Dashboard** | [dashboard-service](./dashboard-service/README.md) | Analytics, Risk Prediction, Aggregation | (TODO) |
+| **API Gateway** | [api-gateway](./api-gateway/README.md) | Routing, Rate Limiting, Circuit Breaker | N/A |
+| **Discovery (Eureka)** | [discovery-eureka-server](./discovery-eureka-server/README.md) | Service Registry (Eureka) | N/A |
+
 
 ## 🤝 Contribution
 1. Fork the repository.

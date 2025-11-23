@@ -3,6 +3,8 @@
 ## 🆔 Overview
 The **Identity Service** is the backbone of security in the ITS ecosystem. It handles user registration, authentication (delegated to Keycloak), and identity management.
 
+> **📋 API Specification**: For detailed endpoint specifications, request/response examples, and validation rules, see [Identity Service API Plan](../../../plan/identity-service-api.md).
+
 ## 🏗 Architecture & Design
 This service follows a **Layered Architecture**:
 - **Controller Layer**: Handles HTTP requests and input validation.
@@ -98,9 +100,12 @@ The Identity Service ensures the JWT contains all necessary claims for downstrea
 - **Password Reset**:
     - User requests reset -> Token stored in Redis (15m) -> Event `PASSWORD_RESET_REQ` published.
     - **Success**: Email received with link.
-- **Account Lockout**:
     - 5 failed logins in 5 mins -> Account locked for 30 mins.
     - **Verify**: Login attempts return 401/403 with specific error code.
+- **Admin Lock/Unlock**:
+    - **Endpoint**: `PUT /users/{id}/lock` / `unlock`
+    - **Response**: `200 OK` with `{ "status": "LOCKED", "updatedAt": "..." }`.
+    - **Audit**: Must log `action=USER_LOCK`, `actor=adminId`.
 
 ### RBAC & Permissions Mapping
 | Role | Permission | Scope | Description |

@@ -3,6 +3,8 @@
 ## 📊 Overview
 The **Dashboard Service** is an aggregation service responsible for collecting, processing, and presenting data to students, instructors, and administrators. It powers the analytics and reporting features.
 
+> **📋 API Specification**: For detailed endpoint specifications, request/response examples, and validation rules, see [Dashboard Service API Plan](../../../plan/dashboard-service-api.md).
+
 ## 🏗 Architecture & Design
 This service acts as an **Aggregator** or **BFF (Backend for Frontend)** helper. It gathers data from multiple sources to provide a unified view.
 
@@ -103,6 +105,41 @@ erDiagram
     
     KPI_DEFINITION ||--o{ KPI_AGGREGATE : tracks
 ```
+
+### gRPC Contracts (Upstream)
+- **Course Service**: `GetCourseProgress(userId)`
+    - **Response**: `{ courseId, progress_percent, last_lesson_id }`
+- **Assessment Service**: `GetSkillMastery(userId)`
+    - **Response**: `{ mastery: { "Java": 0.8, "SQL": 0.6 } }`
+- **Profile Service**: `GetUserProfile(userId)`
+    - **Response**: `{ timezone, learning_style }`
+
+### API Specifications & Rules
+
+#### 1. Student Dashboard
+- **Endpoint**: `GET /api/v1/dashboard/student`
+- **Response**:
+  ```json
+  {
+    "summary": { "coursesInProgress": 3, "nextAssignmentDue": "2023-11-01T10:00:00Z" },
+    "riskProfile": { "level": "LOW", "trend": "STABLE" },
+    "skillRadar": { "Java": 0.8, "SQL": 0.6 }
+  }
+  ```
+- **Fallback Rule**:
+    - If `Assessment Service` fails: Return `skillRadar: {}`.
+    - If `Course Service` fails: Return `summary: { error: "Unavailable" }`.
+    - **Timeout**: 500ms per gRPC call.
+
+#### 2. Instructor Dashboard
+- **Endpoint**: `GET /api/v1/dashboard/instructor/courses/{id}`
+- **Response**: `{ "averageScore": 75.5, "atRiskCount": 5 }`.
+- **Endpoint**: `GET /api/v1/dashboard/instructor/at-risk`
+- **Response**: List of `{ studentId, riskLevel, reasons: ["MISSED_DEADLINES"] }`.
+
+#### 3. Admin Dashboard
+- **Endpoint**: `GET /api/v1/dashboard/admin/stats`
+- **Response**: `{ "activeUsers": 1200, "revenueThisMonth": 5000.00 }`.
 
 ## 🔗 Service Dependencies
 - **Course Service**: Fetches course structure and completion data.

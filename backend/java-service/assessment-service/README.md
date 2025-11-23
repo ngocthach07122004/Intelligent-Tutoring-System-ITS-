@@ -3,6 +3,8 @@
 ## 📝 Overview
 The **Assessment Service** is a specialized domain responsible for managing question banks, generating quizzes/exams, and executing grading logic. It supports complex assessment types like coding challenges and adaptive testing.
 
+> **📋 API Specification**: For detailed endpoint specifications, request/response examples, and validation rules, see [Assessment Service API Plan](../../../plan/assessment-service-api.md).
+
 ## 🏗 Architecture & Design
 This service handles high-throughput exam submissions and complex grading algorithms.
 
@@ -104,7 +106,37 @@ com.its.assessment
 
 ### gRPC Service Methods (`AssessmentService.proto`)
 1.  `GetStudentScores(userId, courseId)`: Returns list of exam scores.
+    - **Response**: List of `{ exam_id, score, grade, passed }`.
 2.  `GetSkillMastery(userId)`: Returns aggregated skill levels based on tagged questions.
+    - **Response**: Map `<skill_name, mastery_level>` (0.0 - 1.0).
+
+### API Specifications & Rules
+
+#### 1. Quiz <-> Lesson Mapping
+- **Relation**: 1-to-1 Mapping via `ExamConfig`.
+- **Field**: `ExamConfig.lessonId` (Nullable). If set, this Exam acts as a Lesson Quiz.
+- **Constraint**: A Lesson can have at most 1 Quiz.
+
+#### 2. Teacher View (Gradebook)
+- **Endpoint**: `GET /api/v1/gradebook/courses/{courseId}`
+- **Role**: `TEACHER` (Owner).
+- **Params**: `?lessonId=...&studentId=...&page=0`.
+- **Response**:
+  ```json
+  {
+    "content": [
+      { "studentId": "u1", "examId": 101, "score": 85.0, "status": "GRADED" }
+    ]
+  }
+  ```
+
+#### 3. Attempt Lifecycle
+- **Start**: `POST /exams/{configId}/start` -> Returns `{ attemptId, questions: [...] }`.
+- **Submit**: `POST /attempts/{id}/submit` -> Payload `{ answers: [{ qId: 1, response: "A" }] }`.
+- **Result**: `GET /attempts/{id}/result` -> Returns `{ score, feedback, passed }`.
+- **Error Codes**:
+    - `EXAM_TIMEOUT`: If submission is after `startedAt + timeLimit`.
+    - `ALREADY_SUBMITTED`: If status is not `IN_PROGRESS`.
 
 ### Entity Relationship Diagram (ERD)
 Reflecting **Gradebook**, **Rubrics**, and **Pool Policies**.
