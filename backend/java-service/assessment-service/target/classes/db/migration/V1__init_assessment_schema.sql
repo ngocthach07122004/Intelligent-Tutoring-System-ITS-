@@ -1,81 +1,105 @@
-CREATE TABLE IF NOT EXISTS question_pool (
-    id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    difficulty VARCHAR(20),
-    is_public BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+create table if not exists question_pool (
+   id         bigserial primary key,
+   name       varchar(255) not null,
+   difficulty varchar(20),
+   is_public  boolean default true,
+   created_at timestamptz default now()
 );
 
-CREATE TABLE IF NOT EXISTS question (
-    id BIGSERIAL PRIMARY KEY,
-    pool_id BIGINT REFERENCES question_pool (id) ON DELETE CASCADE,
-    type VARCHAR(20) NOT NULL,
-    metadata JSONB,
-    weight DOUBLE PRECISION DEFAULT 1.0,
-    skill_tag VARCHAR(100)
+create table if not exists question (
+   id        bigserial primary key,
+   pool_id   bigint
+      references question_pool ( id )
+         on delete cascade,
+   type      varchar(20) not null,
+   metadata  jsonb,
+   weight    double precision default 1.0,
+   skill_tag varchar(100)
 );
 
-CREATE TABLE IF NOT EXISTS rubric (
-    id BIGSERIAL PRIMARY KEY,
-    question_id BIGINT REFERENCES question (id) ON DELETE CASCADE,
-    name VARCHAR(255)
+create table if not exists rubric (
+   id          bigserial primary key,
+   question_id bigint
+      references question ( id )
+         on delete cascade,
+   name        varchar(255)
 );
 
-CREATE TABLE IF NOT EXISTS rubric_item (
-    id BIGSERIAL PRIMARY KEY,
-    rubric_id BIGINT REFERENCES rubric (id) ON DELETE CASCADE,
-    criterion VARCHAR(255),
-    max_points INT,
-    description TEXT
+create table if not exists rubric_item (
+   id          bigserial primary key,
+   rubric_id   bigint
+      references rubric ( id )
+         on delete cascade,
+   criterion   varchar(255),
+   max_points  int,
+   description text
 );
 
-CREATE TABLE IF NOT EXISTS exam_config (
-    id BIGSERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    policy VARCHAR(30),
-    browser_lock_enabled BOOLEAN DEFAULT FALSE,
-    time_limit_minutes INT,
-    lesson_id BIGINT,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+create table if not exists exam_config (
+   id                   bigserial primary key,
+   title                varchar(255) not null,
+   policy               varchar(30),
+   browser_lock_enabled boolean default false,
+   time_limit_minutes   int,
+   lesson_id            bigint,
+   created_at           timestamptz default now()
 );
 
-CREATE TABLE IF NOT EXISTS exam_section_rule (
-    id BIGSERIAL PRIMARY KEY,
-    config_id BIGINT REFERENCES exam_config (id) ON DELETE CASCADE,
-    pool_id BIGINT REFERENCES question_pool (id) ON DELETE CASCADE,
-    count_to_pull INT NOT NULL,
-    points_per_question INT
+create table if not exists exam_section_rule (
+   id                  bigserial primary key,
+   config_id           bigint
+      references exam_config ( id )
+         on delete cascade,
+   pool_id             bigint
+      references question_pool ( id )
+         on delete cascade,
+   count_to_pull       int not null,
+   points_per_question int
 );
 
-CREATE TABLE IF NOT EXISTS attempt (
-    id BIGSERIAL PRIMARY KEY,
-    student_id UUID NOT NULL,
-    exam_config_id BIGINT REFERENCES exam_config (id) ON DELETE CASCADE,
-    status VARCHAR(30) NOT NULL,
-    started_at TIMESTAMPTZ,
-    submitted_at TIMESTAMPTZ
+create table if not exists attempt (
+   id             bigserial primary key,
+   student_id     uuid not null,
+   exam_config_id bigint
+      references exam_config ( id )
+         on delete cascade,
+   status         varchar(30) not null,
+   started_at     timestamptz,
+   submitted_at   timestamptz
 );
 
-CREATE TABLE IF NOT EXISTS answer (
-    id BIGSERIAL PRIMARY KEY,
-    attempt_id BIGINT REFERENCES attempt (id) ON DELETE CASCADE,
-    question_id BIGINT REFERENCES question (id) ON DELETE CASCADE,
-    response JSONB,
-    score DOUBLE PRECISION,
-    feedback JSONB,
-    manual_review_needed BOOLEAN DEFAULT FALSE
+create table if not exists answer (
+   id                   bigserial primary key,
+   attempt_id           bigint
+      references attempt ( id )
+         on delete cascade,
+   question_id          bigint
+      references question ( id )
+         on delete cascade,
+   response             jsonb,
+   score                double precision,
+   feedback             jsonb,
+   manual_review_needed boolean default false
 );
 
-CREATE TABLE IF NOT EXISTS gradebook (
-    id BIGSERIAL PRIMARY KEY,
-    student_id UUID NOT NULL,
-    course_id BIGINT,
-    exam_id BIGINT REFERENCES exam_config (id) ON DELETE SET NULL,
-    final_score DOUBLE PRECISION,
-    grade VARCHAR(10),
-    status VARCHAR(20),
-    graded_at TIMESTAMPTZ DEFAULT NOW()
+create table if not exists gradebook (
+   id          bigserial primary key,
+   student_id  uuid not null,
+   course_id   bigint,
+   exam_id     bigint
+      references exam_config ( id )
+         on delete set null,
+   final_score double precision,
+   grade       varchar(10),
+   status      varchar(20),
+   graded_at   timestamptz default now()
 );
 
-CREATE INDEX IF NOT EXISTS idx_attempt_student ON attempt (student_id);
-CREATE INDEX IF NOT EXISTS idx_gradebook_course ON gradebook (course_id);
+create index if not exists idx_attempt_student on
+   attempt (
+      student_id
+   );
+create index if not exists idx_gradebook_course on
+   gradebook (
+      course_id
+   );

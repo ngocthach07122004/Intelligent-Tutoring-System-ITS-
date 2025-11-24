@@ -90,8 +90,8 @@ services:
     image: rabbitmq:3.12-management
     container_name: rabbitmq
     ports:
-      - "5672:5672"     # AMQP port
-      - "15672:15672"   # Management UI
+      - "5672:5672" # AMQP port
+      - "15672:15672" # Management UI
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
@@ -99,7 +99,6 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
       - idnet
-
 
   eureka:
     build:
@@ -201,6 +200,7 @@ services:
       - postgres_userProfile
       - rabbitmq
       - eureka
+      - keycloak
     networks:
       - idnet
 
@@ -227,10 +227,12 @@ services:
       DB_HOST: ${POSTGRES_COURSE_HOST}
       DB_PORT: ${POSTGRES_PORT_DEFAULT}
       DB_NAME: ${POSTGRES_COURSE_DB}
+      USER_PROFILE_SERVICE_URL: ${USER_PROFILE_SERVICE_URL}
     depends_on:
       - postgres_course
       - rabbitmq
       - eureka
+      - keycloak
     networks:
       - idnet
 
@@ -256,10 +258,14 @@ services:
       DB_HOST: ${POSTGRES_DASHBOARD_HOST}
       DB_PORT: ${POSTGRES_PORT_DEFAULT}
       DB_NAME: ${POSTGRES_DASHBOARD_DB}
+      ASSESSMENT_SERVICE_URL: ${ASSESSMENT_SERVICE_URL}
+      USER_PROFILE_SERVICE_URL: ${USER_PROFILE_SERVICE_URL}
+      COURSE_SERVICE_URL: ${COURSE_SERVICE_URL}
     depends_on:
       - postgres_dashboard
       - rabbitmq
       - eureka
+      - keycloak
     networks:
       - idnet
 
@@ -289,9 +295,9 @@ services:
       - postgres_assessment
       - rabbitmq
       - eureka
+      - keycloak
     networks:
       - idnet
-
 
   # gateway_dev:
   #   image: its-gateway

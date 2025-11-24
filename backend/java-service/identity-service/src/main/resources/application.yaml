@@ -45,14 +45,26 @@ server:
 
 custom:
   datasource:
-     host: ${DB_HOST:postgres_identity}
-     port: ${DB_PORT:5432}
-     dbName: ${DB_NAME:identityDb}
-     user: ${SPRING_DATASOURCE_USERNAME:identityUser}
-     pass: ${SPRING_DATASOURCE_PASSWORD:12345678}
+    host: ${DB_HOST:postgres_identity}
+    port: ${DB_PORT:5432}
+    dbName: ${DB_NAME:identityDb}
+    user: ${SPRING_DATASOURCE_USERNAME:identityUser}
+    pass: ${SPRING_DATASOURCE_PASSWORD:12345678}
 #    host: postgres_identity
 #    port: 5434
 #    dbName: identityDb
 #    user: identityUser
 #    pass: 12345678
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
