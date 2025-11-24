@@ -12,6 +12,7 @@ public class RegisterRequest implements Serializable {
 
     private String email;
     private String username;
+    private String name; // optional display name from FE
     private String password;
 
 
