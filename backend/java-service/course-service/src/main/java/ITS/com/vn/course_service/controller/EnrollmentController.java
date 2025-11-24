@@ -1,0 +1,177 @@
+package ITS.com.vn.course_service.controller;
+
+import ITS.com.vn.course_service.dto.response.EnrollmentResponse;
+import ITS.com.vn.course_service.service.EnrollmentService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/v1")
+@RequiredArgsConstructor
+@Slf4j
+public class EnrollmentController {
+
+    private final EnrollmentService enrollmentService;
+
+    /**
+     * Đăng ký học khóa học
+     * POST /api/v1/courses/{courseId}/enroll
+     */
+    @PostMapping("/courses/{courseId}/enroll")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<EnrollmentResponse> enrollCourse(
+            @PathVariable Long courseId,
+            Authentication authentication) { // From JWT via filter
+
+        Long studentId = extractUserId(authentication, true);
+        log.info("Student {} enrolling in course {}", studentId, courseId);
+
+        EnrollmentResponse response = enrollmentService.enrollStudent(courseId, studentId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
+     * Lấy tất cả khóa học của student hiện tại
+     * GET /api/v1/courses/my-courses
+     */
+    @GetMapping("/courses/my-courses")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<List<EnrollmentResponse>> getMyCourses(
+            Authentication authentication,
+            @RequestParam(required = false) String status) { // Filter by status (optional)
+
+        Long studentId = extractUserId(authentication, true);
+        log.debug("Getting courses for student {}, status filter: {}", studentId, status);
+
+        List<EnrollmentResponse> enrollments = enrollmentService.getMyEnrollments(studentId);
+
+        // Filter by status if provided
+        if (status != null && !status.isEmpty()) {
+            enrollments = enrollments.stream()
+                    .filter(e -> e.getStatus().name().equalsIgnoreCase(status))
+                    .toList();
+        }
+
+        return ResponseEntity.ok(enrollments);
+    }
+
+    /**
+     * Lấy danh sách sinh viên đã enroll vào course (Teacher only)
+     * GET /api/v1/courses/{courseId}/enrollments
+     */
+    @GetMapping("/courses/{courseId}/enrollments")
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
+    public ResponseEntity<List<EnrollmentResponse>> getCourseEnrollments(
+            @PathVariable Long courseId,
+            @RequestParam(required = false) String status) {
+
+        log.debug("Getting enrollments for course {}, status filter: {}", courseId, status);
+
+        List<EnrollmentResponse> enrollments = enrollmentService.getCourseEnrollments(courseId);
+
+        // Filter by status if provided
+        if (status != null && !status.isEmpty()) {
+            enrollments = enrollments.stream()
+                    .filter(e -> e.getStatus().name().equalsIgnoreCase(status))
+                    .toList();
+        }
+
+        return ResponseEntity.ok(enrollments);
+    }
+
+    /**
+     * Cập nhật tiến độ học tập
+     * PATCH /api/v1/enrollments/{enrollmentId}/progress
+     */
+    @PatchMapping("/enrollments/{enrollmentId}/progress")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<EnrollmentResponse> updateProgress(
+            @PathVariable Long enrollmentId,
+            @RequestBody Map<String, Integer> request,
+            Authentication authentication) {
+
+        Long studentId = extractUserId(authentication, true);
+        Integer progress = request.get("progress");
+        if (progress == null) {
+            throw new IllegalArgumentException("Progress is required");
+        }
+
+        log.info("Updating progress for enrollment {} to {}%", enrollmentId, progress);
+
+        EnrollmentResponse response = enrollmentService.updateProgress(enrollmentId, progress, studentId);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Bỏ học (drop enrollment)
+     * DELETE /api/v1/enrollments/{enrollmentId}
+     */
+    @DeleteMapping("/enrollments/{enrollmentId}")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<Void> dropEnrollment(
+            @PathVariable Long enrollmentId,
+            Authentication authentication) {
+
+        Long studentId = extractUserId(authentication, true);
+        log.info("Student {} dropping enrollment {}", studentId, enrollmentId);
+
+        enrollmentService.dropEnrollment(enrollmentId, studentId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Lấy thông tin enrollment cụ thể
+     * GET /api/v1/enrollments/{enrollmentId}
+     */
+    @GetMapping("/enrollments/{enrollmentId}")
+    public ResponseEntity<EnrollmentResponse> getEnrollment(@PathVariable Long enrollmentId) {
+        log.debug("Getting enrollment {}", enrollmentId);
+
+        EnrollmentResponse response = enrollmentService.getEnrollment(enrollmentId);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Kiểm tra student đã enroll vào course chưa
+     * GET /api/v1/courses/{courseId}/is-enrolled
+     */
+    @GetMapping("/courses/{courseId}/is-enrolled")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<Map<String, Boolean>> isEnrolled(
+            @PathVariable Long courseId,
+            Authentication authentication) {
+
+        Long studentId = extractUserId(authentication, true);
+        boolean enrolled = enrollmentService.isEnrolled(courseId, studentId);
+        return ResponseEntity.ok(Map.of("enrolled", enrolled));
+    }
+
+    private Long extractUserId(Authentication authentication, boolean required) {
+        if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
+            String userId = jwt.getClaimAsString("sub");
+            try {
+                return Long.parseLong(userId);
+            } catch (NumberFormatException ex) {
+                log.warn("User id in JWT is not numeric: {}", userId);
+                if (required) {
+                    throw new RuntimeException("User ID in token is not numeric");
+                }
+                return null;
+            }
+        }
+        if (required) {
+            throw new RuntimeException("Unable to extract user ID from authentication");
+        }
+        return null;
+    }
+}

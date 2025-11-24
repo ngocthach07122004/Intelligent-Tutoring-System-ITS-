@@ -38,8 +38,11 @@ public class Gradebook {
     @Column(length = 10)
     private String grade; // A, B, C, F
 
+    @Column(name = "gpa")
+    private Double gpa; // GPA for this course (0.0 - 4.0)
+
     @Column(length = 20)
-    private String status; // PASSED, FAILED
+    private String status; // IN_PROGRESS, PASSED, FAILED
 
     @CreatedDate
     @Column(name = "graded_at")

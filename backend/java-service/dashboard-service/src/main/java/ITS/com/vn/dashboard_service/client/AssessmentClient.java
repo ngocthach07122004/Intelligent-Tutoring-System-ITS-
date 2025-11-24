@@ -1,15 +1,18 @@
 package ITS.com.vn.dashboard_service.client;
 
-import ITS.com.vn.dashboard_service.dto.client.AssessmentSkillDTO;
+import ITS.com.vn.dashboard_service.dto.external.AchievementResponse;
+import ITS.com.vn.dashboard_service.dto.external.GradebookSummaryResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
-import java.util.UUID;
+import java.util.List;
 
-@FeignClient(name = "assessment-service", path = "/api/v1")
+@FeignClient(name = "assessment-service", url = "${application.config.assessment-url}")
 public interface AssessmentClient {
-    // Assuming endpoint from assessment service
-    @GetMapping("/skills/{userId}")
-    AssessmentSkillDTO getStudentSkills(@PathVariable("userId") UUID userId);
+
+    @GetMapping("/api/v1/assessment/gradebook/summary")
+    GradebookSummaryResponse getGradebookSummary();
+
+    @GetMapping("/api/v1/assessment/achievements")
+    List<AchievementResponse> getUserAchievements();
 }

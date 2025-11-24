@@ -22,6 +22,9 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     // Find by status
     Page<Course> findByStatus(CourseStatus status, Pageable pageable);
 
+    // Find by semester
+    Page<Course> findBySemester(String semester, Pageable pageable);
+
     // Find by visibility
     Page<Course> findByVisibility(CourseVisibility visibility, Pageable pageable);
 
@@ -39,6 +42,10 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     @Query("SELECT c FROM Course c WHERE c.status = :status AND LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<Course> searchByTitleAndStatus(@Param("keyword") String keyword, @Param("status") CourseStatus status,
             Pageable pageable);
+
+    @Query("SELECT c FROM Course c WHERE c.status = :status AND c.semester = :semester")
+    Page<Course> findByStatusAndSemester(@Param("status") CourseStatus status,
+            @Param("semester") String semester, Pageable pageable);
 
     // Find courses with tags
     @Query("SELECT DISTINCT c FROM Course c JOIN c.courseTags ct WHERE ct.tag.id IN :tagIds")

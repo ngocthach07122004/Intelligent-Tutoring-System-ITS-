@@ -17,5 +17,6 @@ public interface UserProfileMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "learningAttributes", ignore = true)
     @Mapping(target = "schedules", ignore = true)
+    @Mapping(target = "skills", ignore = true)
     void updateEntityFromRequest(UserProfileRequest request, @MappingTarget UserProfile entity);
 }

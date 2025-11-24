@@ -21,3 +21,76 @@ Thêm issuer-uri; enforce role cơ bản: Teacher tạo group, Leader promote/re
 Emit event profile.group.joined khi join group; validate joinCode.
 (Tùy) CRUD learning attributes key/value nếu muốn sát plan.
 Health giữ /health + /actuator/health.
+///////////////////////////////////////////////////////////////////////////
+Chi tiết kế hoạch triển khai course-service
+
+Security & user context
+
+Thêm JWT filter/resolver để lấy sub (UUID/String) -> convert Long khi lưu DB; bỏ @RequestAttribute("userId") và extractUserIdFromAuth kiểu Long.
+Cập nhật mọi controller dùng Authentication/Jwt để lấy userId, chuẩn hóa kiểu (UUID/String in code, Long for DB fields).
+DB & migration
+
+Tạo Flyway V3__create_enrollments.sql: bảng enrollments theo docs (unique course_id+student_id, progress 0–100, status enum, timestamps, indexes).
+Thêm constraint unique code, indexes max_students-related nếu cần; align column types (instructor_id BIGINT).
+Verify ddl-auto none; adjust entity if needed for new columns.
+DTOs & mapper
+
+Mở rộng CreateCourseRequest/UpdateCourseRequest để nhận code, credits, semester, schedule, maxStudents, startDate, endDate.
+Mở rộng CourseResponse để trả các field trên + progress (per current user) + enrolled flag + optional instructor summary (id,name,avatar) + semester, schedule.
+Update CourseMapper mapping; add CourseStatsResponse DTO.
+Repositories
+
+CourseRepository: filter by semester (findBySemester) and combined filters; ensure search methods support new fields.
+EnrollmentRepository: stats queries (count active/completed, avg progress), filter by status, by student/course; maybe findByStudentIdAndCourseId.
+Services
+
+CourseService:
+Enhance list (GET /courses) to accept semester + enrollmentStatus filter (via enroll repo) and inject per-user progress/enrolled when authenticated student.
+getCourseById: include progress/enrolled for current user, attach instructor info via Profile client.
+Add getCourseStats using enrollment stats (and placeholder Assessment avg score if needed).
+EnrollmentService: ensure business rules (duplicate enroll, maxStudents, drop constraints); getMyEnrollments returns course summary; progress update auto-complete; emit event already wired.
+Controllers & routes
+
+Resolve /courses/my-courses conflict: keep STUDENT version in EnrollmentController, move instructor version to /courses/instructor/my-courses or remove.
+Update controllers to use new security resolution (no RequestAttribute).
+Add endpoint /api/v1/courses/{id}/stats (teacher/admin) and enrich /api/v1/courses/{id} response.
+Replace stub CourseProgressController with real data or remove.
+Integration clients
+
+Add Profile client (instructor info) and, if required, Assessment client stub for stats; handle failures gracefully (fallback null).
+Build validation
+
+Run mvn clean package in backend/java-service/course-service to ensure build passes after changes.
+
+<!-- / -->
+Dựa trên việc so sánh giữa docs/specs và code thực tế trong backend/java-service, hiện tại CHƯA ĐỦ API và các trường dữ liệu cần thiết cho MVP.
+
+Dưới đây là danh sách các hạng mục còn thiếu (Gaps) cần bổ sung:
+
+1. Identity Service
+Thiếu thông tin trong Login Response:
+Spec: API POST /login cần trả về thêm user_id và role để Frontend điều hướng và lưu context.
+Thực tế: TokenResponse hiện chỉ có accessToken, refreshToken, expiresIn.
+Action: Cần update TokenResponse và logic AuthService.
+2. Course Service (Thiếu nhiều nhất)
+Thiếu trường dữ liệu (Entity & DTO):
+Spec: Course cần có code (Mã môn), credits (Tín chỉ), semester, schedule, maxStudents, startDate, endDate.
+Thực tế: CourseResponse hiện tại thiếu toàn bộ các trường này.
+Thiếu API Endpoint:
+Spec: GET /api/v1/courses/{id}/stats (Thống kê lớp học).
+Thực tế: Chưa implement.
+3. Dashboard Service
+Thiếu dữ liệu cho biểu đồ (Analytics):
+Spec: Cần API trả về Exam Scores (Lịch sử điểm theo tháng) và Learning Time.
+Thực tế: StudentDashboardResponse mới chỉ có riskProfile và skillRadar, thiếu dữ liệu lịch sử để vẽ biểu đồ line/bar chart.
+4. Assessment Service
+Skill Controller là Dummy:
+Thực tế: SkillController đang trả về dữ liệu cứng (hardcoded map), chưa có logic tính toán thực tế từ bài làm hoặc Profile.
+Gradebook Entity:
+Cần đảm bảo Gradebook entity đã có các trường gpa, status để map sang GradebookSummaryResponse (DTO này đã có, nhưng cần check logic service).
+Đề xuất kế hoạch tiếp theo:
+Bạn có muốn tôi thực hiện fix theo thứ tự ưu tiên nào không?
+
+Identity Service: Update TokenResponse (Nhanh, impact cao cho FE).
+Course Service: Bổ sung fields và migration DB (Cần thiết để hiển thị đúng thông tin khóa học).
+Dashboard/Assessment: Implement logic Analytics và Skill thật.

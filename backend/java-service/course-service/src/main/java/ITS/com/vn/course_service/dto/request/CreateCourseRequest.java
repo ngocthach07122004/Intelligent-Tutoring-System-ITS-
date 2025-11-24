@@ -27,6 +27,23 @@ public class CreateCourseRequest {
     @NotNull(message = "Visibility is required")
     private CourseVisibility visibility;
 
+    @Size(max = 20, message = "Course code must not exceed 20 characters")
+    private String code;
+
+    private Integer credits;
+
+    @Size(max = 50, message = "Semester must not exceed 50 characters")
+    private String semester;
+
+    @Size(max = 255, message = "Schedule must not exceed 255 characters")
+    private String schedule;
+
+    private Integer maxStudents;
+
+    private java.time.LocalDate startDate;
+
+    private java.time.LocalDate endDate;
+
     @Size(max = 500, message = "Thumbnail URL must not exceed 500 characters")
     private String thumbnailUrl;
 

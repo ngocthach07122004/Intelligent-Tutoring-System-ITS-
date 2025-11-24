@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -30,5 +31,14 @@ public class UserProfileController {
     @GetMapping("/{userId}")
     public ResponseEntity<UserProfileResponse> getProfile(@PathVariable UUID userId) {
         return ResponseEntity.ok(userProfileService.getProfile(userId));
+    }
+
+    /**
+     * Bulk get user profiles by user IDs
+     * Example: GET /api/v1/profiles/users?ids=uuid1,uuid2,uuid3
+     */
+    @GetMapping("/users")
+    public ResponseEntity<List<UserProfileResponse>> getProfiles(@RequestParam List<UUID> ids) {
+        return ResponseEntity.ok(userProfileService.getProfiles(ids));
     }
 }

@@ -2,11 +2,15 @@ package ITS.com.vn.dashboard_service.service.impl;
 
 import ITS.com.vn.dashboard_service.client.AssessmentClient;
 import ITS.com.vn.dashboard_service.client.CourseClient;
-// import ITS.com.vn.dashboard_service.client.ProfileClient;
+import ITS.com.vn.dashboard_service.client.UserProfileClient;
 import ITS.com.vn.dashboard_service.domain.entity.StudentRiskProfile;
 import ITS.com.vn.dashboard_service.domain.enums.RiskLevel;
 import ITS.com.vn.dashboard_service.dto.client.AssessmentSkillDTO;
 import ITS.com.vn.dashboard_service.dto.client.CourseProgressDTO;
+import ITS.com.vn.dashboard_service.dto.external.AchievementResponse;
+import ITS.com.vn.dashboard_service.dto.external.EnrollmentResponse;
+import ITS.com.vn.dashboard_service.dto.external.GradebookSummaryResponse;
+import ITS.com.vn.dashboard_service.dto.external.UserProfileResponse;
 import ITS.com.vn.dashboard_service.dto.response.*;
 import ITS.com.vn.dashboard_service.repository.StudentRiskProfileRepository;
 import ITS.com.vn.dashboard_service.service.DashboardService;
@@ -25,9 +29,48 @@ public class DashboardServiceImpl implements DashboardService {
 
     private final CourseClient courseClient;
     private final AssessmentClient assessmentClient;
-    // TODO: Use ProfileClient to fetch student names in getAtRiskStudents
-    // private final ProfileClient profileClient;
+    private final UserProfileClient profileClient;
     private final StudentRiskProfileRepository riskProfileRepository;
+
+    @Override
+    public DashboardSummaryResponse getStudentSummary(UUID userId) {
+        log.info("Aggregating dashboard summary for user {}", userId);
+
+        // 1. Fetch Profile (Async candidate)
+        UserProfileResponse profile = null;
+        try {
+            profile = profileClient.getMyProfile();
+        } catch (Exception e) {
+            log.error("Failed to fetch profile", e);
+        }
+
+        // 2. Fetch Courses
+        List<EnrollmentResponse> courses = new ArrayList<>();
+        try {
+            courses = courseClient.getMyCourses();
+        } catch (Exception e) {
+            log.error("Failed to fetch courses", e);
+        }
+
+        // 3. Fetch Performance & Achievements
+        GradebookSummaryResponse performance = null;
+        List<AchievementResponse> achievements = new ArrayList<>();
+        try {
+            performance = assessmentClient.getGradebookSummary();
+            achievements = assessmentClient.getUserAchievements();
+        } catch (Exception e) {
+            log.error("Failed to fetch assessment data", e);
+        }
+
+        return DashboardSummaryResponse.builder()
+                .profile(profile)
+                .courses(courses)
+                .performance(performance)
+                .achievements(achievements)
+                .totalLearningHours(120) // Mock
+                .upcomingAssignments(3) // Mock
+                .build();
+    }
 
     @Override
     public StudentDashboardResponse getStudentDashboard(UUID userId) {

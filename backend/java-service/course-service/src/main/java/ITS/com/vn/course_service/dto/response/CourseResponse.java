@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -22,8 +23,19 @@ public class CourseResponse {
     private CourseStatus status;
     private CourseVisibility visibility;
     private Long instructorId;
+    private String instructorName;
+    private String instructorAvatarUrl;
     private String thumbnailUrl;
     private String objectives;
+    private String code;
+    private Integer credits;
+    private String semester;
+    private String schedule;
+    private Integer maxStudents;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private Boolean enrolled;
+    private Integer progress;
     private List<TagResponse> tags;
     private List<PrerequisiteResponse> prerequisites;
     private LocalDateTime createdAt;

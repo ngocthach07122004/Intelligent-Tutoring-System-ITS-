@@ -6,11 +6,13 @@ import ITS.com.vn.course_service.domain.enums.PrerequisiteType;
 import ITS.com.vn.course_service.dto.request.CreateCourseRequest;
 import ITS.com.vn.course_service.dto.request.UpdateCourseRequest;
 import ITS.com.vn.course_service.dto.response.CourseResponse;
+import ITS.com.vn.course_service.dto.response.CourseStatsResponse;
 import ITS.com.vn.course_service.exception.BadRequestException;
 import ITS.com.vn.course_service.exception.ResourceNotFoundException;
 import ITS.com.vn.course_service.exception.UnauthorizedException;
 import ITS.com.vn.course_service.mapper.CourseMapper;
 import ITS.com.vn.course_service.repository.CourseRepository;
+import ITS.com.vn.course_service.repository.EnrollmentRepository;
 import ITS.com.vn.course_service.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Course Service - Implements CRUD operations for courses
@@ -35,6 +40,7 @@ public class CourseService {
     private final CourseRepository courseRepository;
     private final TagRepository tagRepository;
     private final CourseMapper courseMapper;
+    private final EnrollmentRepository enrollmentRepository;
 
     /**
      * Create a new course
@@ -94,12 +100,32 @@ public class CourseService {
      * @return Course response
      */
     public CourseResponse getCourseById(Long id) {
+        return getCourseById(id, null);
+    }
+
+    /**
+     * Get course by ID with optional user context for enrollment/progress
+     *
+     * @param id Course ID
+     * @param userId Current authenticated user ID (nullable)
+     * @return Course response with enrollment info if available
+     */
+    public CourseResponse getCourseById(Long id, Long userId) {
         log.info("Fetching course with ID: {}", id);
 
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Course", "id", id));
 
-        return courseMapper.toResponse(course);
+        CourseResponse response = courseMapper.toResponse(course);
+
+        if (userId != null) {
+            enrollmentRepository.findByCourseIdAndStudentId(id, userId).ifPresent(enrollment -> {
+                response.setEnrolled(true);
+                response.setProgress(enrollment.getProgress());
+            });
+        }
+
+        return response;
     }
 
     /**
@@ -109,10 +135,30 @@ public class CourseService {
      * @return Page of course responses
      */
     public Page<CourseResponse> getAllCourses(Pageable pageable) {
+        return getAllCourses(pageable, null, null);
+    }
+
+    /**
+     * Get all courses with pagination and optional filters/user context
+     *
+     * @param pageable Pagination parameters
+     * @param userId   Optional user for enrollment progress
+     * @param semester Optional semester filter
+     * @return Page of course responses
+     */
+    public Page<CourseResponse> getAllCourses(Pageable pageable, Long userId, String semester) {
         log.info("Fetching all courses with pagination");
 
-        Page<Course> courses = courseRepository.findAll(pageable);
-        return courses.map(courseMapper::toResponse);
+        Page<Course> courses;
+        if (semester != null && !semester.isBlank()) {
+            courses = courseRepository.findBySemester(semester, pageable);
+        } else {
+            courses = courseRepository.findAll(pageable);
+        }
+
+        Map<Long, Integer> progressMap = buildProgressMap(userId);
+
+        return courses.map(course -> decorateCourseResponse(course, progressMap.get(course.getId())));
     }
 
     /**
@@ -136,10 +182,25 @@ public class CourseService {
      * @return Page of published course responses
      */
     public Page<CourseResponse> getPublishedCourses(Pageable pageable) {
+        return getPublishedCourses(pageable, null, null);
+    }
+
+    /**
+     * Get published courses with optional filters/user context
+     */
+    public Page<CourseResponse> getPublishedCourses(Pageable pageable, Long userId, String semester) {
         log.info("Fetching published courses");
 
-        Page<Course> courses = courseRepository.findByStatus(CourseStatus.PUBLISHED, pageable);
-        return courses.map(courseMapper::toResponse);
+        Page<Course> courses;
+        if (semester != null && !semester.isBlank()) {
+            courses = courseRepository.findByStatusAndSemester(CourseStatus.PUBLISHED, semester, pageable);
+        } else {
+            courses = courseRepository.findByStatus(CourseStatus.PUBLISHED, pageable);
+        }
+
+        Map<Long, Integer> progressMap = buildProgressMap(userId);
+
+        return courses.map(course -> decorateCourseResponse(course, progressMap.get(course.getId())));
     }
 
     /**
@@ -185,6 +246,27 @@ public class CourseService {
         }
         if (request.getVisibility() != null) {
             course.setVisibility(request.getVisibility());
+        }
+        if (request.getCode() != null) {
+            course.setCode(request.getCode());
+        }
+        if (request.getCredits() != null) {
+            course.setCredits(request.getCredits());
+        }
+        if (request.getSemester() != null) {
+            course.setSemester(request.getSemester());
+        }
+        if (request.getSchedule() != null) {
+            course.setSchedule(request.getSchedule());
+        }
+        if (request.getMaxStudents() != null) {
+            course.setMaxStudents(request.getMaxStudents());
+        }
+        if (request.getStartDate() != null) {
+            course.setStartDate(request.getStartDate());
+        }
+        if (request.getEndDate() != null) {
+            course.setEndDate(request.getEndDate());
         }
         if (request.getThumbnailUrl() != null) {
             course.setThumbnailUrl(request.getThumbnailUrl());
@@ -318,5 +400,46 @@ public class CourseService {
 
         courseRepository.delete(course);
         log.info("Course deleted successfully with ID: {}", id);
+    }
+
+    /**
+     * Get course statistics (enrollment counts, average progress)
+     */
+    public CourseStatsResponse getCourseStats(Long courseId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Course", "id", courseId));
+
+        Long total = enrollmentRepository.countByCourseId(courseId);
+        Long active = enrollmentRepository.countActiveByCourseId(courseId);
+        Long completed = enrollmentRepository.countCompletedByCourseId(courseId);
+        Double avgProgress = enrollmentRepository.getAverageProgressByCourseId(courseId);
+
+        return CourseStatsResponse.builder()
+                .courseId(course.getId())
+                .totalEnrollments(total)
+                .activeEnrollments(active)
+                .completedEnrollments(completed)
+                .averageProgress(avgProgress != null ? avgProgress : 0.0)
+                .build();
+    }
+
+    private Map<Long, Integer> buildProgressMap(Long userId) {
+        if (userId == null) {
+            return Map.of();
+        }
+        return enrollmentRepository.findByStudentId(userId).stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(e -> e.getCourse().getId(), Enrollment::getProgress, (a, b) -> a));
+    }
+
+    private CourseResponse decorateCourseResponse(Course course, Integer progress) {
+        CourseResponse response = courseMapper.toResponse(course);
+        if (progress != null) {
+            response.setEnrolled(true);
+            response.setProgress(progress);
+        } else {
+            response.setEnrolled(false);
+        }
+        return response;
     }
 }

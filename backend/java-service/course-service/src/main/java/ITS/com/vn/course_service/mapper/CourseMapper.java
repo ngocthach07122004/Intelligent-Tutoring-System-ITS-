@@ -21,10 +21,21 @@ public interface CourseMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "publishedAt", ignore = true)
+    @Mapping(target = "code", source = "code")
+    @Mapping(target = "credits", source = "credits")
+    @Mapping(target = "semester", source = "semester")
+    @Mapping(target = "schedule", source = "schedule")
+    @Mapping(target = "maxStudents", source = "maxStudents")
+    @Mapping(target = "startDate", source = "startDate")
+    @Mapping(target = "endDate", source = "endDate")
     Course toEntity(CreateCourseRequest request);
 
     @Mapping(target = "tags", source = "courseTags")
     @Mapping(target = "prerequisites", source = "prerequisites")
+    @Mapping(target = "progress", ignore = true)
+    @Mapping(target = "enrolled", ignore = true)
+    @Mapping(target = "instructorName", ignore = true)
+    @Mapping(target = "instructorAvatarUrl", ignore = true)
     CourseResponse toResponse(Course course);
 
     List<CourseResponse> toResponseList(List<Course> courses);

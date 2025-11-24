@@ -2,6 +2,7 @@ package ITS.com.vn.dashboard_service.controller;
 
 import ITS.com.vn.dashboard_service.dto.response.AdminStatsResponse;
 import ITS.com.vn.dashboard_service.dto.response.AtRiskListResponse;
+import ITS.com.vn.dashboard_service.dto.response.DashboardSummaryResponse;
 import ITS.com.vn.dashboard_service.dto.response.InstructorCourseStatsResponse;
 import ITS.com.vn.dashboard_service.dto.response.StudentDashboardResponse;
 import ITS.com.vn.dashboard_service.service.DashboardService;
@@ -23,6 +24,12 @@ public class DashboardController {
     public ResponseEntity<StudentDashboardResponse> getStudentDashboard() {
         UUID userId = JwtUtil.getUserIdFromJwt();
         return ResponseEntity.ok(dashboardService.getStudentDashboard(userId));
+    }
+
+    @GetMapping("/student/summary")
+    public ResponseEntity<DashboardSummaryResponse> getStudentSummary() {
+        UUID userId = JwtUtil.getUserIdFromJwt();
+        return ResponseEntity.ok(dashboardService.getStudentSummary(userId));
     }
 
     @GetMapping("/instructor/courses/{id}")

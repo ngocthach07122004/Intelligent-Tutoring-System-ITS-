@@ -51,6 +51,28 @@ public class Course {
     @Column(columnDefinition = "TEXT")
     private String objectives;
 
+    // ========== Thông tin khóa học bổ sung (MVP) ==========
+    @Column(name = "code", unique = true, length = 20)
+    private String code; // Mã môn học, VD: "CS101"
+
+    @Column(name = "credits")
+    private Integer credits; // Số tín chỉ
+
+    @Column(name = "semester", length = 50)
+    private String semester; // Học kỳ áp dụng, VD: "Fall 2024"
+
+    @Column(name = "schedule", length = 255)
+    private String schedule; // Lịch học, VD: "Mon, Wed 9:00-11:00"
+
+    @Column(name = "max_students")
+    private Integer maxStudents; // Số lượng sinh viên tối đa
+
+    @Column(name = "start_date")
+    private java.time.LocalDate startDate; // Ngày bắt đầu khóa học
+
+    @Column(name = "end_date")
+    private java.time.LocalDate endDate; // Ngày kết thúc khóa học
+
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<CourseVersion> versions = new ArrayList<>();
