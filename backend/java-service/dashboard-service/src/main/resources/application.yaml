@@ -15,11 +15,16 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+  rabbitmq:
+    host: ${RABBITMQ_HOST:rabbitmq}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080/realms/its-realm}
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080/realms/ITS-realm}
 
 eureka:
   client:
@@ -36,7 +41,7 @@ server:
 custom:
   datasource:
      host: ${DB_HOST:postgres_dashboard}
-     port: ${DB_POST:5437}
+     port: ${DB_PORT:5432}
      dbName: ${DB_NAME:dashboardDb}
      user: ${SPRING_DATASOURCE_USERNAME:dashboardUser}
      pass: ${SPRING_DATASOURCE_PASSWORD:12345678}

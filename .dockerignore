@@ -1,0 +1,8 @@
+target/
+.git/
+frontend/
+.idea/
+*.iml
+.vscode/
+**/*.class
+**/target/

@@ -28,8 +28,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080/realms/ITS}
-          jwk-set-uri: ${JWT_JWK_SET_URI:http://localhost:8080/realms/ITS/protocol/openid-connect/certs}
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080/realms/ITS-realm}
+          jwk-set-uri: ${JWT_JWK_SET_URI:http://localhost:8080/realms/ITS-realm/protocol/openid-connect/certs}
   
   # RabbitMQ Configuration
   rabbitmq:
@@ -87,7 +87,7 @@ logging:
 custom:
   datasource:
     host: ${DB_HOST:postgres_course}
-    port: ${DB_POST:5436}
+    port: ${DB_PORT:5432}
     dbName: ${DB_NAME:courseDb}
     user: ${SPRING_DATASOURCE_USERNAME:courseUser}
     pass: ${SPRING_DATASOURCE_PASSWORD:12345678}

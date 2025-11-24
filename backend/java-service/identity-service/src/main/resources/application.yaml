@@ -19,7 +19,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080/realms/its-realm}
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080/realms/ITS-realm}
 
 eureka:
   client:
@@ -46,7 +46,7 @@ server:
 custom:
   datasource:
      host: ${DB_HOST:postgres_identity}
-     port: ${DB_POST:5434}
+     port: ${DB_PORT:5432}
      dbName: ${DB_NAME:identityDb}
      user: ${SPRING_DATASOURCE_USERNAME:identityUser}
      pass: ${SPRING_DATASOURCE_PASSWORD:12345678}

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.8 (Microsoft)"
+    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.44.0.v20251118-1623, environment: Java 21.0.9 (Eclipse Adoptium)"
 )
 @Component
 public class QuestionPoolMapperImpl implements QuestionPoolMapper {
@@ -21,9 +21,9 @@ public class QuestionPoolMapperImpl implements QuestionPoolMapper {
 
         QuestionPool.QuestionPoolBuilder questionPool = QuestionPool.builder();
 
-        questionPool.name( request.getName() );
         questionPool.difficulty( request.getDifficulty() );
         questionPool.isPublic( request.getIsPublic() );
+        questionPool.name( request.getName() );
 
         return questionPool.build();
     }
@@ -36,12 +36,12 @@ public class QuestionPoolMapperImpl implements QuestionPoolMapper {
 
         QuestionPoolResponse questionPoolResponse = new QuestionPoolResponse();
 
-        questionPoolResponse.setId( entity.getId() );
-        questionPoolResponse.setName( entity.getName() );
-        questionPoolResponse.setDifficulty( entity.getDifficulty() );
-        questionPoolResponse.setIsPublic( entity.getIsPublic() );
-        questionPoolResponse.setInstructorId( entity.getInstructorId() );
         questionPoolResponse.setCreatedAt( entity.getCreatedAt() );
+        questionPoolResponse.setDifficulty( entity.getDifficulty() );
+        questionPoolResponse.setId( entity.getId() );
+        questionPoolResponse.setInstructorId( entity.getInstructorId() );
+        questionPoolResponse.setIsPublic( entity.getIsPublic() );
+        questionPoolResponse.setName( entity.getName() );
 
         return questionPoolResponse;
     }
@@ -52,8 +52,8 @@ public class QuestionPoolMapperImpl implements QuestionPoolMapper {
             return;
         }
 
-        entity.setName( request.getName() );
         entity.setDifficulty( request.getDifficulty() );
         entity.setIsPublic( request.getIsPublic() );
+        entity.setName( request.getName() );
     }
 }
