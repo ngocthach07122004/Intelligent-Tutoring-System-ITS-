@@ -6,9 +6,9 @@ import ITS.com.vn.user_profile_service.dto.response.UserProfileResponse;
 import ITS.com.vn.user_profile_service.mapper.UserProfileMapper;
 import ITS.com.vn.user_profile_service.repository.UserProfileRepository;
 import ITS.com.vn.user_profile_service.service.UserProfileService;
+import ITS.com.vn.user_profile_service.util.JwtUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +25,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     @Override
     @Transactional(readOnly = true)
     public UserProfileResponse getMyProfile() {
-        UUID userId = getCurrentUserId();
+        UUID userId = JwtUtil.getUserIdFromJwt();
         UserProfile profile = userProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Profile not found for user: " + userId));
         return userProfileMapper.toResponse(profile);
@@ -33,7 +33,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     @Override
     public UserProfileResponse updateMyProfile(UserProfileRequest request) {
-        UUID userId = getCurrentUserId();
+        UUID userId = JwtUtil.getUserIdFromJwt();
         UserProfile profile = userProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Profile not found for user: " + userId));
 
@@ -60,17 +60,5 @@ public class UserProfileServiceImpl implements UserProfileService {
                 .timezone("UTC")
                 .build();
         userProfileRepository.save(profile);
-    }
-
-    private UUID getCurrentUserId() {
-        if (SecurityContextHolder.getContext().getAuthentication() != null) {
-            try {
-                return UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
-            } catch (IllegalArgumentException e) {
-                // For testing or system calls
-                return UUID.randomUUID();
-            }
-        }
-        throw new IllegalStateException("No authenticated user found");
     }
 }

@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.44.0.v20251118-1623, environment: Java 21.0.9 (Eclipse Adoptium)"
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.8 (Microsoft)"
 )
 @Component
 public class ExamConfigMapperImpl implements ExamConfigMapper {
@@ -27,22 +27,22 @@ public class ExamConfigMapperImpl implements ExamConfigMapper {
             return null;
         }
 
-        ExamConfig examConfig = new ExamConfig();
+        ExamConfig.ExamConfigBuilder examConfig = ExamConfig.builder();
 
-        examConfig.setTitle( request.getTitle() );
-        examConfig.setCourseId( request.getCourseId() );
-        examConfig.setLessonId( request.getLessonId() );
-        examConfig.setPolicy( request.getPolicy() );
-        examConfig.setBrowserLockEnabled( request.getBrowserLockEnabled() );
-        examConfig.setTimeLimitMinutes( request.getTimeLimitMinutes() );
-        examConfig.setWindowStart( request.getWindowStart() );
-        examConfig.setWindowEnd( request.getWindowEnd() );
+        examConfig.title( request.getTitle() );
+        examConfig.courseId( request.getCourseId() );
+        examConfig.lessonId( request.getLessonId() );
+        examConfig.policy( request.getPolicy() );
+        examConfig.browserLockEnabled( request.getBrowserLockEnabled() );
+        examConfig.timeLimitMinutes( request.getTimeLimitMinutes() );
+        examConfig.windowStart( request.getWindowStart() );
+        examConfig.windowEnd( request.getWindowEnd() );
         Map<String, Object> map = request.getPolicyConfig();
         if ( map != null ) {
-            examConfig.setPolicyConfig( new LinkedHashMap<String, Object>( map ) );
+            examConfig.policyConfig( new LinkedHashMap<String, Object>( map ) );
         }
 
-        return examConfig;
+        return examConfig.build();
     }
 
     @Override
@@ -111,12 +111,12 @@ public class ExamConfigMapperImpl implements ExamConfigMapper {
             return null;
         }
 
-        ExamSectionRule examSectionRule = new ExamSectionRule();
+        ExamSectionRule.ExamSectionRuleBuilder examSectionRule = ExamSectionRule.builder();
 
-        examSectionRule.setCountToPull( request.getCountToPull() );
-        examSectionRule.setPointsPerQuestion( request.getPointsPerQuestion() );
+        examSectionRule.countToPull( request.getCountToPull() );
+        examSectionRule.pointsPerQuestion( request.getPointsPerQuestion() );
 
-        return examSectionRule;
+        return examSectionRule.build();
     }
 
     @Override

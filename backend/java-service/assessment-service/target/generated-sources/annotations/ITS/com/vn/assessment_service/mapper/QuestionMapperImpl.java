@@ -9,93 +9,88 @@ import java.util.Map;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 
-@Generated(
-    value = "org.mapstruct.ap.MappingProcessor",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.44.0.v20251118-1623, environment: Java 21.0.9 (Eclipse Adoptium)"
-)
+@Generated(value = "org.mapstruct.ap.MappingProcessor", comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.8 (Microsoft)")
 @Component
 public class QuestionMapperImpl implements QuestionMapper {
 
     @Override
     public Question toEntity(QuestionRequest request) {
-        if ( request == null ) {
+        if (request == null) {
             return null;
         }
 
-        Question question = new Question();
+        Question.QuestionBuilder question = Question.builder();
 
-        question.setType( request.getType() );
-        question.setContent( request.getContent() );
+        question.type(request.getType());
+        question.content(request.getContent());
         Map<String, Object> map = request.getMetadata();
-        if ( map != null ) {
-            question.setMetadata( new LinkedHashMap<String, Object>( map ) );
+        if (map != null) {
+            question.metadata(new LinkedHashMap<String, Object>(map));
         }
-        question.setWeight( request.getWeight() );
-        question.setSkillTag( request.getSkillTag() );
+        question.weight(request.getWeight());
+        question.skillTag(request.getSkillTag());
 
-        return question;
+        return question.build();
     }
 
     @Override
     public QuestionResponse toResponse(Question entity) {
-        if ( entity == null ) {
+        if (entity == null) {
             return null;
         }
 
         QuestionResponse questionResponse = new QuestionResponse();
 
-        questionResponse.setPoolId( entityPoolId( entity ) );
-        questionResponse.setId( entity.getId() );
-        questionResponse.setType( entity.getType() );
-        questionResponse.setContent( entity.getContent() );
+        questionResponse.setPoolId(entityPoolId(entity));
+        questionResponse.setId(entity.getId());
+        questionResponse.setType(entity.getType());
+        questionResponse.setContent(entity.getContent());
         Map<String, Object> map = entity.getMetadata();
-        if ( map != null ) {
-            questionResponse.setMetadata( new LinkedHashMap<String, Object>( map ) );
+        if (map != null) {
+            questionResponse.setMetadata(new LinkedHashMap<String, Object>(map));
         }
-        questionResponse.setWeight( entity.getWeight() );
-        questionResponse.setSkillTag( entity.getSkillTag() );
+        questionResponse.setWeight(entity.getWeight());
+        questionResponse.setSkillTag(entity.getSkillTag());
 
         return questionResponse;
     }
 
     @Override
     public void updateEntityFromRequest(QuestionRequest request, Question entity) {
-        if ( request == null ) {
+        if (request == null) {
             return;
         }
 
-        entity.setType( request.getType() );
-        entity.setContent( request.getContent() );
-        if ( entity.getMetadata() != null ) {
+        entity.setType(request.getType());
+        entity.setContent(request.getContent());
+        if (entity.getMetadata() != null) {
             Map<String, Object> map = request.getMetadata();
-            if ( map != null ) {
+            if (map != null) {
                 entity.getMetadata().clear();
-                entity.getMetadata().putAll( map );
+                entity.getMetadata().putAll(map);
+            } else {
+                entity.setMetadata(null);
             }
-            else {
-                entity.setMetadata( null );
-            }
-        }
-        else {
+        } else {
             Map<String, Object> map = request.getMetadata();
-            if ( map != null ) {
-                entity.setMetadata( new LinkedHashMap<String, Object>( map ) );
+            if (map != null) {
+                entity.setMetadata(new LinkedHashMap<String, Object>(map));
             }
         }
-        entity.setWeight( request.getWeight() );
-        entity.setSkillTag( request.getSkillTag() );
+        entity.setWeight(request.getWeight());
+        entity.setSkillTag(request.getSkillTag());
     }
 
     private Long entityPoolId(Question question) {
-        if ( question == null ) {
+        if (question == null) {
             return null;
         }
         QuestionPool pool = question.getPool();
-        if ( pool == null ) {
+        if (pool == null) {
             return null;
         }
         Long id = pool.getId();
-        if ( id == null ) {
+        if (id == null) {
             return null;
         }
         return id;

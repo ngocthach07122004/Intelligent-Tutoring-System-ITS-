@@ -10,9 +10,9 @@ import ITS.com.vn.user_profile_service.mapper.GroupMapper;
 import ITS.com.vn.user_profile_service.repository.ClassGroupRepository;
 import ITS.com.vn.user_profile_service.repository.GroupMemberRepository;
 import ITS.com.vn.user_profile_service.service.GroupService;
+import ITS.com.vn.user_profile_service.util.JwtUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,9 +32,7 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public GroupResponse createGroup(GroupRequest request) {
-        UUID userId = getCurrentUserId();
-        // Role check (TEACHER) should be done via PreAuthorize or similar, assuming
-        // handled by Controller/Security config
+        UUID userId = JwtUtil.getUserIdFromJwt();
 
         ClassGroup group = groupMapper.toEntity(request);
         group.setCreatorId(userId);
@@ -57,7 +55,7 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public void joinGroup(String joinCode) {
-        UUID userId = getCurrentUserId();
+        UUID userId = JwtUtil.getUserIdFromJwt();
         ClassGroup group = classGroupRepository.findByJoinCode(joinCode)
                 .orElseThrow(() -> new EntityNotFoundException("Group not found with code: " + joinCode));
 
@@ -79,7 +77,7 @@ public class GroupServiceImpl implements GroupService {
     @Override
     @Transactional(readOnly = true)
     public List<GroupResponse> getMyGroups(GroupRole role) {
-        UUID userId = getCurrentUserId();
+        UUID userId = JwtUtil.getUserIdFromJwt();
         List<GroupMember> memberships;
         if (role != null) {
             memberships = groupMemberRepository.findByStudentIdAndRole(userId, role);
@@ -99,7 +97,7 @@ public class GroupServiceImpl implements GroupService {
     @Override
     @Transactional(readOnly = true)
     public List<GroupMemberResponse> getGroupMembers(Long groupId) {
-        UUID userId = getCurrentUserId();
+        UUID userId = JwtUtil.getUserIdFromJwt();
         // Check if user is member of the group
         if (!groupMemberRepository.existsByGroupIdAndStudentId(groupId, userId)) {
             throw new SecurityException("You are not a member of this group");
@@ -112,7 +110,7 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public void removeMember(Long groupId, UUID memberId) {
-        UUID currentUserId = getCurrentUserId();
+        UUID currentUserId = JwtUtil.getUserIdFromJwt();
         GroupMember currentMember = groupMemberRepository.findByGroupIdAndStudentId(groupId, currentUserId)
                 .orElseThrow(() -> new SecurityException("You are not a member of this group"));
 
@@ -128,7 +126,7 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public void promoteMember(Long groupId, UUID memberId, GroupRole role) {
-        UUID currentUserId = getCurrentUserId();
+        UUID currentUserId = JwtUtil.getUserIdFromJwt();
         GroupMember currentMember = groupMemberRepository.findByGroupIdAndStudentId(groupId, currentUserId)
                 .orElseThrow(() -> new SecurityException("You are not a member of this group"));
 
@@ -145,16 +143,5 @@ public class GroupServiceImpl implements GroupService {
 
     private String generateJoinCode() {
         return UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-    }
-
-    private UUID getCurrentUserId() {
-        if (SecurityContextHolder.getContext().getAuthentication() != null) {
-            try {
-                return UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
-            } catch (IllegalArgumentException e) {
-                return UUID.randomUUID();
-            }
-        }
-        throw new IllegalStateException("No authenticated user found");
     }
 }

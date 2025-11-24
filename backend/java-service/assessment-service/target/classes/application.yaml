@@ -12,6 +12,11 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080/realms/its-realm}
 
 eureka:
   client:

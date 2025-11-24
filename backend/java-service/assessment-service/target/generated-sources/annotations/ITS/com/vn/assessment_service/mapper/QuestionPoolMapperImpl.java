@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.44.0.v20251118-1623, environment: Java 21.0.9 (Eclipse Adoptium)"
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.8 (Microsoft)"
 )
 @Component
 public class QuestionPoolMapperImpl implements QuestionPoolMapper {
@@ -19,13 +19,13 @@ public class QuestionPoolMapperImpl implements QuestionPoolMapper {
             return null;
         }
 
-        QuestionPool questionPool = new QuestionPool();
+        QuestionPool.QuestionPoolBuilder questionPool = QuestionPool.builder();
 
-        questionPool.setName( request.getName() );
-        questionPool.setDifficulty( request.getDifficulty() );
-        questionPool.setIsPublic( request.getIsPublic() );
+        questionPool.name( request.getName() );
+        questionPool.difficulty( request.getDifficulty() );
+        questionPool.isPublic( request.getIsPublic() );
 
-        return questionPool;
+        return questionPool.build();
     }
 
     @Override

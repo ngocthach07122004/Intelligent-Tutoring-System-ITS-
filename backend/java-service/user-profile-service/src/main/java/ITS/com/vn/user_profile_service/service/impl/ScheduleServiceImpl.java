@@ -8,9 +8,9 @@ import ITS.com.vn.user_profile_service.mapper.ScheduleMapper;
 import ITS.com.vn.user_profile_service.repository.UserProfileRepository;
 import ITS.com.vn.user_profile_service.repository.UserScheduleRepository;
 import ITS.com.vn.user_profile_service.service.ScheduleService;
+import ITS.com.vn.user_profile_service.util.JwtUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +31,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Override
     @Transactional(readOnly = true)
     public List<ScheduleResponse> getMySchedule(Instant from, Instant to) {
-        UUID userId = getCurrentUserId();
+        UUID userId = JwtUtil.getUserIdFromJwt();
         UserProfile profile = userProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Profile not found"));
 
@@ -42,7 +42,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     public ScheduleResponse createSlot(ScheduleRequest request) {
-        UUID userId = getCurrentUserId();
+        UUID userId = JwtUtil.getUserIdFromJwt();
         UserProfile profile = userProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Profile not found"));
 
@@ -58,7 +58,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     public void deleteSlot(Long id) {
-        UUID userId = getCurrentUserId();
+        UUID userId = JwtUtil.getUserIdFromJwt();
         UserSchedule schedule = userScheduleRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Schedule slot not found"));
 
@@ -67,16 +67,5 @@ public class ScheduleServiceImpl implements ScheduleService {
         }
 
         userScheduleRepository.deleteById(id);
-    }
-
-    private UUID getCurrentUserId() {
-        if (SecurityContextHolder.getContext().getAuthentication() != null) {
-            try {
-                return UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
-            } catch (IllegalArgumentException e) {
-                return UUID.randomUUID();
-            }
-        }
-        throw new IllegalStateException("No authenticated user found");
     }
 }
