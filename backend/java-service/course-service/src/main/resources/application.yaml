@@ -85,7 +85,7 @@ logging:
 
 application:
   config:
-    user-profile-url: ${USER_PROFILE_SERVICE_URL:http://localhost:8081}
+    user-profile-url: ${USER_PROFILE_SERVICE_URL:http://localhost:8083}
 
 # Custom Configuration (Legacy - for backward compatibility)
 custom:

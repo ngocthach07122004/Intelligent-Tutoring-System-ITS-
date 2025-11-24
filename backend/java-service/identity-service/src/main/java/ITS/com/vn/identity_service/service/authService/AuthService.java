@@ -59,23 +59,22 @@ public class AuthService {
         if (userRepository.findByGmail(registerRequest.getEmail()).isPresent()) {
              throw new AppException(StatusCode.USER_EXISTED);
         }
-        String keycloakId = keycloakAdminService.createUser(registerRequest.getUsername(), registerRequest.getEmail(), registerRequest.getPassword());
+        String username = resolveUsername(registerRequest);
+        String keycloakId = keycloakAdminService.createUser(username, registerRequest.getEmail(), registerRequest.getPassword());
         User user = new User();
         user.setGmail(registerRequest.getEmail());
-        user.setUserName(registerRequest.getUsername());
+        user.setUserName(username);
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         user.setKeycloakId(keycloakId);
         userRepository.save(user);
-        KeycloakTokenResponse kcResponse = keyCloakAuthenticate(registerRequest.getUsername(),registerRequest.getPassword());
-        TokenSession session = new TokenSession();
-        session.setUsername(registerRequest.getUsername());
-        session.setAccessToken(kcResponse.getAccessToken());
-        session.setRefreshToken(kcResponse.getRefreshToken());
-        session.setAccessTokenExpiry(Instant.now().plusSeconds(kcResponse.getExpiresIn()));
-        session.setRefreshTokenExpiry(Instant.now().plusSeconds(kcResponse.getRefreshExpiresIn()));
-        session.setClientId(clientId);
+        KeycloakTokenResponse kcResponse = keyCloakAuthenticate(username, registerRequest.getPassword());
+        TokenSession session = buildSession(username, kcResponse);
         tokenSessionRepository.save(session);
-        return ApiResponse.<TokenResponse>builder().statusCode(200).message("success").body(new TokenResponse(kcResponse.getAccessToken(), kcResponse.getRefreshToken(), kcResponse.getExpiresIn())).build();
+        return ApiResponse.<TokenResponse>builder()
+                .statusCode(200)
+                .message("success")
+                .body(buildTokenResponse(user, kcResponse))
+                .build();
     }
     private KeycloakTokenResponse keyCloakAuthenticate (String username, String password) {
         String tokenUrl = authServerUrl + "/realms/" + realm + "/protocol/openid-connect/token";
@@ -105,16 +104,20 @@ public class AuthService {
      */
     public ApiResponse<TokenResponse> login(LoginRequest loginRequest) {
 
-        KeycloakTokenResponse kcResponse = keyCloakAuthenticate(loginRequest.getUsername(),loginRequest.getPassword());
-        TokenSession session = new TokenSession();
-        session.setUsername(loginRequest.getUsername());
-        session.setAccessToken(kcResponse.getAccessToken());
-        session.setRefreshToken(kcResponse.getRefreshToken());
-        session.setAccessTokenExpiry(Instant.now().plusSeconds(kcResponse.getExpiresIn()));
-        session.setRefreshTokenExpiry(Instant.now().plusSeconds(kcResponse.getRefreshExpiresIn()));
-        session.setClientId(clientId);
+        String principal = loginRequest.getUsername() != null ? loginRequest.getUsername() : loginRequest.getEmail();
+        if (principal == null || principal.isBlank()) {
+            throw new AppException(StatusCode.UNAUTHENTICATED);
+        }
+        KeycloakTokenResponse kcResponse = keyCloakAuthenticate(principal, loginRequest.getPassword());
+        TokenSession session = buildSession(principal, kcResponse);
         tokenSessionRepository.save(session);
-        return ApiResponse.<TokenResponse>builder().statusCode(200).message("success").body(new TokenResponse(kcResponse.getAccessToken(), kcResponse.getRefreshToken(), kcResponse.getExpiresIn())).build();
+        User user = userRepository.findByGmail(principal)
+                .orElseGet(() -> userRepository.findByUserName(principal).orElse(null));
+        return ApiResponse.<TokenResponse>builder()
+                .statusCode(200)
+                .message("success")
+                .body(buildTokenResponse(user, kcResponse))
+                .build();
     }
 
     /**
@@ -145,7 +148,13 @@ public class AuthService {
         session.setRefreshTokenExpiry(Instant.now().plusSeconds(kcResponse.getRefreshExpiresIn()));
         tokenSessionRepository.save(session);
 
-        return ApiResponse.<TokenResponse>builder().statusCode(200).message("success").body(new TokenResponse(kcResponse.getAccessToken(), kcResponse.getRefreshToken(), kcResponse.getExpiresIn())).build();
+        User user = userRepository.findByUserName(session.getUsername()).orElse(null);
+
+        return ApiResponse.<TokenResponse>builder()
+                .statusCode(200)
+                .message("success")
+                .body(buildTokenResponse(user, kcResponse))
+                .build();
     }
 
     /**
@@ -153,6 +162,9 @@ public class AuthService {
      */
     @Transactional
     public void logout(String refreshToken) {
+        if (refreshToken == null || refreshToken.isBlank()) {
+            return;
+        }
         tokenSessionRepository.deleteByRefreshToken(refreshToken);
     }
 
@@ -180,5 +192,41 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword()));
         userRepository.save(user);
         keycloakAdminService.resetUserPassword(user.getKeycloakId(), resetPasswordRequest.getNewPassword());
+    }
+
+    private TokenSession buildSession(String username, KeycloakTokenResponse kcResponse) {
+        TokenSession session = new TokenSession();
+        session.setUsername(username);
+        session.setAccessToken(kcResponse.getAccessToken());
+        session.setRefreshToken(kcResponse.getRefreshToken());
+        session.setAccessTokenExpiry(Instant.now().plusSeconds(kcResponse.getExpiresIn()));
+        session.setRefreshTokenExpiry(Instant.now().plusSeconds(kcResponse.getRefreshExpiresIn()));
+        session.setClientId(clientId);
+        return session;
+    }
+
+    private TokenResponse buildTokenResponse(User user, KeycloakTokenResponse kcResponse) {
+        String role = "student"; // default role for FE navigation; adjust when roles available
+        return TokenResponse.builder()
+                .accessToken(kcResponse.getAccessToken())
+                .refreshToken(kcResponse.getRefreshToken())
+                .expiresIn(kcResponse.getExpiresIn())
+                .refreshExpiresIn(kcResponse.getRefreshExpiresIn())
+                .tokenType("Bearer")
+                .userId(user != null ? user.getId() : null)
+                .email(user != null ? user.getGmail() : null)
+                .name(user != null ? user.getUserName() : null)
+                .role(role)
+                .build();
+    }
+
+    private String resolveUsername(RegisterRequest registerRequest) {
+        if (registerRequest.getUsername() != null && !registerRequest.getUsername().isBlank()) {
+            return registerRequest.getUsername();
+        }
+        if (registerRequest.getName() != null && !registerRequest.getName().isBlank()) {
+            return registerRequest.getName();
+        }
+        return registerRequest.getEmail();
     }
 }

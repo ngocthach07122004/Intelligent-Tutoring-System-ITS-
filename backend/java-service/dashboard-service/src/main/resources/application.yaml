@@ -38,6 +38,12 @@ server:
    port: ${SERVER_PORT:8085}
 #  port: 8085
 
+application:
+  config:
+    course-url: ${COURSE_SERVICE_URL:http://course-service:8084}
+    assessment-url: ${ASSESSMENT_SERVICE_URL:http://assessment-service:8086}
+    user-profile-url: ${USER_PROFILE_SERVICE_URL:http://user-profile-service:8083}
+
 custom:
   datasource:
      host: ${DB_HOST:postgres_dashboard}

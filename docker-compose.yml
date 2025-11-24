@@ -227,6 +227,7 @@ services:
       DB_HOST: ${POSTGRES_COURSE_HOST}
       DB_PORT: ${POSTGRES_PORT_DEFAULT}
       DB_NAME: ${POSTGRES_COURSE_DB}
+      USER_PROFILE_SERVICE_URL: ${USER_PROFILE_SERVICE_URL:http://user-profile-service:${USER_PROFILE_SERVICE_PORT}}
     depends_on:
       - postgres_course
       - rabbitmq
@@ -256,6 +257,9 @@ services:
       DB_HOST: ${POSTGRES_DASHBOARD_HOST}
       DB_PORT: ${POSTGRES_PORT_DEFAULT}
       DB_NAME: ${POSTGRES_DASHBOARD_DB}
+      COURSE_SERVICE_URL: ${COURSE_SERVICE_URL:http://course-service:${COURSE_SERVICE_PORT}}
+      ASSESSMENT_SERVICE_URL: ${ASSESSMENT_SERVICE_URL:http://assessment-service:${ASSESSMENT_SERVICE_PORT}}
+      USER_PROFILE_SERVICE_URL: ${USER_PROFILE_SERVICE_URL:http://user-profile-service:${USER_PROFILE_SERVICE_PORT}}
     depends_on:
       - postgres_dashboard
       - rabbitmq
