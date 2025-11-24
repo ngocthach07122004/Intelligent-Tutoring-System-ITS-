@@ -11,9 +11,10 @@ Bổ sung các trường hiển thị trên Dashboard:
 *   `code` (String - Mã môn, VD: "CS101").
 *   `credits` (Integer - Số tín chỉ).
 *   `semester` (String - Học kỳ áp dụng).
-*   `schedule` (String - Lịch học text, hoặc cấu trúc phức tạp hơn nếu cần).
-*   `maxStudents` (Integer).
+*   `schedule` (String - Lịch học text, VD: "Thứ 2, 4 - 7:00-9:00").
+*   `maxStudents` (Integer - Sĩ số tối đa).
 *   `startDate`, `endDate` (LocalDate).
+*   **Note:** Cần tính toán `currentStudents` (số lượng đã enroll) để trả về cho FE.
 
 ### `Enrollment` (New Entity - Quan trọng)
 Quản lý việc sinh viên tham gia khóa học. Hiện tại có thể đang thiếu hoặc sơ sài.
@@ -33,7 +34,11 @@ Nếu không tách riêng `Document Service`, có thể để tài liệu khóa 
 ### Existing (Modify)
 *   `GET /api/v1/courses`:
     *   **Filter:** Thêm filter theo `semester`, `status` (của enrollment).
-    *   **Response:** Bổ sung `code`, `schedule`, `progress` (nếu đã login).
+    *   **Response:** 
+        *   Bổ sung `code`, `schedule`, `credits`, `maxStudents`.
+        *   Thêm `instructorName` (Resolve từ `instructorId` qua Profile Service hoặc Cache).
+        *   Thêm `currentStudents` (Count từ Enrollment).
+        *   Thêm `progress` (nếu đã login).
 *   `GET /api/v1/courses/{id}`:
     *   **Response:** Chi tiết đầy đủ, bao gồm cả instructor info (gọi qua Profile Service hoặc cache).
 

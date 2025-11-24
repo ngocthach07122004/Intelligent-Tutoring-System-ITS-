@@ -2,6 +2,7 @@ package ITS.com.vn.course_service.controller;
 
 import ITS.com.vn.course_service.dto.request.CreateLessonRequest;
 import ITS.com.vn.course_service.dto.response.LessonResponse;
+import ITS.com.vn.course_service.security.SecurityUtils;
 import ITS.com.vn.course_service.service.LessonService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,7 +36,7 @@ public class LessonController {
             @Valid @RequestBody CreateLessonRequest request,
             Authentication authentication) {
 
-        Long instructorId = extractUserIdFromAuth(authentication);
+        Long instructorId = SecurityUtils.getUserIdAsLong(authentication, true);
         LessonResponse response = lessonService.createLesson(chapterId, request, instructorId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -72,7 +72,7 @@ public class LessonController {
             @Valid @RequestBody CreateLessonRequest request,
             Authentication authentication) {
 
-        Long instructorId = extractUserIdFromAuth(authentication);
+        Long instructorId = SecurityUtils.getUserIdAsLong(authentication, true);
         LessonResponse response = lessonService.updateLesson(id, request, instructorId);
 
         return ResponseEntity.ok(response);
@@ -87,20 +87,9 @@ public class LessonController {
             @PathVariable Long id,
             Authentication authentication) {
 
-        Long instructorId = extractUserIdFromAuth(authentication);
+        Long instructorId = SecurityUtils.getUserIdAsLong(authentication, true);
         lessonService.deleteLesson(id, instructorId);
 
         return ResponseEntity.noContent().build();
-    }
-
-    /**
-     * Extract user ID from JWT token
-     */
-    private Long extractUserIdFromAuth(Authentication authentication) {
-        if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
-            String userId = jwt.getClaimAsString("sub");
-            return Long.parseLong(userId);
-        }
-        throw new RuntimeException("Unable to extract user ID from authentication");
     }
 }

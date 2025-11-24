@@ -44,17 +44,23 @@ public class AchievementServiceImpl implements AchievementService {
         return allAchievements.stream()
                 .map(achievement -> {
                     UserAchievement userAchievement = earnedMap.get(achievement.getId());
+                    boolean earned = userAchievement != null;
+                    Integer progress = userAchievement != null ? userAchievement.getProgress() : 0;
                     return AchievementResponse.builder()
                             .id(achievement.getId())
                             .code(achievement.getCode())
                             .name(achievement.getName())
                             .description(achievement.getDescription())
                             .iconUrl(achievement.getIconUrl())
+                            .icon(achievement.getIconUrl())
                             .points(achievement.getPoints())
                             .category(achievement.getCategory())
-                            .earned(userAchievement != null)
-                            .earnedAt(userAchievement != null ? userAchievement.getEarnedAt() : null)
-                            .progress(userAchievement != null ? userAchievement.getProgress() : 0)
+                            .rarity("common")
+                            .earned(earned)
+                            .isEarned(earned)
+                            .earnedAt(earned ? userAchievement.getEarnedAt() : null)
+                            .progress(progress)
+                            .progressDetail(new AchievementResponse.AchievementProgress(progress, 100))
                             .build();
                 })
                 .collect(Collectors.toList());

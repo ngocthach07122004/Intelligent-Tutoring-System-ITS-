@@ -36,6 +36,8 @@ public interface CourseMapper {
     @Mapping(target = "enrolled", ignore = true)
     @Mapping(target = "instructorName", ignore = true)
     @Mapping(target = "instructorAvatarUrl", ignore = true)
+    @Mapping(target = "currentStudents", ignore = true)
+    @Mapping(target = "instructor", ignore = true)
     CourseResponse toResponse(Course course);
 
     List<CourseResponse> toResponseList(List<Course> courses);

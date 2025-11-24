@@ -4,6 +4,7 @@ import ITS.com.vn.course_service.dto.request.CreateCourseRequest;
 import ITS.com.vn.course_service.dto.request.UpdateCourseRequest;
 import ITS.com.vn.course_service.dto.response.CourseResponse;
 import ITS.com.vn.course_service.dto.response.CourseStatsResponse;
+import ITS.com.vn.course_service.security.SecurityUtils;
 import ITS.com.vn.course_service.service.CourseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -40,7 +40,7 @@ public class CourseController {
             @Valid @RequestBody CreateCourseRequest request,
             Authentication authentication) {
 
-        Long instructorId = extractUserId(authentication, true);
+        Long instructorId = SecurityUtils.getUserIdAsLong(authentication, true);
         CourseResponse response = courseService.createCourse(request, instructorId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -54,7 +54,7 @@ public class CourseController {
     public ResponseEntity<CourseResponse> getCourseById(
             @PathVariable Long id,
             Authentication authentication) {
-        Long userId = extractUserId(authentication, false);
+        Long userId = SecurityUtils.getUserIdAsLong(authentication, false);
         CourseResponse response = courseService.getCourseById(id, userId);
         return ResponseEntity.ok(response);
     }
@@ -67,10 +67,11 @@ public class CourseController {
     public ResponseEntity<Page<CourseResponse>> getAllCourses(
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) String semester,
+            @RequestParam(required = false, name = "enrollmentStatus") String enrollmentStatus,
             Authentication authentication) {
 
-        Long userId = extractUserId(authentication, false);
-        Page<CourseResponse> response = courseService.getAllCourses(pageable, userId, semester);
+        Long userId = SecurityUtils.getUserIdAsLong(authentication, false);
+        Page<CourseResponse> response = courseService.getAllCourses(pageable, userId, semester, enrollmentStatus);
         return ResponseEntity.ok(response);
     }
 
@@ -96,7 +97,7 @@ public class CourseController {
             Authentication authentication,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Long instructorId = extractUserId(authentication, true);
+        Long instructorId = SecurityUtils.getUserIdAsLong(authentication, true);
         Page<CourseResponse> response = courseService.getCoursesByInstructor(instructorId, pageable);
         return ResponseEntity.ok(response);
     }
@@ -111,7 +112,7 @@ public class CourseController {
             @RequestParam(required = false) String semester,
             Authentication authentication) {
 
-        Long userId = extractUserId(authentication, false);
+        Long userId = SecurityUtils.getUserIdAsLong(authentication, false);
         Page<CourseResponse> response = courseService.getPublishedCourses(pageable, userId, semester);
         return ResponseEntity.ok(response);
     }
@@ -139,7 +140,7 @@ public class CourseController {
             @Valid @RequestBody UpdateCourseRequest request,
             Authentication authentication) {
 
-        Long instructorId = extractUserId(authentication, true);
+        Long instructorId = SecurityUtils.getUserIdAsLong(authentication, true);
         CourseResponse response = courseService.updateCourse(id, request, instructorId);
 
         return ResponseEntity.ok(response);
@@ -154,7 +155,7 @@ public class CourseController {
             @PathVariable Long id,
             Authentication authentication) {
 
-        Long instructorId = extractUserId(authentication, true);
+        Long instructorId = SecurityUtils.getUserIdAsLong(authentication, true);
         CourseResponse response = courseService.publishCourse(id, instructorId);
 
         return ResponseEntity.ok(response);
@@ -169,7 +170,7 @@ public class CourseController {
             @PathVariable Long id,
             Authentication authentication) {
 
-        Long instructorId = extractUserId(authentication, true);
+        Long instructorId = SecurityUtils.getUserIdAsLong(authentication, true);
         CourseResponse response = courseService.archiveCourse(id, instructorId);
 
         return ResponseEntity.ok(response);
@@ -184,7 +185,7 @@ public class CourseController {
             @PathVariable Long id,
             Authentication authentication) {
 
-        Long instructorId = extractUserId(authentication, true);
+        Long instructorId = SecurityUtils.getUserIdAsLong(authentication, true);
         courseService.deleteCourse(id, instructorId);
 
         return ResponseEntity.noContent().build();
@@ -199,27 +200,5 @@ public class CourseController {
     public ResponseEntity<CourseStatsResponse> getCourseStats(@PathVariable Long id) {
         CourseStatsResponse stats = courseService.getCourseStats(id);
         return ResponseEntity.ok(stats);
-    }
-
-    /**
-     * Extract user ID from JWT token
-     */
-    private Long extractUserId(Authentication authentication, boolean required) {
-        if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
-            String userId = jwt.getClaimAsString("sub");
-            try {
-                return Long.parseLong(userId);
-            } catch (NumberFormatException ex) {
-                log.warn("User id in JWT is not numeric: {}", userId);
-                if (required) {
-                    throw new RuntimeException("User ID in token is not numeric");
-                }
-                return null;
-            }
-        }
-        if (required) {
-            throw new RuntimeException("Unable to extract user ID from authentication");
-        }
-        return null;
     }
 }

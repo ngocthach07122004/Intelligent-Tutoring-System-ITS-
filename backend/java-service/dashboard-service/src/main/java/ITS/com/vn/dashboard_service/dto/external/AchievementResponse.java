@@ -12,14 +12,22 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AchievementResponse {
-    private Long id;
-    private String code;
-    private String name;
+    private String id;
+    private String title;
     private String description;
-    private String iconUrl;
-    private Integer points;
-    private String category;
-    private boolean earned;
-    private Instant earnedAt;
-    private Integer progress;
+    private String icon;
+    private String category; // academic|attendance|participation|leadership|special
+    private String rarity;   // common|uncommon|rare|legendary
+    private boolean isEarned;
+    private Instant earnedDate;
+    private Progress progress;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Progress {
+        private Integer current;
+        private Integer target;
+    }
 }

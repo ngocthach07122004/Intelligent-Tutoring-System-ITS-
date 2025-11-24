@@ -17,9 +17,11 @@ Service Aggregator (Tổng hợp), chịu trách nhiệm gọi các service con 
 ### Endpoint: `GET /api/v1/dashboard/student/analytics`
 *   **Mục đích:** Phục vụ `/dashboard/performance` (phần biểu đồ).
 *   **Dữ liệu cần:**
-    1.  **Exam Scores:** Lịch sử điểm số theo tháng (`AssessmentClient`).
-    2.  **Learning Time:** Thời gian học (Cần hệ thống tracking log - Tạm thời mock hoặc lấy từ `CourseProgress`).
-    3.  **Skill Radar:** Tổng hợp kỹ năng (`ProfileClient` hoặc `AssessmentClient`).
+    1.  **Exam Scores History:** Lịch sử điểm số theo tháng (`month`, `score`, `average`).
+    2.  **Learning Time:** Thời gian học theo tuần (`week`, `hours`).
+    3.  **Trend Analysis:** So sánh `current` vs `previous` cho GPA và Subject Score.
+    4.  **Skill Radar:** Tổng hợp kỹ năng (`ProfileClient` hoặc `AssessmentClient`).
+    5.  **AI Insights:** `strengths` (Điểm mạnh) và `improvements` (Cần cải thiện) - Có thể mock hoặc rule-based đơn giản.
 
 ## 3. Feign Clients Requirements
 *   **CourseClient:**

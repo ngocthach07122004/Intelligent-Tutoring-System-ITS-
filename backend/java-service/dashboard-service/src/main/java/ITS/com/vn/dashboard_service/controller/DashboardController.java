@@ -4,6 +4,7 @@ import ITS.com.vn.dashboard_service.dto.response.AdminStatsResponse;
 import ITS.com.vn.dashboard_service.dto.response.AtRiskListResponse;
 import ITS.com.vn.dashboard_service.dto.response.DashboardSummaryResponse;
 import ITS.com.vn.dashboard_service.dto.response.InstructorCourseStatsResponse;
+import ITS.com.vn.dashboard_service.dto.response.StudentAnalyticsResponse;
 import ITS.com.vn.dashboard_service.dto.response.StudentDashboardResponse;
 import ITS.com.vn.dashboard_service.service.DashboardService;
 import ITS.com.vn.dashboard_service.util.JwtUtil;
@@ -30,6 +31,12 @@ public class DashboardController {
     public ResponseEntity<DashboardSummaryResponse> getStudentSummary() {
         UUID userId = JwtUtil.getUserIdFromJwt();
         return ResponseEntity.ok(dashboardService.getStudentSummary(userId));
+    }
+
+    @GetMapping("/student/analytics")
+    public ResponseEntity<StudentAnalyticsResponse> getStudentAnalytics() {
+        UUID userId = JwtUtil.getUserIdFromJwt();
+        return ResponseEntity.ok(dashboardService.getStudentAnalytics(userId));
     }
 
     @GetMapping("/instructor/courses/{id}")

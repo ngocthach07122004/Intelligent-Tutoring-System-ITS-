@@ -83,6 +83,10 @@ logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
 
+application:
+  config:
+    user-profile-url: ${USER_PROFILE_SERVICE_URL:http://localhost:8081}
+
 # Custom Configuration (Legacy - for backward compatibility)
 custom:
   datasource:

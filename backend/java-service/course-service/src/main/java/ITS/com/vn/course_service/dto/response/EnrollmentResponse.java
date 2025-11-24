@@ -18,6 +18,13 @@ public class EnrollmentResponse {
     private Long courseId;
     private String courseTitle;
     private String courseCode;
+    private String courseSemester;
+    private String courseSchedule;
+    private Integer courseCredits;
+    private Integer courseMaxStudents;
+    private String courseThumbnailUrl;
+    private String instructorName;
+    private String instructorAvatarUrl;
     private Long studentId;
     private EnrollmentStatus status;
     private Integer progress;

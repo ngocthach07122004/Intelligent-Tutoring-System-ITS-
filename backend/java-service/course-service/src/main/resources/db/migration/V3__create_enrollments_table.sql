@@ -1,4 +1,5 @@
--- Create enrollments table for Course Service
+-- Create enrollments table with progress/status tracking
+
 CREATE TABLE IF NOT EXISTS enrollments (
     id BIGSERIAL PRIMARY KEY,
     course_id BIGINT NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
@@ -9,13 +10,10 @@ CREATE TABLE IF NOT EXISTS enrollments (
     completed_at TIMESTAMP,
     last_access_at TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(course_id, student_id)
+    CONSTRAINT chk_enrollment_status CHECK (status IN ('ACTIVE','COMPLETED','DROPPED')),
+    CONSTRAINT uk_enrollment UNIQUE (course_id, student_id)
 );
 
 CREATE INDEX IF NOT EXISTS idx_enrollments_student_id ON enrollments(student_id);
 CREATE INDEX IF NOT EXISTS idx_enrollments_course_id ON enrollments(course_id);
 CREATE INDEX IF NOT EXISTS idx_enrollments_status ON enrollments(status);
-
--- Ensure course code is unique for catalog usage
-ALTER TABLE courses
-    ADD CONSTRAINT IF NOT EXISTS uk_courses_code UNIQUE (code);

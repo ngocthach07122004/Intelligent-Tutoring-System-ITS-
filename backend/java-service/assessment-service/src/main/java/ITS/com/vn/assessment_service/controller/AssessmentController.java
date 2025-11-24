@@ -1,11 +1,12 @@
 package ITS.com.vn.assessment_service.controller;
 
 import ITS.com.vn.assessment_service.dto.response.AchievementResponse;
+import ITS.com.vn.assessment_service.dto.response.GradebookHistoryResponse;
 import ITS.com.vn.assessment_service.dto.response.GradebookSummaryResponse;
+import ITS.com.vn.assessment_service.dto.response.GradebookSummaryV2Response;
+import ITS.com.vn.assessment_service.dto.response.AnalyticsResponse;
 import ITS.com.vn.assessment_service.service.AchievementService;
 import ITS.com.vn.assessment_service.service.GradebookService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,29 +18,46 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/assessment")
 @RequiredArgsConstructor
-@Tag(name = "Assessment API", description = "APIs for Gradebook and Achievements")
 public class AssessmentController {
 
     private final GradebookService gradebookService;
     private final AchievementService achievementService;
 
     @GetMapping("/gradebook/summary")
-    @Operation(summary = "Get gradebook summary (GPA, Rank, Course Grades)")
     public ResponseEntity<GradebookSummaryResponse> getGradebookSummary(
             @RequestParam(required = false) String semester) {
         UUID userId = getCurrentUserId();
         return ResponseEntity.ok(gradebookService.getGradebookSummary(userId, semester));
     }
 
+    @GetMapping("/gradebook/summary/v2")
+    public ResponseEntity<GradebookSummaryV2Response> getGradebookSummaryV2(
+            @RequestParam(required = false) String semester,
+            @RequestParam(required = false) UUID studentId) {
+        UUID userId = studentId != null ? studentId : getCurrentUserId();
+        return ResponseEntity.ok(gradebookService.getGradebookSummaryV2(userId, semester));
+    }
+
+    @GetMapping("/gradebook/history/{studentId}")
+    public ResponseEntity<GradebookHistoryResponse> getGradebookHistory(
+            @PathVariable UUID studentId) {
+        return ResponseEntity.ok(gradebookService.getGradebookHistory(studentId));
+    }
+
+    @GetMapping("/analytics")
+    public ResponseEntity<AnalyticsResponse> getAnalytics(
+            @RequestParam(required = false) UUID studentId) {
+        UUID userId = studentId != null ? studentId : getCurrentUserId();
+        return ResponseEntity.ok(gradebookService.getAnalytics(userId));
+    }
+
     @GetMapping("/achievements")
-    @Operation(summary = "Get user achievements")
     public ResponseEntity<List<AchievementResponse>> getUserAchievements() {
         UUID userId = getCurrentUserId();
         return ResponseEntity.ok(achievementService.getUserAchievements(userId));
     }
 
     @PostMapping("/achievements/{code}/award")
-    @Operation(summary = "Award achievement to current user (Test only)")
     public ResponseEntity<Void> awardAchievement(@PathVariable String code) {
         UUID userId = getCurrentUserId();
         achievementService.awardAchievement(userId, code);

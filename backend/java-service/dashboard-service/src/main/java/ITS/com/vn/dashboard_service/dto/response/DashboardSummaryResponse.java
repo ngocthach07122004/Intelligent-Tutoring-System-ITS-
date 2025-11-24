@@ -19,10 +19,21 @@ public class DashboardSummaryResponse {
 
     private UserProfileResponse profile;
     private List<EnrollmentResponse> courses;
+    private CourseStats courseStats;
     private GradebookSummaryResponse performance;
     private List<AchievementResponse> achievements;
-    
-    // Additional aggregated stats
+    private Integer achievementsCount;
     private Integer totalLearningHours; // Mock or calculated
     private Integer upcomingAssignments; // Mock
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CourseStats {
+        private Integer totalCourses;
+        private Integer inProgressCourses;
+        private Integer completedCourses;
+        private Double averageProgress;
+    }
 }

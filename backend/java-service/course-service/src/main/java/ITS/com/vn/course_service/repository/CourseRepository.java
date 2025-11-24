@@ -47,6 +47,10 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     Page<Course> findByStatusAndSemester(@Param("status") CourseStatus status,
             @Param("semester") String semester, Pageable pageable);
 
+    Page<Course> findByIdIn(List<Long> ids, Pageable pageable);
+
+    Page<Course> findByIdInAndSemester(List<Long> ids, String semester, Pageable pageable);
+
     // Find courses with tags
     @Query("SELECT DISTINCT c FROM Course c JOIN c.courseTags ct WHERE ct.tag.id IN :tagIds")
     Page<Course> findByTagIds(@Param("tagIds") List<Long> tagIds, Pageable pageable);

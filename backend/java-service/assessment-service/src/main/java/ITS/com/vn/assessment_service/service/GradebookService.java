@@ -2,6 +2,9 @@ package ITS.com.vn.assessment_service.service;
 
 import ITS.com.vn.assessment_service.dto.response.GradebookResponse;
 import ITS.com.vn.assessment_service.dto.response.GradebookSummaryResponse;
+import ITS.com.vn.assessment_service.dto.response.GradebookHistoryResponse;
+import ITS.com.vn.assessment_service.dto.response.GradebookSummaryV2Response;
+import ITS.com.vn.assessment_service.dto.response.AnalyticsResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -28,4 +31,19 @@ public interface GradebookService {
      * @return GradebookSummaryResponse
      */
     GradebookSummaryResponse getGradebookSummary(UUID userId, String semester);
+
+    /**
+     * Summary dạng v2: danh sách học kỳ + tổng quan.
+     */
+    GradebookSummaryV2Response getGradebookSummaryV2(UUID userId, String semester);
+
+    /**
+     * Lịch sử bảng điểm chi tiết theo học kỳ.
+     */
+    GradebookHistoryResponse getGradebookHistory(UUID userId);
+
+    /**
+     * Dữ liệu analytics (điểm theo tháng, thời gian học...).
+     */
+    AnalyticsResponse getAnalytics(UUID userId);
 }

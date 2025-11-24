@@ -34,8 +34,10 @@ public class CourseResponse {
     private Integer maxStudents;
     private LocalDate startDate;
     private LocalDate endDate;
+    private Integer currentStudents;
     private Boolean enrolled;
     private Integer progress;
+    private InstructorSummaryResponse instructor;
     private List<TagResponse> tags;
     private List<PrerequisiteResponse> prerequisites;
     private LocalDateTime createdAt;

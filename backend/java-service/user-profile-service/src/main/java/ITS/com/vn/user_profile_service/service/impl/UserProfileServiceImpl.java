@@ -8,6 +8,7 @@ import ITS.com.vn.user_profile_service.repository.UserProfileRepository;
 import ITS.com.vn.user_profile_service.service.UserProfileService;
 import ITS.com.vn.user_profile_service.util.JwtUtil;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,13 @@ public class UserProfileServiceImpl implements UserProfileService {
         UUID userId = JwtUtil.getUserIdFromJwt();
         UserProfile profile = userProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Profile not found for user: " + userId));
+
+        if (request.getStudentId() != null && !request.getStudentId().isBlank()) {
+            boolean studentIdTaken = userProfileRepository.existsByStudentIdAndUserIdNot(request.getStudentId(), userId);
+            if (studentIdTaken) {
+                throw new ValidationException("Student ID already in use");
+            }
+        }
 
         userProfileMapper.updateEntityFromRequest(request, profile);
         profile = userProfileRepository.save(profile);

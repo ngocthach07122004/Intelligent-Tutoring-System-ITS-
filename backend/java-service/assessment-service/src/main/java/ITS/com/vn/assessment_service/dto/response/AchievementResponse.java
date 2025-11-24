@@ -21,9 +21,22 @@ public class AchievementResponse {
     private String name;
     private String description;
     private String iconUrl;
+    private String icon;
     private Integer points;
     private String category;
+    private String rarity;
     private boolean earned; // Đã đạt được chưa
+    private Boolean isEarned; // Alias cho FE
     private Instant earnedAt; // Thời điểm đạt được
     private Integer progress; // Tiến độ (0-100)
+    private AchievementProgress progressDetail;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AchievementProgress {
+        private Integer current;
+        private Integer target;
+    }
 }

@@ -1,12 +1,16 @@
 package ITS.com.vn.course_service.service;
 
+import ITS.com.vn.course_service.client.ProfileClient;
 import ITS.com.vn.course_service.domain.entity.*;
 import ITS.com.vn.course_service.domain.enums.CourseStatus;
+import ITS.com.vn.course_service.domain.enums.EnrollmentStatus;
 import ITS.com.vn.course_service.domain.enums.PrerequisiteType;
+import ITS.com.vn.course_service.dto.external.UserProfileResponse;
 import ITS.com.vn.course_service.dto.request.CreateCourseRequest;
 import ITS.com.vn.course_service.dto.request.UpdateCourseRequest;
 import ITS.com.vn.course_service.dto.response.CourseResponse;
 import ITS.com.vn.course_service.dto.response.CourseStatsResponse;
+import ITS.com.vn.course_service.dto.response.InstructorSummaryResponse;
 import ITS.com.vn.course_service.exception.BadRequestException;
 import ITS.com.vn.course_service.exception.ResourceNotFoundException;
 import ITS.com.vn.course_service.exception.UnauthorizedException;
@@ -21,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -41,6 +46,7 @@ public class CourseService {
     private final TagRepository tagRepository;
     private final CourseMapper courseMapper;
     private final EnrollmentRepository enrollmentRepository;
+    private final ProfileClient profileClient;
 
     /**
      * Create a new course
@@ -90,7 +96,7 @@ public class CourseService {
         Course savedCourse = courseRepository.save(course);
         log.info("Course created successfully with ID: {}", savedCourse.getId());
 
-        return courseMapper.toResponse(savedCourse);
+        return decorateCourseResponse(savedCourse, null, 0L);
     }
 
     /**
@@ -116,16 +122,12 @@ public class CourseService {
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Course", "id", id));
 
-        CourseResponse response = courseMapper.toResponse(course);
-
+        Enrollment enrollment = null;
         if (userId != null) {
-            enrollmentRepository.findByCourseIdAndStudentId(id, userId).ifPresent(enrollment -> {
-                response.setEnrolled(true);
-                response.setProgress(enrollment.getProgress());
-            });
+            enrollment = enrollmentRepository.findByCourseIdAndStudentId(id, userId).orElse(null);
         }
 
-        return response;
+        return decorateCourseResponse(course, enrollment, enrollmentRepository.countCurrentByCourseId(id));
     }
 
     /**
@@ -135,7 +137,7 @@ public class CourseService {
      * @return Page of course responses
      */
     public Page<CourseResponse> getAllCourses(Pageable pageable) {
-        return getAllCourses(pageable, null, null);
+        return getAllCourses(pageable, null, null, null);
     }
 
     /**
@@ -146,19 +148,34 @@ public class CourseService {
      * @param semester Optional semester filter
      * @return Page of course responses
      */
-    public Page<CourseResponse> getAllCourses(Pageable pageable, Long userId, String semester) {
+    public Page<CourseResponse> getAllCourses(Pageable pageable, Long userId, String semester, String enrollmentStatus) {
         log.info("Fetching all courses with pagination");
 
         Page<Course> courses;
-        if (semester != null && !semester.isBlank()) {
+        if (enrollmentStatus != null && !enrollmentStatus.isBlank() && userId != null) {
+            EnrollmentStatus status = parseEnrollmentStatus(enrollmentStatus);
+            List<Enrollment> enrollments = enrollmentRepository.findByStudentIdAndStatus(userId, status);
+            List<Long> courseIds = enrollments.stream()
+                    .map(e -> e.getCourse().getId())
+                    .toList();
+            if (courseIds.isEmpty()) {
+                return Page.empty(pageable);
+            }
+            courses = (semester != null && !semester.isBlank())
+                    ? courseRepository.findByIdInAndSemester(courseIds, semester, pageable)
+                    : courseRepository.findByIdIn(courseIds, pageable);
+        } else if (semester != null && !semester.isBlank()) {
             courses = courseRepository.findBySemester(semester, pageable);
         } else {
             courses = courseRepository.findAll(pageable);
         }
 
-        Map<Long, Integer> progressMap = buildProgressMap(userId);
+        Map<Long, Enrollment> enrollmentMap = buildEnrollmentMap(userId, enrollmentStatus);
+        Map<Long, Long> studentCounts = countCurrentEnrollments(courses.getContent());
 
-        return courses.map(course -> decorateCourseResponse(course, progressMap.get(course.getId())));
+        return courses.map(course -> decorateCourseResponse(course,
+                enrollmentMap.get(course.getId()),
+                studentCounts.get(course.getId())));
     }
 
     /**
@@ -172,7 +189,8 @@ public class CourseService {
         log.info("Fetching courses for instructor: {}", instructorId);
 
         Page<Course> courses = courseRepository.findByInstructorId(instructorId, pageable);
-        return courses.map(courseMapper::toResponse);
+        Map<Long, Long> studentCounts = countCurrentEnrollments(courses.getContent());
+        return courses.map(course -> decorateCourseResponse(course, null, studentCounts.get(course.getId())));
     }
 
     /**
@@ -198,9 +216,12 @@ public class CourseService {
             courses = courseRepository.findByStatus(CourseStatus.PUBLISHED, pageable);
         }
 
-        Map<Long, Integer> progressMap = buildProgressMap(userId);
+        Map<Long, Enrollment> enrollmentMap = buildEnrollmentMap(userId, null);
+        Map<Long, Long> studentCounts = countCurrentEnrollments(courses.getContent());
 
-        return courses.map(course -> decorateCourseResponse(course, progressMap.get(course.getId())));
+        return courses.map(course -> decorateCourseResponse(course,
+                enrollmentMap.get(course.getId()),
+                studentCounts.get(course.getId())));
     }
 
     /**
@@ -214,7 +235,8 @@ public class CourseService {
         log.info("Searching courses with keyword: {}", keyword);
 
         Page<Course> courses = courseRepository.searchByTitle(keyword, pageable);
-        return courses.map(courseMapper::toResponse);
+        Map<Long, Long> studentCounts = countCurrentEnrollments(courses.getContent());
+        return courses.map(course -> decorateCourseResponse(course, null, studentCounts.get(course.getId())));
     }
 
     /**
@@ -314,7 +336,7 @@ public class CourseService {
         Course updatedCourse = courseRepository.save(course);
         log.info("Course updated successfully with ID: {}", updatedCourse.getId());
 
-        return courseMapper.toResponse(updatedCourse);
+        return decorateCourseResponse(updatedCourse, null, enrollmentRepository.countCurrentByCourseId(updatedCourse.getId()));
     }
 
     /**
@@ -344,7 +366,7 @@ public class CourseService {
 
         // TODO: Emit COURSE_PUBLISHED event to RabbitMQ
 
-        return courseMapper.toResponse(publishedCourse);
+        return decorateCourseResponse(publishedCourse, null, enrollmentRepository.countCurrentByCourseId(publishedCourse.getId()));
     }
 
     /**
@@ -371,7 +393,7 @@ public class CourseService {
         Course archivedCourse = courseRepository.save(course);
         log.info("Course archived successfully with ID: {}", archivedCourse.getId());
 
-        return courseMapper.toResponse(archivedCourse);
+        return decorateCourseResponse(archivedCourse, null, enrollmentRepository.countCurrentByCourseId(archivedCourse.getId()));
     }
 
     /**
@@ -423,23 +445,88 @@ public class CourseService {
                 .build();
     }
 
-    private Map<Long, Integer> buildProgressMap(Long userId) {
+    private Map<Long, Enrollment> buildEnrollmentMap(Long userId, String enrollmentStatus) {
         if (userId == null) {
             return Map.of();
         }
-        return enrollmentRepository.findByStudentId(userId).stream()
+        List<Enrollment> enrollments;
+        if (enrollmentStatus != null && !enrollmentStatus.isBlank()) {
+            EnrollmentStatus status = parseEnrollmentStatus(enrollmentStatus);
+            enrollments = enrollmentRepository.findByStudentIdAndStatus(userId, status);
+        } else {
+            enrollments = enrollmentRepository.findByStudentId(userId);
+        }
+
+        return enrollments.stream()
                 .filter(Objects::nonNull)
-                .collect(Collectors.toMap(e -> e.getCourse().getId(), Enrollment::getProgress, (a, b) -> a));
+                .collect(Collectors.toMap(e -> e.getCourse().getId(), e -> e, (a, b) -> a));
     }
 
-    private CourseResponse decorateCourseResponse(Course course, Integer progress) {
+    private Map<Long, Long> countCurrentEnrollments(List<Course> courses) {
+        if (courses == null || courses.isEmpty()) {
+            return Map.of();
+        }
+        List<Long> courseIds = courses.stream()
+                .map(Course::getId)
+                .toList();
+        Map<Long, Long> counts = new HashMap<>();
+        enrollmentRepository.countByCourseIds(courseIds).forEach(row -> {
+            if (row != null && row.length >= 2) {
+                Long courseId = row[0] != null ? ((Number) row[0]).longValue() : null;
+                Long total = row[1] != null ? ((Number) row[1]).longValue() : null;
+                if (courseId != null && total != null) {
+                    counts.put(courseId, total);
+                }
+            }
+        });
+        return counts;
+    }
+
+    private CourseResponse decorateCourseResponse(Course course, Enrollment enrollment, Long currentStudents) {
         CourseResponse response = courseMapper.toResponse(course);
-        if (progress != null) {
+        if (enrollment != null) {
             response.setEnrolled(true);
-            response.setProgress(progress);
+            response.setProgress(enrollment.getProgress());
         } else {
             response.setEnrolled(false);
         }
+        response.setCurrentStudents(safeLongToInt(currentStudents));
+        enrichInstructor(response, course.getInstructorId());
         return response;
+    }
+
+    private EnrollmentStatus parseEnrollmentStatus(String status) {
+        try {
+            return EnrollmentStatus.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new BadRequestException("Invalid enrollment status: " + status);
+        }
+    }
+
+    private int safeLongToInt(Long value) {
+        if (value == null) {
+            return 0;
+        }
+        return Math.toIntExact(value);
+    }
+
+    private void enrichInstructor(CourseResponse response, Long instructorId) {
+        if (instructorId == null) {
+            return;
+        }
+        try {
+            UserProfileResponse profile = profileClient.getProfile(String.valueOf(instructorId));
+            if (profile != null) {
+                response.setInstructorName(profile.getFullName());
+                response.setInstructorAvatarUrl(profile.getAvatarUrl());
+                response.setInstructor(InstructorSummaryResponse.builder()
+                        .id(profile.getId())
+                        .fullName(profile.getFullName())
+                        .avatarUrl(profile.getAvatarUrl())
+                        .build());
+            }
+        } catch (Exception ex) {
+            log.warn("Failed to fetch instructor profile for {}: {}", instructorId, ex.getMessage());
+        }
     }
 }

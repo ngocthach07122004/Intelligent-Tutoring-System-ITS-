@@ -3,6 +3,7 @@ package ITS.com.vn.course_service.controller;
 import ITS.com.vn.course_service.dto.request.CreateChapterRequest;
 import ITS.com.vn.course_service.dto.request.ReorderChaptersRequest;
 import ITS.com.vn.course_service.dto.response.ChapterResponse;
+import ITS.com.vn.course_service.security.SecurityUtils;
 import ITS.com.vn.course_service.service.ChapterService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,7 +37,7 @@ public class ChapterController {
             @Valid @RequestBody CreateChapterRequest request,
             Authentication authentication) {
 
-        Long instructorId = extractUserIdFromAuth(authentication);
+        Long instructorId = SecurityUtils.getUserIdAsLong(authentication, true);
         ChapterResponse response = chapterService.createChapter(courseId, request, instructorId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -73,7 +73,7 @@ public class ChapterController {
             @Valid @RequestBody CreateChapterRequest request,
             Authentication authentication) {
 
-        Long instructorId = extractUserIdFromAuth(authentication);
+        Long instructorId = SecurityUtils.getUserIdAsLong(authentication, true);
         ChapterResponse response = chapterService.updateChapter(id, request, instructorId);
 
         return ResponseEntity.ok(response);
@@ -89,7 +89,7 @@ public class ChapterController {
             @Valid @RequestBody ReorderChaptersRequest request,
             Authentication authentication) {
 
-        Long instructorId = extractUserIdFromAuth(authentication);
+        Long instructorId = SecurityUtils.getUserIdAsLong(authentication, true);
         List<ChapterResponse> response = chapterService.reorderChapters(courseId, request, instructorId);
 
         return ResponseEntity.ok(response);
@@ -104,20 +104,9 @@ public class ChapterController {
             @PathVariable Long id,
             Authentication authentication) {
 
-        Long instructorId = extractUserIdFromAuth(authentication);
+        Long instructorId = SecurityUtils.getUserIdAsLong(authentication, true);
         chapterService.deleteChapter(id, instructorId);
 
         return ResponseEntity.noContent().build();
-    }
-
-    /**
-     * Extract user ID from JWT token
-     */
-    private Long extractUserIdFromAuth(Authentication authentication) {
-        if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
-            String userId = jwt.getClaimAsString("sub");
-            return Long.parseLong(userId);
-        }
-        throw new RuntimeException("Unable to extract user ID from authentication");
     }
 }

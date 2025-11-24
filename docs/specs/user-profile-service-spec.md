@@ -15,7 +15,7 @@ Cần bổ sung các trường sau để khớp với `StudentProfile.tsx`:
     *   `address` (String).
     *   `gender` (Enum).
 *   **Thông tin học vụ:**
-    *   `classId` / `className` (String - Lớp sinh hoạt).
+    *   `class` (String - Lớp sinh hoạt, VD: "12A1").
     *   `academicYear` (String - Niên khóa, VD: "2023-2024").
     *   `enrollmentDate` (LocalDate - Ngày nhập học).
 *   **Thông tin phụ huynh (New Embedded/Entity):**

@@ -65,4 +65,16 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
      */
     @Query("SELECT AVG(e.progress) FROM Enrollment e WHERE e.course.id = :courseId AND e.status = 'ACTIVE'")
     Double getAverageProgressByCourseId(@Param("courseId") Long courseId);
+
+    /**
+     * Count enrollments for a set of courses
+     */
+    @Query("SELECT e.course.id, COUNT(e) FROM Enrollment e WHERE e.course.id IN :courseIds AND e.status <> 'DROPPED' GROUP BY e.course.id")
+    List<Object[]> countByCourseIds(@Param("courseIds") List<Long> courseIds);
+
+    /**
+     * Count current (non-dropped) enrollments for a course
+     */
+    @Query("SELECT COUNT(e) FROM Enrollment e WHERE e.course.id = :courseId AND e.status <> 'DROPPED'")
+    Long countCurrentByCourseId(@Param("courseId") Long courseId);
 }

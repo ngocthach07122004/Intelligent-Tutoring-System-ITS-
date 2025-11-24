@@ -1,15 +1,14 @@
 package ITS.com.vn.course_service.controller;
 
 import ITS.com.vn.course_service.dto.response.EnrollmentResponse;
+import ITS.com.vn.course_service.security.SecurityUtils;
 import ITS.com.vn.course_service.service.EnrollmentService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,7 +32,7 @@ public class EnrollmentController {
             @PathVariable Long courseId,
             Authentication authentication) { // From JWT via filter
 
-        Long studentId = extractUserId(authentication, true);
+        Long studentId = SecurityUtils.getUserIdAsLong(authentication, true);
         log.info("Student {} enrolling in course {}", studentId, courseId);
 
         EnrollmentResponse response = enrollmentService.enrollStudent(courseId, studentId);
@@ -50,7 +49,7 @@ public class EnrollmentController {
             Authentication authentication,
             @RequestParam(required = false) String status) { // Filter by status (optional)
 
-        Long studentId = extractUserId(authentication, true);
+        Long studentId = SecurityUtils.getUserIdAsLong(authentication, true);
         log.debug("Getting courses for student {}, status filter: {}", studentId, status);
 
         List<EnrollmentResponse> enrollments = enrollmentService.getMyEnrollments(studentId);
@@ -100,7 +99,7 @@ public class EnrollmentController {
             @RequestBody Map<String, Integer> request,
             Authentication authentication) {
 
-        Long studentId = extractUserId(authentication, true);
+        Long studentId = SecurityUtils.getUserIdAsLong(authentication, true);
         Integer progress = request.get("progress");
         if (progress == null) {
             throw new IllegalArgumentException("Progress is required");
@@ -122,7 +121,7 @@ public class EnrollmentController {
             @PathVariable Long enrollmentId,
             Authentication authentication) {
 
-        Long studentId = extractUserId(authentication, true);
+        Long studentId = SecurityUtils.getUserIdAsLong(authentication, true);
         log.info("Student {} dropping enrollment {}", studentId, enrollmentId);
 
         enrollmentService.dropEnrollment(enrollmentId, studentId);
@@ -151,27 +150,8 @@ public class EnrollmentController {
             @PathVariable Long courseId,
             Authentication authentication) {
 
-        Long studentId = extractUserId(authentication, true);
+        Long studentId = SecurityUtils.getUserIdAsLong(authentication, true);
         boolean enrolled = enrollmentService.isEnrolled(courseId, studentId);
         return ResponseEntity.ok(Map.of("enrolled", enrolled));
-    }
-
-    private Long extractUserId(Authentication authentication, boolean required) {
-        if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
-            String userId = jwt.getClaimAsString("sub");
-            try {
-                return Long.parseLong(userId);
-            } catch (NumberFormatException ex) {
-                log.warn("User id in JWT is not numeric: {}", userId);
-                if (required) {
-                    throw new RuntimeException("User ID in token is not numeric");
-                }
-                return null;
-            }
-        }
-        if (required) {
-            throw new RuntimeException("Unable to extract user ID from authentication");
-        }
-        return null;
     }
 }

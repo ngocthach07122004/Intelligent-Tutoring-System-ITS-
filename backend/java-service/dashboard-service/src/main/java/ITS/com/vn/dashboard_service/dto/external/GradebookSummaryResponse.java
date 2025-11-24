@@ -13,26 +13,30 @@ import java.util.List;
 @AllArgsConstructor
 public class GradebookSummaryResponse {
 
-    private Double overallGpa;
-    private Integer totalCredits;
-    private Integer completedCourses;
-    private Integer inProgressCourses;
-    private Integer rank;
-    private String semester;
-    
-    private List<CourseGradeDetail> courseGrades;
+    private String studentId;
+    private List<SemesterSummary> semesters;
+    private OverallSummary overall;
 
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class CourseGradeDetail {
-        private Long courseId;
-        private String courseName;
-        private String courseCode;
-        private Double finalScore;
-        private String grade;
+    public static class SemesterSummary {
+        private String semester;
         private Double gpa;
-        private String status;
+        private Integer totalCredits;
+        private Integer rank;
+        private Integer totalStudents;
+        private Integer achievements;
+        private Double attendance;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class OverallSummary {
+        private Double gpa;
+        private Integer totalCredits;
     }
 }

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.44.0.v20251118-1623, environment: Java 21.0.9 (Eclipse Adoptium)"
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.8 (Microsoft)"
 )
 @Component
 public class QuestionMapperImpl implements QuestionMapper {
@@ -24,14 +24,14 @@ public class QuestionMapperImpl implements QuestionMapper {
 
         Question.QuestionBuilder question = Question.builder();
 
+        question.type( request.getType() );
         question.content( request.getContent() );
         Map<String, Object> map = request.getMetadata();
         if ( map != null ) {
             question.metadata( new LinkedHashMap<String, Object>( map ) );
         }
-        question.skillTag( request.getSkillTag() );
-        question.type( request.getType() );
         question.weight( request.getWeight() );
+        question.skillTag( request.getSkillTag() );
 
         return question.build();
     }
@@ -45,15 +45,15 @@ public class QuestionMapperImpl implements QuestionMapper {
         QuestionResponse questionResponse = new QuestionResponse();
 
         questionResponse.setPoolId( entityPoolId( entity ) );
-        questionResponse.setContent( entity.getContent() );
         questionResponse.setId( entity.getId() );
+        questionResponse.setType( entity.getType() );
+        questionResponse.setContent( entity.getContent() );
         Map<String, Object> map = entity.getMetadata();
         if ( map != null ) {
             questionResponse.setMetadata( new LinkedHashMap<String, Object>( map ) );
         }
-        questionResponse.setSkillTag( entity.getSkillTag() );
-        questionResponse.setType( entity.getType() );
         questionResponse.setWeight( entity.getWeight() );
+        questionResponse.setSkillTag( entity.getSkillTag() );
 
         return questionResponse;
     }
@@ -64,6 +64,7 @@ public class QuestionMapperImpl implements QuestionMapper {
             return;
         }
 
+        entity.setType( request.getType() );
         entity.setContent( request.getContent() );
         if ( entity.getMetadata() != null ) {
             Map<String, Object> map = request.getMetadata();
@@ -81,9 +82,8 @@ public class QuestionMapperImpl implements QuestionMapper {
                 entity.setMetadata( new LinkedHashMap<String, Object>( map ) );
             }
         }
-        entity.setSkillTag( request.getSkillTag() );
-        entity.setType( request.getType() );
         entity.setWeight( request.getWeight() );
+        entity.setSkillTag( request.getSkillTag() );
     }
 
     private Long entityPoolId(Question question) {

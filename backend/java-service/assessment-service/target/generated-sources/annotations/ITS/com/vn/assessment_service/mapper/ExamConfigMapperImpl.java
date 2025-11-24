@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.44.0.v20251118-1623, environment: Java 21.0.9 (Eclipse Adoptium)"
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.8 (Microsoft)"
 )
 @Component
 public class ExamConfigMapperImpl implements ExamConfigMapper {
@@ -29,18 +29,18 @@ public class ExamConfigMapperImpl implements ExamConfigMapper {
 
         ExamConfig.ExamConfigBuilder examConfig = ExamConfig.builder();
 
-        examConfig.browserLockEnabled( request.getBrowserLockEnabled() );
+        examConfig.title( request.getTitle() );
         examConfig.courseId( request.getCourseId() );
         examConfig.lessonId( request.getLessonId() );
         examConfig.policy( request.getPolicy() );
+        examConfig.browserLockEnabled( request.getBrowserLockEnabled() );
+        examConfig.timeLimitMinutes( request.getTimeLimitMinutes() );
+        examConfig.windowStart( request.getWindowStart() );
+        examConfig.windowEnd( request.getWindowEnd() );
         Map<String, Object> map = request.getPolicyConfig();
         if ( map != null ) {
             examConfig.policyConfig( new LinkedHashMap<String, Object>( map ) );
         }
-        examConfig.timeLimitMinutes( request.getTimeLimitMinutes() );
-        examConfig.title( request.getTitle() );
-        examConfig.windowEnd( request.getWindowEnd() );
-        examConfig.windowStart( request.getWindowStart() );
 
         return examConfig.build();
     }
@@ -53,22 +53,22 @@ public class ExamConfigMapperImpl implements ExamConfigMapper {
 
         ExamConfigResponse examConfigResponse = new ExamConfigResponse();
 
-        examConfigResponse.setBrowserLockEnabled( entity.getBrowserLockEnabled() );
-        examConfigResponse.setCourseId( entity.getCourseId() );
-        examConfigResponse.setCreatedAt( entity.getCreatedAt() );
         examConfigResponse.setId( entity.getId() );
-        examConfigResponse.setInstructorId( entity.getInstructorId() );
+        examConfigResponse.setTitle( entity.getTitle() );
+        examConfigResponse.setCourseId( entity.getCourseId() );
         examConfigResponse.setLessonId( entity.getLessonId() );
         examConfigResponse.setPolicy( entity.getPolicy() );
+        examConfigResponse.setBrowserLockEnabled( entity.getBrowserLockEnabled() );
+        examConfigResponse.setTimeLimitMinutes( entity.getTimeLimitMinutes() );
+        examConfigResponse.setWindowStart( entity.getWindowStart() );
+        examConfigResponse.setWindowEnd( entity.getWindowEnd() );
         Map<String, Object> map = entity.getPolicyConfig();
         if ( map != null ) {
             examConfigResponse.setPolicyConfig( new LinkedHashMap<String, Object>( map ) );
         }
+        examConfigResponse.setInstructorId( entity.getInstructorId() );
+        examConfigResponse.setCreatedAt( entity.getCreatedAt() );
         examConfigResponse.setSections( examSectionRuleListToExamSectionRuleResponseList( entity.getSections() ) );
-        examConfigResponse.setTimeLimitMinutes( entity.getTimeLimitMinutes() );
-        examConfigResponse.setTitle( entity.getTitle() );
-        examConfigResponse.setWindowEnd( entity.getWindowEnd() );
-        examConfigResponse.setWindowStart( entity.getWindowStart() );
 
         return examConfigResponse;
     }
@@ -79,10 +79,14 @@ public class ExamConfigMapperImpl implements ExamConfigMapper {
             return;
         }
 
-        entity.setBrowserLockEnabled( request.getBrowserLockEnabled() );
+        entity.setTitle( request.getTitle() );
         entity.setCourseId( request.getCourseId() );
         entity.setLessonId( request.getLessonId() );
         entity.setPolicy( request.getPolicy() );
+        entity.setBrowserLockEnabled( request.getBrowserLockEnabled() );
+        entity.setTimeLimitMinutes( request.getTimeLimitMinutes() );
+        entity.setWindowStart( request.getWindowStart() );
+        entity.setWindowEnd( request.getWindowEnd() );
         if ( entity.getPolicyConfig() != null ) {
             Map<String, Object> map = request.getPolicyConfig();
             if ( map != null ) {
@@ -99,10 +103,6 @@ public class ExamConfigMapperImpl implements ExamConfigMapper {
                 entity.setPolicyConfig( new LinkedHashMap<String, Object>( map ) );
             }
         }
-        entity.setTimeLimitMinutes( request.getTimeLimitMinutes() );
-        entity.setTitle( request.getTitle() );
-        entity.setWindowEnd( request.getWindowEnd() );
-        entity.setWindowStart( request.getWindowStart() );
     }
 
     @Override
@@ -129,8 +129,8 @@ public class ExamConfigMapperImpl implements ExamConfigMapper {
 
         examSectionRuleResponse.setPoolId( entityPoolId( entity ) );
         examSectionRuleResponse.setPoolName( entityPoolName( entity ) );
-        examSectionRuleResponse.setCountToPull( entity.getCountToPull() );
         examSectionRuleResponse.setId( entity.getId() );
+        examSectionRuleResponse.setCountToPull( entity.getCountToPull() );
         examSectionRuleResponse.setPointsPerQuestion( entity.getPointsPerQuestion() );
 
         return examSectionRuleResponse;
