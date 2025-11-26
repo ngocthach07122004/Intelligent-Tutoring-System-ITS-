@@ -34,7 +34,9 @@ export const SignUpForm = () => {
     try {
       const response = await signup({ name, email, password });
       console.log("Signup successful:", response);
-      setSuccess("Signup successful! Redirecting to dashboard...");
+      setSuccess(
+        response.message || "Signup successful! Redirecting to dashboard..."
+      );
       setTimeout(() => router.push("/dashboard/home"), 2000); // Redirect after 2 seconds
     } catch (err: any) {
       setError(err.message);
