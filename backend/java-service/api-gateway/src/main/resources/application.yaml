@@ -11,47 +11,64 @@ spring:
 
   cloud:
     gateway:
+      ### =======================
+      ###    GLOBAL CORS FIX
+      ### =======================
+      globalcors:
+        add-to-simple-url-handler-mapping: true
+        corsConfigurations:
+          "[/**]":
+            allowedOrigins:
+              - "${WEB_CLIENT_URL_IP:http://localhost:3000}"
+              - "${WEB_CLIENT_URL_IP:http://127.0.0.1:3000}"
+              - "${WEB_CLIENT_URL_IP:http://host.docker.internal:3000}"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            exposedHeaders: "*"
+            allowCredentials: true
+
+      ### Fix duplicate headers
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
+
+      ### =======================
+      ###   ROUTE DEFINITIONS
+      ### =======================
       routes:
         - id: identity-service
           uri: lb://identity-service
           predicates:
-            - "Path=${app.api-prefix}/auth/**"
+            - Path=${app.api-prefix}/auth/**
 
         - id: user-profile-service
           uri: lb://user-profile-service
           predicates:
-            - "Path=${app.api-prefix}/profiles/**,${app.api-prefix}/groups/**,${app.api-prefix}/schedules/**"
+            - Path=${app.api-prefix}/profiles/**,${app.api-prefix}/groups/**,${app.api-prefix}/schedules/**
 
         - id: course-service
           uri: lb://course-service
           predicates:
-            - "Path=${app.api-prefix}/courses/**,${app.api-prefix}/chapters/**,${app.api-prefix}/health/**"
+            - Path=${app.api-prefix}/courses/**,${app.api-prefix}/chapters/**,${app.api-prefix}/health/**
 
         - id: assessment-service
           uri: lb://assessment-service
           predicates:
-            - "Path=${app.api-prefix}/exams/**,${app.api-prefix}/attempts/**,${app.api-prefix}/gradebook/**,${app.api-prefix}/pools/**,${app.api-prefix}/questions/**,${app.api-prefix}/skills/**"
+            - Path=${app.api-prefix}/exams/**,${app.api-prefix}/attempts/**,${app.api-prefix}/gradebook/**,${app.api-prefix}/pools/**,${app.api-prefix}/questions/**,${app.api-prefix}/skills/**
 
         - id: dashboard-service
           uri: lb://dashboard-service
           predicates:
-            - "Path=${app.api-prefix}/dashboard/**,/health"
+            - Path=${app.api-prefix}/dashboard/**,/health
 
         - id: discovery-eureka-server
           uri: http://eureka:12345678@${app.eureka-host}:8761
           predicates:
-            - "Path=/eureka/web"
+            - Path=/eureka/web
 
         - id: discovery-eureka-server-static
           uri: http://eureka:12345678@${app.eureka-host}:8761
           predicates:
-            - "Path=/eureka/**"
-
-#security:
-#  oauth2:
-#    resourceserver:
-#      jwt:
-#        issuer-uri: 'http://localhost:8080/realms/spring-boot-microservices-realm'
+            - Path=/eureka/**
 
 eureka:
   client:
@@ -59,10 +76,3 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka/}
-#logging:
-#  level:
-#    com.netflix.discovery: DEBUG
-#    org.springframework.cloud.netflix.eureka: DEBUG
-#    org.springframework.web.client.RestTemplate: DEBUG
-#  file:
-#    name: logs/gateway-debug.log
