@@ -6,6 +6,8 @@ WORKDIR /build
 COPY backend/java-service/api-gateway/mvnw .
 COPY backend/java-service/api-gateway/.mvn .mvn
 COPY backend/java-service/api-gateway/pom.xml .
+# Copy root parent pom for multi-module resolution
+COPY backend/java-service/pom.xml ../pom.xml
 
 RUN chmod +x mvnw
 

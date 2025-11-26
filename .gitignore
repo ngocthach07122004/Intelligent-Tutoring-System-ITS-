@@ -1,13 +1,143 @@
-# Ignore build and dependency folders
+# ==========================================
+# FRONTEND (Next.js)
+# ==========================================
 frontend/.next/
 frontend/node_modules/
-
-# Ignore environment variables
 frontend/.env.local
-
-# Ignore TypeScript environment definition file
 frontend/next-env.d.ts
-
-# Ignore macOS system files
-.DS_Store
 frontend/.DS_Store
+
+# ==========================================
+# BACKEND (Java/Maven)
+# ==========================================
+# Maven build output
+backend/java-service/*/target/
+backend/java-service/target/
+
+# Maven wrapper
+backend/java-service/*/.mvn/
+!backend/java-service/*/mvnw
+!backend/java-service/*/mvnw.cmd
+
+# IDE files
+backend/java-service/**/.idea/
+backend/java-service/**/*.iml
+backend/java-service/**/.classpath
+backend/java-service/**/.project
+backend/java-service/**/.settings/
+backend/java-service/**/.vscode/
+
+# Eclipse
+backend/java-service/**/.metadata/
+backend/java-service/**/bin/
+backend/java-service/**/tmp/
+backend/java-service/**/*.tmp
+backend/java-service/**/*.bak
+backend/java-service/**/*.swp
+
+# IntelliJ IDEA
+backend/java-service/**/*.iws
+backend/java-service/**/out/
+
+# NetBeans
+backend/java-service/**/nbproject/private/
+backend/java-service/**/nbbuild/
+backend/java-service/**/dist/
+backend/java-service/**/nbdist/
+backend/java-service/**/.nb-gradle/
+
+# Compiled class files
+backend/java-service/**/*.class
+
+# Log files
+backend/java-service/**/*.log
+backend/java-service/**/logs/
+
+# Package files
+backend/java-service/**/*.jar
+backend/java-service/**/*.war
+backend/java-service/**/*.nar
+backend/java-service/**/*.ear
+backend/java-service/**/*.zip
+backend/java-service/**/*.tar.gz
+backend/java-service/**/*.rar
+
+# ==========================================
+# DATABASE
+# ==========================================
+# PostgreSQL data
+postgres-data/
+pgdata/
+
+# ==========================================
+# DOCKER
+# ==========================================
+# Docker volumes
+docker/volumes/
+
+# ==========================================
+# OS FILES
+# ==========================================
+# macOS
+.DS_Store
+*.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# ==========================================
+# MISC
+# ==========================================
+# Environment files
+.env
+.env.local
+.env.*.local
+*.env
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Coverage reports
+coverage/
+*.lcov
+
+# Test output
+test-results/
+
+# Build artifacts
+build/
+dist/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Lock files (optional - uncomment if you want to ignore)
+# package-lock.json
+# yarn.lock
+
+# ==========================================
+# PROJECT SPECIFIC
+# ==========================================
+# Compilation logs
+compile-log.txt
+*-log.txt
+
+# Maven local repository (if you use it)
+.m2/
+.pytest_cache
+.vscode
+.idea

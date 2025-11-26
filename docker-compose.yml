@@ -72,6 +72,34 @@ services:
     networks:
       - idnet
 
+  postgres_assessment:
+    image: postgres:14
+    container_name: postgres_assessment
+    environment:
+      POSTGRES_DB: ${POSTGRES_ASSESSMENT_DB}
+      POSTGRES_USER: ${POSTGRES_ASSESSMENT_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_ASSESSMENT_PASSWORD}
+    ports:
+      - "${POSTGRES_ASSESSMENT_PORT}:5432"
+    volumes:
+      - postgres_assessment_data:/var/lib/postgresql/data
+    networks:
+      - idnet
+
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672" # AMQP port
+      - "15672:15672" # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - idnet
+
   eureka:
     build:
       context: .
@@ -97,6 +125,8 @@ services:
       - "${KEYCLOAK_EXTERNAL_PORT}:${KEYCLOAK_INTERNAL_PORT}"
     volumes:
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+    depends_on:
+      - postgres_keycloak
     networks:
       - idnet
 
@@ -108,7 +138,11 @@ services:
     ports:
       - "${GATEWAY_PORT}:8181"
     environment:
+      WEB_CLIENT_URL_IP: ${WEB_CLIENT_URL_IP}
+      WEB_CLIENT_URL_DNS: ${WEB_CLIENT_URL_DNS}
+      WEB_CLIENT_URL_DEV: ${WEB_CLIENT_URL_DEV}
       EUREKA_SERVER: ${EUREKA_SERVER}
+      EUREKA_HOST: eureka
     depends_on:
       - eureka
     networks:
@@ -134,11 +168,13 @@ services:
       KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
       EUREKA_SERVER: ${EUREKA_SERVER}
       DB_HOST: ${POSTGRES_IDENTITY_HOST}
-      DB_POST: ${POSTGRES_IDENTITY_PORT}
+      DB_PORT: ${POSTGRES_PORT_DEFAULT}
       DB_NAME: ${POSTGRES_IDENTITY_DB}
+      JWT_ISSUER_URI: ${JWT_ISSUER_URI}
     depends_on:
       - postgres_identity
       - keycloak
+      - eureka
     networks:
       - idnet
   user-profile-service:
@@ -155,9 +191,19 @@ services:
       SPRING_DATASOURCE_USERNAME: ${DATASOURCE_USERNAME_USER_PROFILE}
       SPRING_DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD_USER_PROFILE}
       EUREKA_SERVER: ${EUREKA_SERVER}
+      JWT_ISSUER_URI: ${JWT_ISSUER_URI}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
       DB_HOST: ${POSTGRES_USER_PROFILE_HOST}
-      DB_POST: ${POSTGRES_PORT_DEFAULT}
+      DB_PORT: ${POSTGRES_PORT_DEFAULT}
       DB_NAME: ${POSTGRES_USER_PROFILE_DB}
+    depends_on:
+      - postgres_userProfile
+      - rabbitmq
+      - eureka
+      - keycloak
     networks:
       - idnet
 
@@ -175,9 +221,21 @@ services:
       SPRING_DATASOURCE_USERNAME: ${DATASOURCE_USERNAME_COURSE}
       SPRING_DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD_COURSE}
       EUREKA_SERVER: ${EUREKA_SERVER}
+      JWT_ISSUER_URI: ${JWT_ISSUER_URI}
+      JWT_JWK_SET_URI: ${JWT_JWK_SET_URI}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
       DB_HOST: ${POSTGRES_COURSE_HOST}
-      DB_POST: ${POSTGRES_COURSE_PORT}
+      DB_PORT: ${POSTGRES_PORT_DEFAULT}
       DB_NAME: ${POSTGRES_COURSE_DB}
+      USER_PROFILE_SERVICE_URL: ${USER_PROFILE_SERVICE_URL}
+    depends_on:
+      - postgres_course
+      - rabbitmq
+      - eureka
+      - keycloak
     networks:
       - idnet
 
@@ -195,9 +253,52 @@ services:
       SPRING_DATASOURCE_USERNAME: ${DATASOURCE_USERNAME_DASHBOARD}
       SPRING_DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD_DASHBOARD}
       EUREKA_SERVER: ${EUREKA_SERVER}
+      JWT_ISSUER_URI: ${JWT_ISSUER_URI}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
       DB_HOST: ${POSTGRES_DASHBOARD_HOST}
-      DB_POST: ${POSTGRES_DASHBOARD_PORT}
+      DB_PORT: ${POSTGRES_PORT_DEFAULT}
       DB_NAME: ${POSTGRES_DASHBOARD_DB}
+      ASSESSMENT_SERVICE_URL: ${ASSESSMENT_SERVICE_URL}
+      USER_PROFILE_SERVICE_URL: ${USER_PROFILE_SERVICE_URL}
+      COURSE_SERVICE_URL: ${COURSE_SERVICE_URL}
+    depends_on:
+      - postgres_dashboard
+      - rabbitmq
+      - eureka
+      - keycloak
+    networks:
+      - idnet
+
+  assessment-service:
+    build:
+      context: .
+      dockerfile: ./dockerfile/Dockerfile.assessment-service
+    container_name: assessment-service
+    ports:
+      - "${ASSESSMENT_SERVICE_PORT}:${ASSESSMENT_SERVICE_PORT}"
+    environment:
+      SERVER_PORT: ${ASSESSMENT_SERVICE_PORT}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      SPRING_DATASOURCE_URL: ${DATASOURCE_URL_ASSESSMENT}
+      SPRING_DATASOURCE_USERNAME: ${DATASOURCE_USERNAME_ASSESSMENT}
+      SPRING_DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD_ASSESSMENT}
+      EUREKA_SERVER: ${EUREKA_SERVER}
+      JWT_ISSUER_URI: ${JWT_ISSUER_URI}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      DB_HOST: ${POSTGRES_ASSESSMENT_HOST}
+      DB_PORT: ${POSTGRES_PORT_DEFAULT}
+      DB_NAME: ${POSTGRES_ASSESSMENT_DB}
+    depends_on:
+      - postgres_assessment
+      - rabbitmq
+      - eureka
+      - keycloak
     networks:
       - idnet
 
@@ -219,6 +320,8 @@ volumes:
   postgres_userProfile_data:
   postgres_course_data:
   postgres_dashboard_data:
+  postgres_assessment_data:
+  rabbitmq_data:
 
 networks:
   idnet:

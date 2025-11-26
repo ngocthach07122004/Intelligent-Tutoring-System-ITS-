@@ -20,6 +20,12 @@ public class TokenResponse implements Serializable {
     private Long refreshExpiresIn;
     private String tokenType;
 
+    // Basic user info for FE navigation/header
+    private Long userId;
+    private String email;
+    private String name;
+    private String role;
+
     public TokenResponse(String accessToken, String refreshToken, Long expiresIn) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;

@@ -15,7 +15,7 @@
 <!--        <version>0.0.1-SNAPSHOT</version>-->
 <!--    </parent>-->
 
-<!--	<groupId>ITS.com.vn</groupId>-->
+	<groupId>ITS.com.vn</groupId>
 	<artifactId>discovery-eureka-server</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>discovery-eureka-server</name>

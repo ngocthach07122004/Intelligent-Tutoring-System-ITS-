@@ -10,8 +10,16 @@ spring:
   #    password: 12345678
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: true
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080/realms/ITS-realm}
 
 eureka:
   client:
@@ -35,21 +43,28 @@ server:
   port: ${SERVER_PORT:8082}
 #  port: 8082
 
-security:
-  oauth2:
-    resourceserver:
-      jwt:
-        #issuer-uri: http://localhost:8081/realms/ITS-realm
-        issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8081/realms/ITS-realm}
 custom:
   datasource:
-     host: ${DB_HOST:postgres_identity}
-     port: ${DB_POST:5434}
-     dbName: ${DB_NAME:identityDb}
-     user: ${SPRING_DATASOURCE_USERNAME:identityUser}
-     pass: ${SPRING_DATASOURCE_PASSWORD:12345678}
+    host: ${DB_HOST:postgres_identity}
+    port: ${DB_PORT:5432}
+    dbName: ${DB_NAME:identityDb}
+    user: ${SPRING_DATASOURCE_USERNAME:identityUser}
+    pass: ${SPRING_DATASOURCE_PASSWORD:12345678}
 #    host: postgres_identity
 #    port: 5434
 #    dbName: identityDb
 #    user: identityUser
 #    pass: 12345678
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true

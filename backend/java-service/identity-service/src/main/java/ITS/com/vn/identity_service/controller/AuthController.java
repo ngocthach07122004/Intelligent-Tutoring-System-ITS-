@@ -15,18 +15,18 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/v1/auth")
 public class AuthController {
 
     @Autowired
     private AuthService authService;
 
-    @PostMapping("/register")
+    @PostMapping({"/register", "/signup"})
     public ApiResponse<TokenResponse> register(@RequestBody RegisterRequest req) {
         return authService.register(req);
     }
 
-    @PostMapping("/login")
+    @PostMapping({"/login", "/signin"})
     public ApiResponse<TokenResponse> login(@RequestBody LoginRequest req) {
         return authService.login(req);
     }

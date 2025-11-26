@@ -1,15 +1,17 @@
 {
-  "realm": "demo-realm",
+  "realm": "ITS-realm",
   "enabled": true,
   "clients": [
     {
       "clientId": "identity-service",
-      "secret": "change-me",
+      "secret": "KjaceHUSAVIKEh38ybI3kQ6RgMU5xnrF",
       "publicClient": false,
       "serviceAccountsEnabled": true,
       "directAccessGrantsEnabled": true,
       "protocol": "openid-connect",
-      "redirectUris": ["*"]
+      "redirectUris": [
+        "*"
+      ]
     }
   ],
   "users": []
