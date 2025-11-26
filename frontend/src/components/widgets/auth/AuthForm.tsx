@@ -6,7 +6,9 @@ import { FormMessageAlert } from "../../ui/FormMessageAlert";
 import { CustomButton } from "../../ui/CustomButton";
 import { TextField } from "../../blocks/TextField";
 import { MailIcon, LockIcon, GoogleIcon, MicrosoftIcon } from "../../icons";
-import { signin } from "@/app/api/auth";
+import { AuthOperation } from "@/lib/BE-library/main";
+
+const auth = new AuthOperation();
 
 export const AuthForm = () => {
   const [username, setEmail] = useState("");
@@ -26,7 +28,7 @@ export const AuthForm = () => {
 
     // Simulate API call
     try {
-      const response = await signin({ username, password });
+      const response = await auth.signin({ username, password });
       console.log("Signin successful:", response);
       setSuccess(
         response.message || "Login successful! Redirecting to dashboard..."

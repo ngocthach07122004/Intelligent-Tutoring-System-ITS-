@@ -11,7 +11,9 @@ import {
   GoogleIcon,
   MicrosoftIcon,
 } from "@/components/icons";
-import { signup } from "@/app/api/auth";
+import { AuthOperation } from "@/lib/BE-library/main";
+
+const auth = new AuthOperation();
 
 export default function SignUpPage() {
   const [username, setName] = useState("");
@@ -37,7 +39,7 @@ export default function SignUpPage() {
     setSuccess("");
 
     try {
-      const response = await signup({ username, password });
+      const response = await auth.signup({ username, email: username, password });
       setSuccess("Signup successful! Redirecting to dashboard...");
       setTimeout(() => router.push("/dashboard/home"), 2000);
     } catch (err: any) {
