@@ -50,6 +50,11 @@ public class KeycloakAdminService {
         user.setUsername(username);
         user.setEmail(email);
         user.setEnabled(true);
+        user.setEmailVerified(true);
+        user.setRequiredActions(Collections.emptyList());
+
+        // ⚠ Quan trọng: không cho Keycloak tạo required actions mặc định
+        user.setAttributes(Collections.emptyMap());
 
         CredentialRepresentation cred = new CredentialRepresentation();
         cred.setType(CredentialRepresentation.PASSWORD);
