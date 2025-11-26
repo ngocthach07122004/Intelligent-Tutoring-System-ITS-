@@ -138,6 +138,9 @@ services:
     ports:
       - "${GATEWAY_PORT}:8181"
     environment:
+      WEB_CLIENT_URL_IP: ${WEB_CLIENT_URL_IP}
+      WEB_CLIENT_URL_DNS: ${WEB_CLIENT_URL_DNS}
+      WEB_CLIENT_URL_DEV: ${WEB_CLIENT_URL_DEV}
       EUREKA_SERVER: ${EUREKA_SERVER}
       EUREKA_HOST: eureka
     depends_on:
