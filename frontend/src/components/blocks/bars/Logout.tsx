@@ -1,6 +1,8 @@
 "use client";
 
-import { logout } from "@/app/api/auth"; // Import the logout API function
+import { AuthOperation } from "@/lib/BE-library/main"; // Import the AuthOperation class
+
+const auth = new AuthOperation();
 import { useRouter } from "next/navigation";
 
 export const Logout = () => {
@@ -8,7 +10,7 @@ export const Logout = () => {
 
   const handleLogout = async () => {
     try {
-      await logout(); // Call the logout API
+      await auth.logout(); // Call the logout API
       router.push("/auth/login"); // Redirect to the login page
     } catch (error) {
       console.error("Logout failed:", error);

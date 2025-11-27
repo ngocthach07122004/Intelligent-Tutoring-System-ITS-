@@ -6,8 +6,9 @@ import { FormMessageAlert } from "../../ui/FormMessageAlert"; // Import success 
 import { CustomButton } from "../../ui/CustomButton";
 import { TextField } from "../../blocks/TextField";
 import { MailIcon, LockIcon, GoogleIcon, MicrosoftIcon } from "../../icons";
-import { signup } from "@/app/api/auth";
+import { AuthOperation } from "@/lib/BE-library/main";
 
+const auth = new AuthOperation();
 export const SignUpForm = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -32,7 +33,7 @@ export const SignUpForm = () => {
     setSuccess(""); // Clear previous success message
 
     try {
-      const response = await signup({ name, email, password });
+      const response = await auth.signup({ username: name, email, password });
       console.log("Signup successful:", response);
       setSuccess(
         response.message || "Signup successful! Redirecting to dashboard..."
