@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowLeft, BookOpen, Clock, Award, Users, Calendar, CheckCircle2, PlayCircle, FileText, Download, Star } from "lucide-react";
+import { EnrollmentResponse } from "@/lib/BE-library/interfaces";
 
 interface CourseModule {
   id: string;
@@ -32,14 +33,14 @@ interface Course {
 }
 
 interface CourseDetailModalProps {
-  course: Course;
+  course: EnrollmentResponse;
   onClose: () => void;
 }
 
 export const CourseDetailModal = ({ course, onClose }: CourseDetailModalProps) => {
   // Mock data for course details
   const courseDetails = {
-    fullDescription: `${course.description}. Khóa học này được thiết kế để cung cấp nền tảng vững chắc về các khái niệm cơ bản và nâng cao trong lĩnh vực này. Bạn sẽ được học từ những giảng viên giàu kinh nghiệm với phương pháp giảng dạy thực tế và dễ hiểu.`,
+    fullDescription: `. Khóa học này được thiết kế để cung cấp nền tảng vững chắc về các khái niệm cơ bản và nâng cao trong lĩnh vực này. Bạn sẽ được học từ những giảng viên giàu kinh nghiệm với phương pháp giảng dạy thực tế và dễ hiểu.`,
     
     whatYouWillLearn: [
       "Nắm vững các khái niệm cơ bản và nền tảng của môn học",
@@ -58,7 +59,7 @@ export const CourseDetailModal = ({ course, onClose }: CourseDetailModalProps) =
     ],
 
     instructorInfo: {
-      name: course.instructor,
+      name: course.instructorName,
       title: "Giảng viên chính",
       rating: 4.8,
       students: 1250,
@@ -149,13 +150,13 @@ export const CourseDetailModal = ({ course, onClose }: CourseDetailModalProps) =
           <div className="max-w-4xl">
             <div className="flex items-center gap-2 mb-3">
               <span className="px-3 py-1 bg-white/10 rounded-full text-xs font-semibold">
-                {course.code}
+                {course.courseCode}
               </span>
               <span className="px-3 py-1 bg-white/10 rounded-full text-xs font-semibold">
-                {course.semester}
+                {course.courseSemester}
               </span>
             </div>
-            <h1 className="text-4xl font-bold mb-4">{course.name}</h1>
+            <h1 className="text-4xl font-bold mb-4">{course.courseTitle}</h1>
             <p className="text-lg text-white/90 mb-6">{courseDetails.fullDescription}</p>
             
             {/* Stats */}
@@ -167,15 +168,15 @@ export const CourseDetailModal = ({ course, onClose }: CourseDetailModalProps) =
               </div>
               <div className="flex items-center gap-2">
                 <Users className="w-5 h-5" />
-                <span>{course.students} sinh viên</span>
+                <span>{course.courseMaxStudents} sinh viên</span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="w-5 h-5" />
-                <span>{course.schedule}</span>
+                <span>{course.courseSchedule}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Award className="w-5 h-5" />
-                <span>{course.credits} tín chỉ</span>
+                <span>{course.courseCredits} tín chỉ</span>
               </div>
             </div>
           </div>
@@ -319,7 +320,7 @@ export const CourseDetailModal = ({ course, onClose }: CourseDetailModalProps) =
                       <h3 className="font-semibold text-gray-800 mb-4">Giảng viên</h3>
                       <div className="flex items-start gap-3 mb-4">
                         <div className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                          {courseDetails.instructorInfo.name.charAt(0)}
+                          {((courseDetails.instructorInfo.name ?? "").charAt(0))}
                         </div>
                         <div>
                           <div className="font-semibold text-gray-800">{courseDetails.instructorInfo.name}</div>

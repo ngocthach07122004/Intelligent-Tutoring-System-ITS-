@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CustomButton } from "@/components/ui/CustomButton";
 import { CourseDetailModal } from "./CourseDetailModal";
 import { 
@@ -16,101 +16,118 @@ import {
   Users,
   BarChart3
 } from "lucide-react";
+import { CourseOperation } from "@/lib/BE-library/main";
+import { EnrollmentResponse } from "@/lib/BE-library/interfaces";
 
-interface Course {
-  id: string;
-  name: string;
-  code: string;
-  instructor: string;
-  semester: string;
-  credits: number;
-  schedule: string;
-  status: 'active' | 'completed' | 'upcoming';
-  enrollmentDate: string;
-  progress: number;
-  students: number;
-  maxStudents: number;
-  description: string;
-}
+const courseOp = new CourseOperation();
 
-// Mock data
-const mockCourses: Course[] = [
-  {
-    id: "CS101",
-    name: "Lập trình căn bản",
-    code: "CS101",
-    instructor: "Nguyễn Văn A",
-    semester: "HK1 2024-2025",
-    credits: 4,
-    schedule: "Thứ 2, 4 - 7:00-9:00",
-    status: 'active',
-    enrollmentDate: "2024-08-15",
-    progress: 65,
-    students: 45,
-    maxStudents: 50,
-    description: "Khóa học giới thiệu về lập trình với Python"
-  },
-  {
-    id: "MATH201",
-    name: "Toán cao cấp",
-    code: "MATH201",
-    instructor: "Trần Thị B",
-    semester: "HK1 2024-2025",
-    credits: 3,
-    schedule: "Thứ 3, 5 - 9:00-11:00",
-    status: 'active',
-    enrollmentDate: "2024-08-15",
-    progress: 45,
-    students: 50,
-    maxStudents: 50,
-    description: "Giải tích và đại số tuyến tính"
-  },
-  {
-    id: "ENG102",
-    name: "Tiếng Anh giao tiếp",
-    code: "ENG102",
-    instructor: "Smith John",
-    semester: "HK1 2024-2025",
-    credits: 2,
-    schedule: "Thứ 6 - 13:00-15:00",
-    status: 'active',
-    enrollmentDate: "2024-08-15",
-    progress: 80,
-    students: 30,
-    maxStudents: 35,
-    description: "Phát triển kỹ năng giao tiếp tiếng Anh"
-  }
-];
+
 
 export const CourseManagement = () => {
-  const [courses] = useState<Course[]>(mockCourses);
-  const [filter, setFilter] = useState<'all' | 'active' | 'completed' | 'upcoming'>('all');
+  // const [courses] = useState<Course[]>(mockCourses);
+  const [courses, setCourses] = useState<EnrollmentResponse[]>([]);
+  // const [filter, setFilter] = useState<'all' | 'ACTIVE' | 'completed' | 'upcoming'>('all');
+  const [filter, setFilter] = useState<'all' | 'ACTIVE' | 'COMPLETED' | 'DROPPED'>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<EnrollmentResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const getStatusColor = (status: string) => {
+  const fallbackCourses: EnrollmentResponse[] = [
+  {
+    id: 1,
+    courseId: 101,
+    courseTitle: "Nhập môn Lập trình",
+    courseCode: "IT101",
+    courseSemester: "HK1 - 2024",
+    courseSchedule: "Thứ 2 - 7h đến 9h",
+    courseCredits: 3,
+    courseMaxStudents: 50,
+    courseThumbnailUrl: "/course-default.jpg",
+    instructorName: "Nguyễn Văn A",
+    instructorAvatarUrl: "/teacher-default.jpg",
+    studentId: 2024001234,
+    status: "ACTIVE",
+    progress: 60,
+    enrolledAt: "2024-01-20T10:00:00Z",
+    lastAccessAt: "2024-02-01T09:15:00Z",
+    updatedAt: "2024-02-01T09:15:00Z",
+  },
+  {
+    id: 2,
+    courseId: 102,
+    courseTitle: "Cơ sở dữ liệu",
+    courseCode: "DB102",
+    courseSemester: "HK1 - 2024",
+    courseSchedule: "Thứ 4 - 9h đến 11h",
+    courseCredits: 3,
+    courseMaxStudents: 45,
+    courseThumbnailUrl: "/course-default.jpg",
+    instructorName: "Trần Thị B",
+    instructorAvatarUrl: "/teacher-default.jpg",
+    studentId: 2024001234,
+    status: "COMPLETED",
+    progress: 100,
+    enrolledAt: "2023-09-10T10:00:00Z",
+    completedAt: "2023-12-20T10:00:00Z",
+    lastAccessAt: "2023-12-20T10:00:00Z",
+    updatedAt: "2024-01-01T10:00:00Z",
+  },
+];
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        // Gọi API lấy danh sách khóa học của tôi
+        const response = await courseOp.getMyCourses();
+        
+        if (response.success && response.data) {
+          setCourses(response.data);
+        } else {
+          setCourses(fallbackCourses)
+          setError(response.message || "Không thể tải danh sách khóa học");
+        }
+      } catch (err: any) {
+        setCourses(fallbackCourses);
+        setError(err.message || "Đã xảy ra lỗi kết nối");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, []);
+
+  const getStatusColor = (status?: string) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800 border-green-200';
-      case 'completed': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'upcoming': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'ACTIVE': return 'bg-green-100 text-green-800 border-green-200';
+      case 'COMPLETED': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'DROPPED': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
-  const getStatusLabel = (status: string) => {
+  const getStatusLabel = (status?: string) => {
     switch (status) {
-      case 'active': return 'Đang học';
-      case 'completed': return 'Hoàn thành';
-      case 'upcoming': return 'Sắp diễn ra';
+      case 'ACTIVE': return 'Đang học';
+      case 'COMPLETED': return 'Hoàn thành';
+      case 'DROPPED': return 'Sắp diễn ra';
       default: return '';
     }
   };
 
   const filteredCourses = courses.filter(course => {
     const matchesFilter = filter === 'all' || course.status === filter;
-    const matchesSearch = course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         course.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         course.instructor.toLowerCase().includes(searchTerm.toLowerCase());
+    // const matchesSearch = course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    //                      course.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    //                      course.instructor.toLowerCase().includes(searchTerm.toLowerCase());
+    const title = course.courseTitle?.toLowerCase() || '';
+    const code = course.courseCode?.toLowerCase() || '';
+    const instructor = course.instructorName?.toLowerCase() || '';
+    const search = searchTerm.toLowerCase();
+    const matchesSearch = title.includes(search) || code.includes(search) || instructor.includes(search);
     return matchesFilter && matchesSearch;
   });
 
@@ -146,7 +163,7 @@ export const CourseManagement = () => {
               <div>
                 <p className="text-sm text-gray-700 font-medium">Đang học</p>
                 <p className="text-3xl font-bold text-gray-900">
-                  {courses.filter(c => c.status === 'active').length}
+                  {courses.filter(c => c.status === 'ACTIVE').length}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
@@ -160,7 +177,7 @@ export const CourseManagement = () => {
               <div>
                 <p className="text-sm text-gray-700 font-medium">Tổng tín chỉ</p>
                 <p className="text-3xl font-bold text-gray-900">
-                  {courses.reduce((sum, c) => sum + c.credits, 0)}
+                  {courses.reduce((sum, c) => sum + (c.courseCredits ?? 0), 0)}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
@@ -174,7 +191,7 @@ export const CourseManagement = () => {
               <div>
                 <p className="text-sm text-gray-700 font-medium">Tiến độ TB</p>
                 <p className="text-3xl font-bold text-gray-900">
-                  {Math.round(courses.reduce((sum, c) => sum + c.progress, 0) / courses.length)}%
+                  {Math.round(courses.reduce((sum, c) => sum + (c.progress ?? 0), 0) / courses.length)}%
                 </p>
               </div>
               <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
@@ -212,9 +229,9 @@ export const CourseManagement = () => {
                 Tất cả
               </button>
               <button
-                onClick={() => setFilter('active')}
+                onClick={() => setFilter('ACTIVE')}
                 className={`px-4 py-2.5 rounded-lg font-medium transition-all ${
-                  filter === 'active'
+                  filter === 'ACTIVE'
                     ? 'bg-gray-800 text-white shadow-md'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
@@ -222,9 +239,9 @@ export const CourseManagement = () => {
                 Đang học
               </button>
               <button
-                onClick={() => setFilter('completed')}
+                onClick={() => setFilter('COMPLETED')}
                 className={`px-4 py-2.5 rounded-lg font-medium transition-all ${
-                  filter === 'completed'
+                  filter === 'COMPLETED'
                     ? 'bg-gray-700 text-white shadow-md'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
@@ -244,15 +261,15 @@ export const CourseManagement = () => {
                 <div className="flex justify-between items-start mb-3">
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900">
-                      {course.name}
+                      {course.courseTitle}
                     </h3>
-                    <p className="text-sm text-gray-500 mt-1">{course.code} • {course.instructor}</p>
+                    <p className="text-sm text-gray-500 mt-1">{course.courseCode} • {course.instructorName}</p>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(course.status)}`}>
                     {getStatusLabel(course.status)}
                   </span>
                 </div>
-                <p className="text-sm text-gray-600">{course.description}</p>
+                {/* <p className="text-sm text-gray-600">{course.description}</p> */}
               </div>
 
               {/* Course Info */}
@@ -262,28 +279,28 @@ export const CourseManagement = () => {
                     <Calendar className="w-4 h-4 text-gray-600" />
                     <div>
                       <p className="text-gray-500">Học kỳ</p>
-                      <p className="font-medium text-gray-800">{course.semester}</p>
+                      <p className="font-medium text-gray-800">{course.courseSemester}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <Award className="w-4 h-4 text-gray-600" />
                     <div>
                       <p className="text-gray-500">Tín chỉ</p>
-                      <p className="font-medium text-gray-800">{course.credits}</p>
+                      <p className="font-medium text-gray-800">{course.courseCredits}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-gray-600" />
                     <div>
                       <p className="text-gray-500">Lịch học</p>
-                      <p className="font-medium text-gray-800">{course.schedule}</p>
+                      <p className="font-medium text-gray-800">{course.courseSchedule}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <Users className="w-4 h-4 text-gray-600" />
                     <div>
                       <p className="text-gray-500">Sĩ số</p>
-                      <p className="font-medium text-gray-800">{course.students}/{course.maxStudents}</p>
+                      <p className="font-medium text-gray-800">{course.courseMaxStudents}</p>
                     </div>
                   </div>
                 </div>
