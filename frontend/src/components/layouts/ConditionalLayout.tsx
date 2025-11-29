@@ -16,9 +16,7 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
 
   return (
     <>
-      {!hideHeaderFooter && <Header />}
       {children}
-      {!hideHeaderFooter && <Footer />}
     </>
   );
 }
