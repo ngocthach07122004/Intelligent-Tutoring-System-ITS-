@@ -4,18 +4,20 @@ import (
 	"context"
 
 	"init-src/internal/models"
-	"init-src/pkg/paginator"
 )
 
-// Repository is the interface for todo repository
-//
-//go:generate mockery --name=Repository
+// Repository defines the small surface we need from the user domain.
 type Repository interface {
-	Create(ctx context.Context, sc models.Scope, opts CreateOptions) (models.User, error)
-	// FindByEmail(ctx context.Context, sc models.Scope, email string, shopID string) (models.User, error)
-	List(ctx context.Context, sc models.Scope, opts ListInput) ([]models.User, error)
-	Get(ctx context.Context, sc models.Scope, opts GetInput) ([]models.User, paginator.Paginator, error)
-	GetOne(ctx context.Context, sc models.Scope, opts GetOneInput) (models.User, error)
-	Update(ctx context.Context, sc models.Scope, id string, opts UpdateOptions) (models.User, error)
-	Delete(ctx context.Context, sc models.Scope, id string) (string, error)
+	// List returns every user that the repository knows about.
+	List(ctx context.Context) ([]models.User, error)
+	// GetUser fetches a single user by id.
+	GetUser(ctx context.Context, id string) (models.User, error)
+	// GetUsers fetches multiple users by their ids.
+	GetUsers(ctx context.Context, ids []string) ([]models.User, error)
+	// Create inserts a brand new user entry.
+	Create(ctx context.Context, input CreateInput) (models.User, error)
+	// Update mutates an existing user entry.
+	Update(ctx context.Context, id string, input UpdateInput) (models.User, error)
+	// Delete removes a user entry.
+	Delete(ctx context.Context, id string) error
 }

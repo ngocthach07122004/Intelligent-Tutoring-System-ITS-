@@ -109,7 +109,7 @@ func (uc *implUsecase) List(ctx context.Context, sc models.Scope, input conversa
 		return nil, err
 	}
 
-	return conversations, nil
+	return uc.enrichConversations(ctx, sc.UserID, conversations)
 }
 
 func (uc *implUsecase) Get(ctx context.Context, sc models.Scope, input conversation.GetInput) (conversation.GetOutput, error) {
@@ -121,6 +121,12 @@ func (uc *implUsecase) Get(ctx context.Context, sc models.Scope, input conversat
 	if err != nil {
 		uc.l.Warnf(ctx, "conversation.Usecase.Get error: %v", err)
 		return conversation.GetOutput{}, err
+	}
+
+	conversations, err = uc.enrichConversations(ctx, sc.UserID, conversations)
+	if err != nil {
+		uc.l.Warnf(ctx, "conversation.Usecase.Get.enrichConversations error: %v", err)
+		// Continue without enrichment if error
 	}
 
 	return conversation.GetOutput{
@@ -147,6 +153,11 @@ func (uc *implUsecase) GetOne(ctx context.Context, sc models.Scope, input conver
 	}
 	if !isParticipant {
 		return conversation.GetOneOutput{}, ErrNotParticipant
+	}
+
+	enriched, _ := uc.enrichConversations(ctx, sc.UserID, []models.Conversation{conv})
+	if len(enriched) > 0 {
+		conv = enriched[0]
 	}
 
 	return conversation.GetOneOutput{
@@ -378,4 +389,76 @@ func (uc *implUsecase) parseUUID(id string) (uuid.UUID, error) {
 		return uuid.UUID{}, fmt.Errorf("invalid UUID: %w", err)
 	}
 	return convID, nil
+}
+
+func (uc *implUsecase) GetClassChannels(ctx context.Context, sc models.Scope, classID string) ([]models.Conversation, error) {
+	channels, err := uc.repo.GetClassChannels(ctx, classID)
+	if err != nil {
+		uc.l.Warnf(ctx, "conversation.Usecase.GetClassChannels error: %v", err)
+		return nil, err
+	}
+	return channels, nil
+}
+
+func (uc *implUsecase) CreateClassChannel(ctx context.Context, sc models.Scope, input conversation.CreateChannelInput) (models.Conversation, error) {
+	tx, err := uc.db.BeginTx(ctx)
+	if err != nil {
+		uc.l.Warnf(ctx, "conversation.Usecase.CreateClassChannel.BeginTx error: %v", err)
+		return models.Conversation{}, err
+	}
+	defer tx.Rollback(ctx)
+
+	opts := conversation.CreateOptions{
+		Type:      models.ConversationChannel,
+		Name:      &input.Name,
+		Topic:     &input.Topic,
+		Avatar:    &input.Avatar,
+		ClassID:   &input.ClassID,
+		CreatedBy: sc.UserID,
+	}
+
+	conv, err := uc.repo.Create(ctx, tx, opts)
+	if err != nil {
+		uc.l.Warnf(ctx, "conversation.Usecase.CreateClassChannel.Create error: %v", err)
+		return models.Conversation{}, err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		uc.l.Warnf(ctx, "conversation.Usecase.CreateClassChannel.Commit error: %v", err)
+		return models.Conversation{}, err
+	}
+
+	return conv, nil
+}
+
+func (uc *implUsecase) enrichConversations(ctx context.Context, userID string, conversations []models.Conversation) ([]models.Conversation, error) {
+	for i, c := range conversations {
+		if c.Type == models.ConversationDirect {
+			participants, err := uc.repo.GetParticipants(ctx, c.ID.String())
+			if err != nil {
+				continue
+			}
+
+			var otherUserID string
+			for _, p := range participants {
+				if p.UserID != userID {
+					otherUserID = p.UserID
+					break
+				}
+			}
+
+			if otherUserID != "" {
+				user, err := uc.userRepo.GetUser(ctx, otherUserID)
+				if err == nil {
+					name := user.Name
+					avatar := user.Avatar
+					role := user.Role
+					conversations[i].Name = &name
+					conversations[i].Avatar = &avatar
+					conversations[i].Role = &role
+				}
+			}
+		}
+	}
+	return conversations, nil
 }

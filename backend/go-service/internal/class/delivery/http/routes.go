@@ -9,7 +9,7 @@ import (
 // MapRoutes maps the routes to the handler functions
 func MapRoutes(r *gin.RouterGroup, mw middleware.Middleware, h Handler) {
 	classes := r.Group("/classes")
-	classes.Use(mw.Auth(), mw.Authorize())
+	classes.Use(mw.Auth())
 
 	// Class CRUD operations
 	classes.POST("", h.create)
@@ -24,5 +24,9 @@ func MapRoutes(r *gin.RouterGroup, mw middleware.Middleware, h Handler) {
 	classes.GET("/:id/members", h.listMembers)
 
 	// Join by code
+	// Join by code
 	classes.POST("/join", h.joinByCode)
+
+	// User classes
+	r.GET("/users/me/classes", mw.Auth(), h.listUserClasses)
 }

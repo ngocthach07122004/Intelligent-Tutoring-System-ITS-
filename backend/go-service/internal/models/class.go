@@ -22,6 +22,7 @@ type Class struct {
 	Name        string     `db:"name" json:"name"`
 	Description string     `db:"description" json:"description"`
 	Code        string     `db:"code" json:"code"` // Invite code (e.g., "CS101-2025")
+	AvatarURL   string     `db:"avatar_url" json:"avatar_url"`
 	CreatedBy   string     `db:"created_by" json:"created_by"` // MongoDB User ID
 	Archived    bool       `db:"archived" json:"archived"`
 	CreatedAt   time.Time  `db:"created_at" json:"created_at"`

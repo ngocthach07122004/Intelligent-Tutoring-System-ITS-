@@ -18,6 +18,14 @@ type AddParticipantsInput struct {
 	UserIDs []string
 }
 
+// CreateChannelInput contains parameters for creating a class channel
+type CreateChannelInput struct {
+	ClassID string
+	Name    string
+	Topic   string
+	Avatar  string
+}
+
 // GetOutput contains the result of Get operation
 type GetOutput struct {
 	Conversations []models.Conversation

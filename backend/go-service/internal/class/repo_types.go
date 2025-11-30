@@ -7,6 +7,7 @@ type CreateOptions struct {
 	Name        string
 	Description string
 	Code        string
+	AvatarURL   string
 	CreatedBy   string // MongoDB User ID
 }
 

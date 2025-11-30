@@ -96,6 +96,10 @@ type detailResp struct {
 	Type models.ConversationType `json:"type"`
 	// Name of the conversation (null for direct chats)
 	Name *string `json:"name,omitempty"`
+	// Topic of the conversation (for channels)
+	Topic *string `json:"topic,omitempty"`
+	// Avatar of the conversation
+	Avatar *string `json:"avatar,omitempty"`
 	// Class ID if this is a class conversation
 	ClassID *string `json:"class_id,omitempty"`
 	// ID of the user who created the conversation
@@ -139,6 +143,8 @@ func (h handler) newDetailResp(d models.Conversation) detailResp {
 		ID:        d.ID.String(),
 		Type:      d.Type,
 		Name:      d.Name,
+		Topic:     d.Topic,
+		Avatar:    d.Avatar,
 		CreatedBy: d.CreatedBy,
 		CreatedAt: response.DateTime(d.CreatedAt),
 		UpdatedAt: response.DateTime(d.UpdatedAt),
@@ -254,5 +260,21 @@ type MarkAsReadResponse struct {
 func (h handler) newMarkAsReadResponse() MarkAsReadResponse {
 	return MarkAsReadResponse{
 		Message: "Marked as read",
+	}
+}
+
+// createChannelReq represents the request body for creating a class channel
+type createChannelReq struct {
+	Name   string `json:"name" binding:"required"`
+	Topic  string `json:"topic"`
+	Avatar string `json:"avatar"`
+}
+
+func (r createChannelReq) toInput(classID string) conversation.CreateChannelInput {
+	return conversation.CreateChannelInput{
+		ClassID: classID,
+		Name:    r.Name,
+		Topic:   r.Topic,
+		Avatar:  r.Avatar,
 	}
 }

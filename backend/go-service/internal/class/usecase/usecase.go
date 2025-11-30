@@ -81,8 +81,8 @@ func (uc *implUsecase) Create(ctx context.Context, sc models.Scope, input class.
 }
 
 func (uc *implUsecase) List(ctx context.Context, sc models.Scope, input class.ListInput) ([]models.Class, error) {
-	// Filter by user's classes (as member)
-	// For now, return all classes (can add authorization later)
+	// Automatically filter by user's classes (as member)
+	input.Filter.MemberID = sc.UserID
 
 	classes, err := uc.repo.List(ctx, sc, input)
 	if err != nil {
@@ -94,6 +94,9 @@ func (uc *implUsecase) List(ctx context.Context, sc models.Scope, input class.Li
 }
 
 func (uc *implUsecase) Get(ctx context.Context, sc models.Scope, input class.GetInput) (class.GetOutput, error) {
+	// Automatically filter by user's classes (as member)
+	input.Filter.MemberID = sc.UserID
+
 	classes, pag, err := uc.repo.Get(ctx, sc, input)
 	if err != nil {
 		uc.l.Warnf(ctx, "class.Usecase.Get error: %v", err)

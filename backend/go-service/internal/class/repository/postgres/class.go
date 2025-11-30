@@ -21,9 +21,9 @@ func (repo *implRepository) Create(ctx context.Context, tx postgres.Tx, opts cla
 	}
 
 	query := `
-		INSERT INTO classes (id, name, description, code, created_by, archived, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-		RETURNING id, name, description, code, created_by, archived, created_at, updated_at, deleted_at
+		INSERT INTO classes (id, name, description, code, avatar_url, created_by, archived, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		RETURNING id, name, description, code, avatar_url, created_by, archived, created_at, updated_at, deleted_at
 	`
 
 	now := time.Now()
@@ -32,6 +32,7 @@ func (repo *implRepository) Create(ctx context.Context, tx postgres.Tx, opts cla
 		cls.Name,
 		cls.Description,
 		cls.Code,
+		cls.AvatarURL,
 		cls.CreatedBy,
 		cls.Archived,
 		now,
@@ -41,6 +42,7 @@ func (repo *implRepository) Create(ctx context.Context, tx postgres.Tx, opts cla
 		&cls.Name,
 		&cls.Description,
 		&cls.Code,
+		&cls.AvatarURL,
 		&cls.CreatedBy,
 		&cls.Archived,
 		&cls.CreatedAt,
@@ -64,10 +66,10 @@ func (repo *implRepository) List(ctx context.Context, sc models.Scope, input cla
 	}
 
 	query := fmt.Sprintf(`
-		SELECT id, name, description, code, created_by, archived, created_at, updated_at, deleted_at
-		FROM classes
+		SELECT c.id, c.name, c.description, c.code, c.avatar_url, c.created_by, c.archived, c.created_at, c.updated_at, c.deleted_at
+		FROM classes c
 		%s
-		ORDER BY created_at DESC
+		ORDER BY c.created_at DESC
 	`, whereClause)
 
 	rows, err := repo.db.Query(ctx, query, args...)
@@ -85,6 +87,7 @@ func (repo *implRepository) List(ctx context.Context, sc models.Scope, input cla
 			&cls.Name,
 			&cls.Description,
 			&cls.Code,
+			&cls.AvatarURL,
 			&cls.CreatedBy,
 			&cls.Archived,
 			&cls.CreatedAt,
@@ -114,7 +117,7 @@ func (repo *implRepository) Get(ctx context.Context, sc models.Scope, input clas
 	}
 
 	// Count total
-	countQuery := fmt.Sprintf("SELECT COUNT(*) FROM classes %s", whereClause)
+	countQuery := fmt.Sprintf("SELECT COUNT(c.id) FROM classes c %s", whereClause)
 	var total int64
 	err = repo.db.QueryRow(ctx, countQuery, args...).Scan(&total)
 	if err != nil {
@@ -124,10 +127,10 @@ func (repo *implRepository) Get(ctx context.Context, sc models.Scope, input clas
 
 	// Get paginated results
 	query := fmt.Sprintf(`
-		SELECT id, name, description, code, created_by, archived, created_at, updated_at, deleted_at
-		FROM classes
+		SELECT c.id, c.name, c.description, c.code, c.avatar_url, c.created_by, c.archived, c.created_at, c.updated_at, c.deleted_at
+		FROM classes c
 		%s
-		ORDER BY created_at DESC
+		ORDER BY c.created_at DESC
 		LIMIT $%d OFFSET $%d
 	`, whereClause, len(args)+1, len(args)+2)
 
@@ -148,6 +151,7 @@ func (repo *implRepository) Get(ctx context.Context, sc models.Scope, input clas
 			&cls.Name,
 			&cls.Description,
 			&cls.Code,
+			&cls.AvatarURL,
 			&cls.CreatedBy,
 			&cls.Archived,
 			&cls.CreatedAt,
@@ -184,7 +188,7 @@ func (repo *implRepository) GetOne(ctx context.Context, sc models.Scope, input c
 	}
 
 	query := fmt.Sprintf(`
-		SELECT id, name, description, code, created_by, archived, created_at, updated_at, deleted_at
+		SELECT id, name, description, code, avatar_url, created_by, archived, created_at, updated_at, deleted_at
 		FROM classes
 		%s
 		LIMIT 1
@@ -196,6 +200,7 @@ func (repo *implRepository) GetOne(ctx context.Context, sc models.Scope, input c
 		&cls.Name,
 		&cls.Description,
 		&cls.Code,
+		&cls.AvatarURL,
 		&cls.CreatedBy,
 		&cls.Archived,
 		&cls.CreatedAt,
@@ -213,7 +218,7 @@ func (repo *implRepository) GetOne(ctx context.Context, sc models.Scope, input c
 
 func (repo *implRepository) GetByCode(ctx context.Context, code string) (models.Class, error) {
 	query := `
-		SELECT id, name, description, code, created_by, archived, created_at, updated_at, deleted_at
+		SELECT id, name, description, code, avatar_url, created_by, archived, created_at, updated_at, deleted_at
 		FROM classes
 		WHERE code = $1 AND deleted_at IS NULL
 		LIMIT 1
@@ -225,6 +230,7 @@ func (repo *implRepository) GetByCode(ctx context.Context, code string) (models.
 		&cls.Name,
 		&cls.Description,
 		&cls.Code,
+		&cls.AvatarURL,
 		&cls.CreatedBy,
 		&cls.Archived,
 		&cls.CreatedAt,
@@ -257,7 +263,7 @@ func (repo *implRepository) Update(ctx context.Context, tx postgres.Tx, id strin
 		UPDATE classes
 		SET name = $1, description = $2, archived = $3, updated_at = $4
 		WHERE id = $5 AND deleted_at IS NULL
-		RETURNING id, name, description, code, created_by, archived, created_at, updated_at, deleted_at
+		RETURNING id, name, description, code, avatar_url, created_by, archived, created_at, updated_at, deleted_at
 	`
 
 	now := time.Now()
@@ -272,6 +278,7 @@ func (repo *implRepository) Update(ctx context.Context, tx postgres.Tx, id strin
 		&cls.Name,
 		&cls.Description,
 		&cls.Code,
+		&cls.AvatarURL,
 		&cls.CreatedBy,
 		&cls.Archived,
 		&cls.CreatedAt,

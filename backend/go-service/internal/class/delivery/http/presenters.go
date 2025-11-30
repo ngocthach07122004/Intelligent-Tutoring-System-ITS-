@@ -111,6 +111,8 @@ type detailResp struct {
 	Description string `json:"description"`
 	// Unique code for joining the class
 	Code string `json:"code"`
+	// Avatar URL
+	AvatarURL string `json:"avatar_url"`
 	// ID of the user who created the class
 	CreatedBy string `json:"created_by"`
 	// Whether the class is archived
@@ -153,6 +155,7 @@ func (h handler) newDetailResp(d models.Class) detailResp {
 		Name:        d.Name,
 		Description: d.Description,
 		Code:        d.Code,
+		AvatarURL:   d.AvatarURL,
 		CreatedBy:   d.CreatedBy,
 		Archived:    d.Archived,
 		CreatedAt:   response.DateTime(d.CreatedAt),
