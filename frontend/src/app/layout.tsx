@@ -7,6 +7,8 @@ import HeaderWrapper from "@/components/layouts/HeaderWrapper";
 import Footer from "@/components/layouts/Footer";
 import Header from "@/components/layouts/Header";
 import ConditionalLayout from "@/components/layouts/ConditionalLayout";
+// Import HTTP interceptor for automatic JWT token injection
+import "@/lib/utils/httpInterceptor";
 
 const inter = Inter({
   variable: "--font-inter",

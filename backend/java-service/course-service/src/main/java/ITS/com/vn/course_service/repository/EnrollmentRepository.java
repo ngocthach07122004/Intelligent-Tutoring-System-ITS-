@@ -16,22 +16,22 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     /**
      * Tìm enrollment theo course ID và student ID
      */
-    Optional<Enrollment> findByCourseIdAndStudentId(Long courseId, Long studentId);
+    Optional<Enrollment> findByCourseIdAndStudentId(Long courseId, String studentId);
 
     /**
      * Kiểm tra student đã enroll vào course chưa
      */
-    boolean existsByCourseIdAndStudentId(Long courseId, Long studentId);
+    boolean existsByCourseIdAndStudentId(Long courseId, String studentId);
 
     /**
      * Lấy tất cả enrollments của một student
      */
-    List<Enrollment> findByStudentId(Long studentId);
+    List<Enrollment> findByStudentId(String studentId);
 
     /**
      * Lấy enrollments của student theo status
      */
-    List<Enrollment> findByStudentIdAndStatus(Long studentId, EnrollmentStatus status);
+    List<Enrollment> findByStudentIdAndStatus(String studentId, EnrollmentStatus status);
 
     /**
      * Lấy tất cả enrollments của một course

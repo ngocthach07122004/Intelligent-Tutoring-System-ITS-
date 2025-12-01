@@ -17,16 +17,23 @@ public interface GradebookService {
     Page<GradebookResponse> getMyCourseGrades(Long courseId, Pageable pageable);
 
     /**
+     * Get grades for a specific student in a specific course.
+     */
+    Page<GradebookResponse> getStudentCourseGrades(Long courseId, UUID studentId, Pageable pageable);
+
+    /**
      * Tạo Gradebook entry khi student enroll vào course
-     * @param courseId ID của khóa học
-     * @param studentId ID của sinh viên
+     * 
+     * @param courseId   ID của khóa học
+     * @param studentId  ID của sinh viên
      * @param enrolledAt Thời điểm enroll
      */
     void createGradebookForEnrollment(Long courseId, Long studentId, LocalDateTime enrolledAt);
 
     /**
      * Lấy gradebook summary (GPA, credits, rank)
-     * @param userId User ID
+     * 
+     * @param userId   User ID
      * @param semester Học kỳ (optional)
      * @return GradebookSummaryResponse
      */
@@ -45,5 +52,5 @@ public interface GradebookService {
     /**
      * Dữ liệu analytics (điểm theo tháng, thời gian học...).
      */
-    AnalyticsResponse getAnalytics(UUID userId);
+    AnalyticsResponse getAnalytics(UUID userId, String timeframe);
 }

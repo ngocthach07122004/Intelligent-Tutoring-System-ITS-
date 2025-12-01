@@ -40,7 +40,7 @@ public class CourseController {
             @Valid @RequestBody CreateCourseRequest request,
             Authentication authentication) {
 
-        Long instructorId = SecurityUtils.getUserIdAsLong(authentication, true);
+        String instructorId = SecurityUtils.getUserId(authentication, true);
         CourseResponse response = courseService.createCourse(request, instructorId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -54,7 +54,7 @@ public class CourseController {
     public ResponseEntity<CourseResponse> getCourseById(
             @PathVariable Long id,
             Authentication authentication) {
-        Long userId = SecurityUtils.getUserIdAsLong(authentication, false);
+        String userId = SecurityUtils.getUserId(authentication, false);
         CourseResponse response = courseService.getCourseById(id, userId);
         return ResponseEntity.ok(response);
     }
@@ -70,7 +70,7 @@ public class CourseController {
             @RequestParam(required = false, name = "enrollmentStatus") String enrollmentStatus,
             Authentication authentication) {
 
-        Long userId = SecurityUtils.getUserIdAsLong(authentication, false);
+        String userId = SecurityUtils.getUserId(authentication, false);
         Page<CourseResponse> response = courseService.getAllCourses(pageable, userId, semester, enrollmentStatus);
         return ResponseEntity.ok(response);
     }
@@ -81,7 +81,7 @@ public class CourseController {
      */
     @GetMapping("/instructor/{instructorId}")
     public ResponseEntity<Page<CourseResponse>> getCoursesByInstructor(
-            @PathVariable Long instructorId,
+            @PathVariable String instructorId,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         Page<CourseResponse> response = courseService.getCoursesByInstructor(instructorId, pageable);
@@ -97,7 +97,7 @@ public class CourseController {
             Authentication authentication,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Long instructorId = SecurityUtils.getUserIdAsLong(authentication, true);
+        String instructorId = SecurityUtils.getUserId(authentication, true);
         Page<CourseResponse> response = courseService.getCoursesByInstructor(instructorId, pageable);
         return ResponseEntity.ok(response);
     }
@@ -112,7 +112,7 @@ public class CourseController {
             @RequestParam(required = false) String semester,
             Authentication authentication) {
 
-        Long userId = SecurityUtils.getUserIdAsLong(authentication, false);
+        String userId = SecurityUtils.getUserId(authentication, false);
         Page<CourseResponse> response = courseService.getPublishedCourses(pageable, userId, semester);
         return ResponseEntity.ok(response);
     }
@@ -140,7 +140,7 @@ public class CourseController {
             @Valid @RequestBody UpdateCourseRequest request,
             Authentication authentication) {
 
-        Long instructorId = SecurityUtils.getUserIdAsLong(authentication, true);
+        String instructorId = SecurityUtils.getUserId(authentication, true);
         CourseResponse response = courseService.updateCourse(id, request, instructorId);
 
         return ResponseEntity.ok(response);
@@ -155,7 +155,7 @@ public class CourseController {
             @PathVariable Long id,
             Authentication authentication) {
 
-        Long instructorId = SecurityUtils.getUserIdAsLong(authentication, true);
+        String instructorId = SecurityUtils.getUserId(authentication, true);
         CourseResponse response = courseService.publishCourse(id, instructorId);
 
         return ResponseEntity.ok(response);
@@ -170,7 +170,7 @@ public class CourseController {
             @PathVariable Long id,
             Authentication authentication) {
 
-        Long instructorId = SecurityUtils.getUserIdAsLong(authentication, true);
+        String instructorId = SecurityUtils.getUserId(authentication, true);
         CourseResponse response = courseService.archiveCourse(id, instructorId);
 
         return ResponseEntity.ok(response);
@@ -185,7 +185,7 @@ public class CourseController {
             @PathVariable Long id,
             Authentication authentication) {
 
-        Long instructorId = SecurityUtils.getUserIdAsLong(authentication, true);
+        String instructorId = SecurityUtils.getUserId(authentication, true);
         courseService.deleteCourse(id, instructorId);
 
         return ResponseEntity.noContent().build();

@@ -6,15 +6,14 @@ import { FormMessageAlert } from "../../ui/FormMessageAlert";
 import { CustomButton } from "../../ui/CustomButton";
 import { TextField } from "../../blocks/TextField";
 import { MailIcon, LockIcon, GoogleIcon, MicrosoftIcon } from "../../icons";
-import { AuthOperation } from "@/lib/BE-library/main";
-
-const auth = new AuthOperation();
+import { identityServiceApi } from "@/lib/BE-library/identity-service-api";
+import { TokenStorage } from "@/lib/utils/tokenStorage";
 
 export const AuthForm = () => {
-  const [username, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(""); // State for success message
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
   const router = useRouter();
@@ -24,27 +23,44 @@ export const AuthForm = () => {
     setIsDisabled(true);
     setLoading(true);
     setError("");
-    setSuccess(""); // Clear previous success message
+    setSuccess("");
 
-    // Simulate API call
     try {
-      const response = await auth.signin({ username, password });
-      console.log("Signin successful:", response);
-      setSuccess(
-        response.message || "Login successful! Redirecting to dashboard..."
-      );
-      setTimeout(() => router.push("/dashboard/home"), 2000); // Redirect after 2 seconds
+      // Login with new identity service
+      const response = await identityServiceApi.login({ username, password });
+
+      if (response.success && response.data) {
+        // Save tokens
+        TokenStorage.saveTokens({
+          accessToken: response.data.accessToken,
+          refreshToken: response.data.refreshToken,
+          tokenType: response.data.tokenType || "Bearer",
+        });
+
+        // Get user info
+        const userResponse = await identityServiceApi.getCurrentUser(response.data.accessToken);
+        if (userResponse.success && userResponse.data) {
+          TokenStorage.saveUser({
+            id: userResponse.data.id,
+            username: userResponse.data.username,
+            email: userResponse.data.email,
+            roles: userResponse.data.roles,
+          });
+        }
+
+        setSuccess("Login successful! Redirecting to dashboard...");
+        setTimeout(() => router.push("/dashboard/home"), 1500);
+      } else {
+        setError(response.message || "Login failed. Please try again.");
+      }
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "An error occurred during login.");
+    } finally {
+      setLoading(false);
+      setIsDisabled(false);
     }
-
-    if (!username.includes("@") || password.length < 4) {
-      setError("Email or password is not correct.");
-    }
-
-    setLoading(false);
-    setIsDisabled(false);
   };
+
   return (
     <div>
       <div className="flex flex-col space-y-1.5 p-6">
@@ -60,14 +76,14 @@ export const AuthForm = () => {
         noValidate
         className="p-6 pt-0 flex flex-col gap-4"
       >
-        {/* Email Field */}
+        {/* Username/Email Field */}
         <TextField
-          label="Email"
-          type="email"
-          id="email"
+          label="Username or Email"
+          type="text"
+          id="username"
           icon={<MailIcon />}
           value={username}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => setUsername(e.target.value)}
         />
         {/* Password Field */}
         <TextField
@@ -85,10 +101,8 @@ export const AuthForm = () => {
             Forgot your password?
           </a>
         </TextField>
-        {success && <FormMessageAlert message={success} success={true} />}{" "}
-        {/* Display success message */}
-        {error && <FormMessageAlert message={error} />}{" "}
-        {/* Display error message */}
+        {success && <FormMessageAlert message={success} success={true} />}
+        {error && <FormMessageAlert message={error} />}
         {/* Submit Button */}
         <CustomButton
           type="submit"
@@ -121,7 +135,7 @@ export const AuthForm = () => {
         </div>
       </form>
       <p className="items-center p-6 pt-0 flex justify-center gap-1 text-sm text-muted-foreground">
-        Don’t have an account?{" "}
+        Don't have an account?{" "}
         <a
           href="/auth/signup"
           className="underline font-semibold text-gray-700"

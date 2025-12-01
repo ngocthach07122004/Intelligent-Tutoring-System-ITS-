@@ -48,7 +48,7 @@ public class AssessmentController {
     public ResponseEntity<AnalyticsResponse> getAnalytics(
             @RequestParam(required = false) UUID studentId) {
         UUID userId = studentId != null ? studentId : getCurrentUserId();
-        return ResponseEntity.ok(gradebookService.getAnalytics(userId));
+        return ResponseEntity.ok(gradebookService.getAnalytics(userId, "semester"));
     }
 
     @GetMapping("/achievements")

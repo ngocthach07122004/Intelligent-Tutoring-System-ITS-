@@ -4,9 +4,9 @@
 Information about the team and the project.
 
 ## API Usage
-- **Current Status**: Mock / Static
+- **Current Status**: Static
 - **Backend Service**: N/A
-- **Endpoints**: None currently used.
+- **Endpoints**: None.
 
 ## Notes
 - Static content describing the mission and team.

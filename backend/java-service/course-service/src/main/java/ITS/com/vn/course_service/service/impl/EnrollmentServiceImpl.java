@@ -4,7 +4,8 @@ import ITS.com.vn.course_service.domain.entity.Course;
 import ITS.com.vn.course_service.domain.entity.Enrollment;
 import ITS.com.vn.course_service.domain.enums.EnrollmentStatus;
 import ITS.com.vn.course_service.dto.event.StudentEnrolledEvent;
-import ITS.com.vn.course_service.dto.request.EnrollmentRequest;
+
+import ITS.com.vn.course_service.dto.response.CourseStatistics;
 import ITS.com.vn.course_service.dto.response.EnrollmentResponse;
 import ITS.com.vn.course_service.repository.CourseRepository;
 import ITS.com.vn.course_service.repository.EnrollmentRepository;
@@ -31,7 +32,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     private final EventPublisherService eventPublisherService;
 
     @Override
-    public EnrollmentResponse enrollStudent(Long courseId, Long studentId) {
+    public EnrollmentResponse enrollStudent(Long courseId, String studentId) {
         log.info("Enrolling student {} to course {}", studentId, courseId);
 
         // 1. Kiểm tra course tồn tại
@@ -82,7 +83,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<EnrollmentResponse> getMyEnrollments(Long studentId) {
+    public List<EnrollmentResponse> getMyEnrollments(String studentId) {
         log.debug("Getting enrollments for student {}", studentId);
 
         List<Enrollment> enrollments = enrollmentRepository.findByStudentId(studentId);
@@ -110,7 +111,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
-    public EnrollmentResponse updateProgress(Long enrollmentId, Integer progress, Long studentId) {
+    public EnrollmentResponse updateProgress(Long enrollmentId, Integer progress, String studentId) {
         log.debug("Updating progress for enrollment {} to {}%", enrollmentId, progress);
 
         // Validate progress range
@@ -137,7 +138,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
-    public void dropEnrollment(Long enrollmentId, Long studentId) {
+    public void dropEnrollment(Long enrollmentId, String studentId) {
         log.info("Dropping enrollment {} for student {}", enrollmentId, studentId);
 
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
@@ -174,8 +175,36 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Override
     @Transactional(readOnly = true)
-    public boolean isEnrolled(Long courseId, Long studentId) {
+    public boolean isEnrolled(Long courseId, String studentId) {
         return enrollmentRepository.existsByCourseIdAndStudentId(courseId, studentId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CourseStatistics getCourseStatistics(String studentId) {
+        List<Enrollment> enrollments = enrollmentRepository.findByStudentId(studentId);
+
+        int totalCourses = enrollments.size();
+        int activeCourses = (int) enrollments.stream()
+                .filter(e -> e.getStatus() == EnrollmentStatus.ACTIVE)
+                .count();
+
+        int totalCredits = enrollments.stream()
+                .mapToInt(e -> e.getCourse().getCredits())
+                .sum();
+
+        double averageProgress = enrollments.isEmpty() ? 0.0
+                : enrollments.stream()
+                        .mapToInt(Enrollment::getProgress)
+                        .average()
+                        .orElse(0.0);
+
+        return CourseStatistics.builder()
+                .totalCourses(totalCourses)
+                .activeCourses(activeCourses)
+                .totalCredits(totalCredits)
+                .averageProgress(Math.round(averageProgress * 100.0) / 100.0)
+                .build();
     }
 
     // Helper method to map entity to response

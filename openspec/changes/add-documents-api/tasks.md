@@ -1,0 +1,16 @@
+- [x] **1. Persistence**
+  - [x] Add a Flyway migration creating a documents table (id UUID, user_id UUID, title, content text, category enum note|assignment|reference|project, course nullable, tags collection, is_favorite default false, created_at/updated_at timestamps).
+  - [x] Add the Document entity/DTOs/repository with validation for required fields, category enum, and tag mapping.
+- [x] **2. Service and validation**
+  - [x] Implement DocumentService methods for create/read/update/delete/list/stats/favorite with ownership enforcement and field validation.
+  - [x] Implement filtering/search logic for category, isFavorite, and text query across title/content/tags.
+- [x] **3. API layer**
+  - [x] Add controller endpoints for stats, list, create, get, update, favorite toggle, and delete with DTOs and status codes matching the spec.
+  - [x] Wire auth context extraction so all queries and mutations are scoped to the authenticated user.
+- [x] **4. Gateway routing**
+  - [x] Add /api/v1/documents/** routing in api-gateway with auth filter enabled.
+- [x] **5. Testing**
+  - [x] Add unit tests for service validation/ownership and controller contracts.
+  - [x] Add integration tests covering list filters, stats, CRUD lifecycle, and favorite toggling.
+- [x] **6. Documentation**
+  - [x] Update user-profile-service API docs (and gateway docs if present) to include the documents endpoints.

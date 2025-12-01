@@ -15,11 +15,20 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080/realms/ITS-realm}
+    locations: classpath:db/migration
+
+  # RabbitMQ Configuration
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET:your-256-bit-secret-key-change-this-in-production-please-make-it-long-enough}
+  access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:3600000}  # 1 hour
+  refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:604800000}  # 7 days
 
 eureka:
   client:
@@ -27,17 +36,6 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka/}
-#      defaultZone: http://localhost:8761/eureka/
-
-keycloak:
-  server-url: ${KEYCLOAK_SERVER_URL:http://localhost:8081}
-  realm: ${KEYCLOAK_REALM:ITS-realm}
-  client-id: ${KEYCLOAK_CLIENT_ID:identity-service}
-  client-secret: ${KEYCLOAK_CLIENT_SECRET:KjaceHUSAVIKEh38ybI3kQ6RgMU5xnrF}
-#  server-url: http://localhost:8081
-#  realm: ITS-realm
-#  client-id: identity-service
-#  client-secret: KjaceHUSAVIKEh38ybI3kQ6RgMU5xnrF
 
 server:
   port: ${SERVER_PORT:8082}
@@ -55,6 +53,10 @@ custom:
 #    dbName: identityDb
 #    user: identityUser
 #    pass: 12345678
+
+logging:
+  level:
+    com.netflix.discovery.shared.resolver.aws.ConfigClusterResolver: WARN
 
 management:
   endpoints:

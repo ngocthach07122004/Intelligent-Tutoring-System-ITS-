@@ -2,14 +2,13 @@ package ITS.com.vn.dashboard_service.util;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.util.UUID;
 
 public class JwtUtil {
 
     /**
-     * Extract user ID from JWT token's 'sub' claim as UUID
+     * Extract user ID from SecurityContext
      */
     public static UUID getUserIdFromJwt() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -18,19 +17,17 @@ public class JwtUtil {
             throw new IllegalStateException("No authenticated user found");
         }
 
-        if (!(authentication.getPrincipal() instanceof Jwt jwt)) {
-            throw new IllegalStateException("Principal is not a JWT token");
+        Object principal = authentication.getPrincipal();
+
+        if (principal instanceof String userIdStr) {
+            try {
+                return UUID.fromString(userIdStr);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Principal is not a valid UUID: " + userIdStr, e);
+            }
         }
 
-        String subject = jwt.getSubject();
-        if (subject == null || subject.isEmpty()) {
-            throw new IllegalStateException("JWT token does not contain 'sub' claim");
-        }
-
-        try {
-            return UUID.fromString(subject);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("'sub' claim is not a valid UUID: " + subject, e);
-        }
+        throw new IllegalStateException(
+                "Principal is not a String (User ID). Found: " + principal.getClass().getName());
     }
 }

@@ -25,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +57,7 @@ public class CourseService {
      * @return Created course response
      */
     @Transactional
-    public CourseResponse createCourse(CreateCourseRequest request, Long instructorId) {
+    public CourseResponse createCourse(CreateCourseRequest request, String instructorId) {
         log.info("Creating new course: {} for instructor: {}", request.getTitle(), instructorId);
 
         // Map request to entity
@@ -112,11 +113,11 @@ public class CourseService {
     /**
      * Get course by ID with optional user context for enrollment/progress
      *
-     * @param id Course ID
+     * @param id     Course ID
      * @param userId Current authenticated user ID (nullable)
      * @return Course response with enrollment info if available
      */
-    public CourseResponse getCourseById(Long id, Long userId) {
+    public CourseResponse getCourseById(Long id, String userId) {
         log.info("Fetching course with ID: {}", id);
 
         Course course = courseRepository.findById(id)
@@ -148,7 +149,8 @@ public class CourseService {
      * @param semester Optional semester filter
      * @return Page of course responses
      */
-    public Page<CourseResponse> getAllCourses(Pageable pageable, Long userId, String semester, String enrollmentStatus) {
+    public Page<CourseResponse> getAllCourses(Pageable pageable, String userId, String semester,
+            String enrollmentStatus) {
         log.info("Fetching all courses with pagination");
 
         Page<Course> courses;
@@ -185,7 +187,7 @@ public class CourseService {
      * @param pageable     Pagination parameters
      * @return Page of course responses
      */
-    public Page<CourseResponse> getCoursesByInstructor(Long instructorId, Pageable pageable) {
+    public Page<CourseResponse> getCoursesByInstructor(String instructorId, Pageable pageable) {
         log.info("Fetching courses for instructor: {}", instructorId);
 
         Page<Course> courses = courseRepository.findByInstructorId(instructorId, pageable);
@@ -206,7 +208,7 @@ public class CourseService {
     /**
      * Get published courses with optional filters/user context
      */
-    public Page<CourseResponse> getPublishedCourses(Pageable pageable, Long userId, String semester) {
+    public Page<CourseResponse> getPublishedCourses(Pageable pageable, String userId, String semester) {
         log.info("Fetching published courses");
 
         Page<Course> courses;
@@ -248,7 +250,7 @@ public class CourseService {
      * @return Updated course response
      */
     @Transactional
-    public CourseResponse updateCourse(Long id, UpdateCourseRequest request, Long instructorId) {
+    public CourseResponse updateCourse(Long id, UpdateCourseRequest request, String instructorId) {
         log.info("Updating course with ID: {} by instructor: {}", id, instructorId);
 
         Course course = courseRepository.findById(id)
@@ -336,7 +338,8 @@ public class CourseService {
         Course updatedCourse = courseRepository.save(course);
         log.info("Course updated successfully with ID: {}", updatedCourse.getId());
 
-        return decorateCourseResponse(updatedCourse, null, enrollmentRepository.countCurrentByCourseId(updatedCourse.getId()));
+        return decorateCourseResponse(updatedCourse, null,
+                enrollmentRepository.countCurrentByCourseId(updatedCourse.getId()));
     }
 
     /**
@@ -347,7 +350,7 @@ public class CourseService {
      * @return Published course response
      */
     @Transactional
-    public CourseResponse publishCourse(Long id, Long instructorId) {
+    public CourseResponse publishCourse(Long id, String instructorId) {
         log.info("Publishing course with ID: {} by instructor: {}", id, instructorId);
 
         Course course = courseRepository.findByIdWithDetails(id)
@@ -366,7 +369,8 @@ public class CourseService {
 
         // TODO: Emit COURSE_PUBLISHED event to RabbitMQ
 
-        return decorateCourseResponse(publishedCourse, null, enrollmentRepository.countCurrentByCourseId(publishedCourse.getId()));
+        return decorateCourseResponse(publishedCourse, null,
+                enrollmentRepository.countCurrentByCourseId(publishedCourse.getId()));
     }
 
     /**
@@ -377,7 +381,7 @@ public class CourseService {
      * @return Archived course response
      */
     @Transactional
-    public CourseResponse archiveCourse(Long id, Long instructorId) {
+    public CourseResponse archiveCourse(Long id, String instructorId) {
         log.info("Archiving course with ID: {} by instructor: {}", id, instructorId);
 
         Course course = courseRepository.findById(id)
@@ -393,7 +397,8 @@ public class CourseService {
         Course archivedCourse = courseRepository.save(course);
         log.info("Course archived successfully with ID: {}", archivedCourse.getId());
 
-        return decorateCourseResponse(archivedCourse, null, enrollmentRepository.countCurrentByCourseId(archivedCourse.getId()));
+        return decorateCourseResponse(archivedCourse, null,
+                enrollmentRepository.countCurrentByCourseId(archivedCourse.getId()));
     }
 
     /**
@@ -403,7 +408,7 @@ public class CourseService {
      * @param instructorId ID of the instructor deleting the course
      */
     @Transactional
-    public void deleteCourse(Long id, Long instructorId) {
+    public void deleteCourse(Long id, String instructorId) {
         log.info("Deleting course with ID: {} by instructor: {}", id, instructorId);
 
         Course course = courseRepository.findById(id)
@@ -445,7 +450,7 @@ public class CourseService {
                 .build();
     }
 
-    private Map<Long, Enrollment> buildEnrollmentMap(Long userId, String enrollmentStatus) {
+    private Map<Long, Enrollment> buildEnrollmentMap(String userId, String enrollmentStatus) {
         if (userId == null) {
             return Map.of();
         }
@@ -491,6 +496,12 @@ public class CourseService {
             response.setEnrolled(false);
         }
         response.setCurrentStudents(safeLongToInt(currentStudents));
+
+        // Initialize details lists
+        response.setSyllabus(new ArrayList<>());
+        response.setAssignments(new ArrayList<>());
+        response.setResources(new ArrayList<>());
+
         enrichInstructor(response, course.getInstructorId());
         return response;
     }
@@ -510,7 +521,7 @@ public class CourseService {
         return Math.toIntExact(value);
     }
 
-    private void enrichInstructor(CourseResponse response, Long instructorId) {
+    private void enrichInstructor(CourseResponse response, String instructorId) {
         if (instructorId == null) {
             return;
         }

@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-import { 
+import {
   LoginPayload, SignUpPayload, ResetPasswordPayload,
   Page, PageableParams, CourseResponse, CreateCourseRequest,
   EnrollmentResponse,
@@ -20,7 +20,7 @@ import {
   InstructorCourseStatsResponse,
   AtRiskListResponse,
   AdminStatsResponse,
- } from "./interfaces";
+} from "./interfaces";
 
 /*
   HƯỚNG DẪN LẮP API (DEV / INTEGRATION)
@@ -34,7 +34,7 @@ import {
   6) Import và sử dụng class đã viết trong codebase frontend (tham khảo file signup/page.tsx)
 */
 
-const BASE_URL = "http://localhost:8080/api/v1";
+const BASE_URL = "http://localhost:8181/api/v1";
 
 const unwrap = (response: AxiosResponse) => ({
   success: response?.data?.success ??
@@ -333,7 +333,7 @@ export class ProfileOperation {
       return {
         success: false,
         message: error?.response?.data?.message || "An error occurred",
-        data: null, 
+        data: null,
         status: error?.response?.status || 500,
       };
     }
@@ -355,12 +355,12 @@ export class ProfileOperation {
       return {
         success: false,
         message: error?.response?.data?.message || "An error occurred",
-        data: null, 
+        data: null,
         status: error?.response?.status || 500,
       };
     }
   }
-  
+
   async getProfile(userId: string) {
     try {
       const response: AxiosResponse<UserProfileResponse> = await axios.get(
@@ -376,7 +376,7 @@ export class ProfileOperation {
       return {
         success: false,
         message: error?.response?.data?.message || "An error occurred",
-        data: null, 
+        data: null,
         status: error?.response?.status || 500,
       };
     }
@@ -398,7 +398,7 @@ export class ProfileOperation {
       return {
         success: false,
         message: error?.response?.data?.message || "An error occurred",
-        data: null, 
+        data: null,
         status: error?.response?.status || 500,
       };
     }
@@ -423,7 +423,7 @@ export class ProfileOperation {
       return {
         success: false,
         message: error?.response?.data?.message || "An error occurred",
-        data: null, 
+        data: null,
         status: error?.response?.status || 500,
       };
     }
@@ -445,7 +445,7 @@ export class ProfileOperation {
       return {
         success: false,
         message: error?.response?.data?.message || "An error occurred",
-        data: null, 
+        data: null,
         status: error?.response?.status || 500,
       };
     }
@@ -467,7 +467,7 @@ export class ProfileOperation {
       return {
         success: false,
         message: error?.response?.data?.message || "An error occurred",
-        data: null, 
+        data: null,
         status: error?.response?.status || 500,
       };
     }
@@ -488,12 +488,12 @@ export class ProfileOperation {
       return {
         success: false,
         message: error?.response?.data?.message || "An error occurred",
-        data: null, 
+        data: null,
         status: error?.response?.status || 500,
       };
     }
   }
-  
+
   async getUserSkills(userId: string, category?: string) {
     try {
       const response: AxiosResponse<SkillResponse[]> = await axios.get(
@@ -510,7 +510,7 @@ export class ProfileOperation {
       return {
         success: false,
         message: error?.response?.data?.message || "An error occurred",
-        data: null, 
+        data: null,
         status: error?.response?.status || 500,
       };
     }
@@ -537,7 +537,7 @@ export class ProfileOperation {
       return {
         success: false,
         message: error?.response?.data?.message || "An error occurred",
-        data: null, 
+        data: null,
         status: error?.response?.status || 500,
       };
     }
@@ -559,7 +559,7 @@ export class ProfileOperation {
       return {
         success: false,
         message: error?.response?.data?.message || "An error occurred",
-        data: null, 
+        data: null,
         status: error?.response?.status || 500,
       };
     }
@@ -580,7 +580,7 @@ export class ProfileOperation {
       return {
         success: false,
         message: error?.response?.data?.message || "An error occurred",
-        data: null, 
+        data: null,
         status: error?.response?.status || 500,
       };
     }
@@ -606,7 +606,7 @@ export class ProfileOperation {
       return {
         success: false,
         message: error?.response?.data?.message || "An error occurred",
-        data: null, 
+        data: null,
         status: error?.response?.status || 500,
       };
     }
@@ -628,12 +628,12 @@ export class ProfileOperation {
       return {
         success: false,
         message: error?.response?.data?.message || "An error occurred",
-        data: null, 
+        data: null,
         status: error?.response?.status || 500,
       };
     }
   }
-  
+
   async joinGroup(payload: JoinGroupRequest) {
     try {
       const response: AxiosResponse = await axios.post(
@@ -650,7 +650,7 @@ export class ProfileOperation {
       return {
         success: false,
         message: error?.response?.data?.message || "An error occurred",
-        data: null, 
+        data: null,
         status: error?.response?.status || 500,
       };
     }
@@ -671,12 +671,12 @@ export class ProfileOperation {
       return {
         success: false,
         message: error?.response?.data?.message || "An error occurred",
-        data: null, 
+        data: null,
         status: error?.response?.status || 500,
       };
     }
   }
-  
+
   async promoteMember(id: number, userId: string, payload: PromoteMemberRequest) {
     try {
       const response: AxiosResponse = await axios.put(
@@ -693,7 +693,7 @@ export class ProfileOperation {
       return {
         success: false,
         message: error?.response?.data?.message || "An error occurred",
-        data: null, 
+        data: null,
         status: error?.response?.status || 500,
       };
     }
@@ -714,7 +714,7 @@ export class ProfileOperation {
       return {
         success: false,
         message: error?.response?.data?.message || "An error occurred",
-        data: null, 
+        data: null,
         status: error?.response?.status || 500,
       };
     }
@@ -722,7 +722,7 @@ export class ProfileOperation {
 }
 
 export class DashboardOperation {
-  
+
   private baseUrl: string;
 
   constructor() {
@@ -744,7 +744,7 @@ export class DashboardOperation {
       return {
         success: false,
         message: error?.response?.data?.message || "An error occurred",
-        data: null, 
+        data: null,
         status: error?.response?.status || 500,
       };
     }
@@ -765,7 +765,7 @@ export class DashboardOperation {
       return {
         success: false,
         message: error?.response?.data?.message || "An error occurred",
-        data: null, 
+        data: null,
         status: error?.response?.status || 500,
       };
     }
@@ -786,7 +786,7 @@ export class DashboardOperation {
       return {
         success: false,
         message: error?.response?.data?.message || "An error occurred",
-        data: null, 
+        data: null,
         status: error?.response?.status || 500,
       };
     }
@@ -795,7 +795,7 @@ export class DashboardOperation {
   // ==========================================
   // INSTRUCTOR DASHBOARD CONTROLLER
   // ==========================================
-  
+
   async getInstructorCourseStats(id: number) {
     try {
       const response: AxiosResponse<InstructorCourseStatsResponse> = await axios.get(
@@ -811,7 +811,7 @@ export class DashboardOperation {
       return {
         success: false,
         message: error?.response?.data?.message || "An error occurred",
-        data: null, 
+        data: null,
         status: error?.response?.status || 500,
       };
     }
@@ -832,7 +832,7 @@ export class DashboardOperation {
       return {
         success: false,
         message: error?.response?.data?.message || "An error occurred",
-        data: null, 
+        data: null,
         status: error?.response?.status || 500,
       };
     }
@@ -841,7 +841,7 @@ export class DashboardOperation {
   // ==========================================
   // ADMIN DASHBOARD CONTROLLER
   // ==========================================
-  
+
   async getAdminStats() {
     try {
       const response: AxiosResponse<AdminStatsResponse> = await axios.get(
@@ -857,7 +857,7 @@ export class DashboardOperation {
       return {
         success: false,
         message: error?.response?.data?.message || "An error occurred",
-        data: null, 
+        data: null,
         status: error?.response?.status || 500,
       };
     }
@@ -866,11 +866,11 @@ export class DashboardOperation {
   // ==========================================
   // HEALTH CHECK (ROOT)
   // ==========================================
-  
+
   async healthCheck() {
     try {
       const healthUrl = BASE_URL.replace('/api/v1', '') + '/health';
-      
+
       const response: AxiosResponse<Record<string, string>> = await axios.get(
         healthUrl,
         {
@@ -883,7 +883,7 @@ export class DashboardOperation {
       return {
         success: false,
         message: "Failed to connect to health endpoint",
-        data: null, 
+        data: null,
         status: error?.response?.status || 500,
       };
     }

@@ -4,11 +4,12 @@
 User login screen.
 
 ## API Usage
-- **Current Status**: Implemented (Frontend helpers exist but wiring needs verification)
+- **Current Status**: Implemented
 - **Backend Service**: Identity Service
 - **Endpoints**:
-    - `POST /api/v1/auth/login` (via `AuthOperation.signin`)
-- **Helpers**: `AuthOperation.signin`
+    - `POST /api/v1/auth/login`
+        - **Request**: `LoginRequest` { `username`, `password` }
+        - **Response**: `ApiResponse<TokenResponse>` { `accessToken`, `refreshToken`, `expiresIn`, `tokenType` }
 
 ## Notes
 - Documented in `backend/java-service/api-docs/identity-service.md`.

@@ -22,7 +22,7 @@ public class CourseResponse {
     private String description;
     private CourseStatus status;
     private CourseVisibility visibility;
-    private Long instructorId;
+    private String instructorId;
     private String instructorName;
     private String instructorAvatarUrl;
     private String thumbnailUrl;
@@ -43,4 +43,9 @@ public class CourseResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime publishedAt;
+
+    // Additional fields for details view
+    private List<Object> syllabus; // Placeholder for now
+    private List<Object> assignments; // Placeholder for now
+    private List<Object> resources; // Placeholder for now
 }

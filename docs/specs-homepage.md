@@ -4,9 +4,9 @@
 Public homepage for the Intelligent Tutoring System.
 
 ## API Usage
-- **Current Status**: Mock / Static
-- **Backend Service**: N/A (Mostly static content)
-- **Endpoints**: None currently used.
+- **Current Status**: Static
+- **Backend Service**: N/A
+- **Endpoints**: None.
 
 ## Notes
 - Displays general information about the platform.

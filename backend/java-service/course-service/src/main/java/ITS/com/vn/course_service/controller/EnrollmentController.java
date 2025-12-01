@@ -1,5 +1,6 @@
 package ITS.com.vn.course_service.controller;
 
+import ITS.com.vn.course_service.dto.response.CourseStatistics;
 import ITS.com.vn.course_service.dto.response.EnrollmentResponse;
 import ITS.com.vn.course_service.security.SecurityUtils;
 import ITS.com.vn.course_service.service.EnrollmentService;
@@ -32,7 +33,7 @@ public class EnrollmentController {
             @PathVariable Long courseId,
             Authentication authentication) { // From JWT via filter
 
-        Long studentId = SecurityUtils.getUserIdAsLong(authentication, true);
+        String studentId = SecurityUtils.getUserId(authentication, true);
         log.info("Student {} enrolling in course {}", studentId, courseId);
 
         EnrollmentResponse response = enrollmentService.enrollStudent(courseId, studentId);
@@ -47,10 +48,11 @@ public class EnrollmentController {
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<List<EnrollmentResponse>> getMyCourses(
             Authentication authentication,
-            @RequestParam(required = false) String status) { // Filter by status (optional)
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String q) { // Search query
 
-        Long studentId = SecurityUtils.getUserIdAsLong(authentication, true);
-        log.debug("Getting courses for student {}, status filter: {}", studentId, status);
+        String studentId = SecurityUtils.getUserId(authentication, true);
+        log.debug("Getting courses for student {}, status filter: {}, query: {}", studentId, status, q);
 
         List<EnrollmentResponse> enrollments = enrollmentService.getMyEnrollments(studentId);
 
@@ -61,7 +63,27 @@ public class EnrollmentController {
                     .toList();
         }
 
+        // Filter by query if provided
+        if (q != null && !q.isEmpty()) {
+            String lowerQ = q.toLowerCase();
+            enrollments = enrollments.stream()
+                    .filter(e -> e.getCourseTitle().toLowerCase().contains(lowerQ) ||
+                            e.getCourseCode().toLowerCase().contains(lowerQ))
+                    .toList();
+        }
+
         return ResponseEntity.ok(enrollments);
+    }
+
+    /**
+     * Get course statistics for current user
+     * GET /api/v1/courses/my-courses/stats
+     */
+    @GetMapping("/courses/my-courses/stats")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<CourseStatistics> getMyCourseStats(Authentication authentication) {
+        String studentId = SecurityUtils.getUserId(authentication, true);
+        return ResponseEntity.ok(enrollmentService.getCourseStatistics(studentId));
     }
 
     /**
@@ -99,7 +121,7 @@ public class EnrollmentController {
             @RequestBody Map<String, Integer> request,
             Authentication authentication) {
 
-        Long studentId = SecurityUtils.getUserIdAsLong(authentication, true);
+        String studentId = SecurityUtils.getUserId(authentication, true);
         Integer progress = request.get("progress");
         if (progress == null) {
             throw new IllegalArgumentException("Progress is required");
@@ -121,7 +143,7 @@ public class EnrollmentController {
             @PathVariable Long enrollmentId,
             Authentication authentication) {
 
-        Long studentId = SecurityUtils.getUserIdAsLong(authentication, true);
+        String studentId = SecurityUtils.getUserId(authentication, true);
         log.info("Student {} dropping enrollment {}", studentId, enrollmentId);
 
         enrollmentService.dropEnrollment(enrollmentId, studentId);
@@ -150,8 +172,20 @@ public class EnrollmentController {
             @PathVariable Long courseId,
             Authentication authentication) {
 
-        Long studentId = SecurityUtils.getUserIdAsLong(authentication, true);
+        String studentId = SecurityUtils.getUserId(authentication, true);
         boolean enrolled = enrollmentService.isEnrolled(courseId, studentId);
         return ResponseEntity.ok(Map.of("enrolled", enrolled));
+    }
+
+    /**
+     * Lấy tất cả enrollments của một student cụ thể (Admin/System/Teacher)
+     * GET /api/v1/enrollments/student/{studentId}
+     */
+    @GetMapping("/enrollments/student/{studentId}")
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
+    public ResponseEntity<List<EnrollmentResponse>> getStudentEnrollments(
+            @PathVariable String studentId) {
+        log.debug("Getting enrollments for student {}", studentId);
+        return ResponseEntity.ok(enrollmentService.getMyEnrollments(studentId));
     }
 }

@@ -36,7 +36,7 @@ public class LessonService {
      * Create a new lesson in a chapter
      */
     @Transactional
-    public LessonResponse createLesson(Long chapterId, CreateLessonRequest request, Long instructorId) {
+    public LessonResponse createLesson(Long chapterId, CreateLessonRequest request, String instructorId) {
         log.info("Creating new lesson for chapter: {}", chapterId);
 
         Chapter chapter = chapterRepository.findById(chapterId)
@@ -109,7 +109,7 @@ public class LessonService {
      * Update lesson
      */
     @Transactional
-    public LessonResponse updateLesson(Long id, CreateLessonRequest request, Long instructorId) {
+    public LessonResponse updateLesson(Long id, CreateLessonRequest request, String instructorId) {
         log.info("Updating lesson with ID: {}", id);
 
         Lesson lesson = lessonRepository.findById(id)
@@ -151,7 +151,7 @@ public class LessonService {
      * Delete lesson
      */
     @Transactional
-    public void deleteLesson(Long id, Long instructorId) {
+    public void deleteLesson(Long id, String instructorId) {
         log.info("Deleting lesson with ID: {}", id);
 
         Lesson lesson = lessonRepository.findById(id)

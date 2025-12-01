@@ -4,9 +4,9 @@
 This is the landing page of the application.
 
 ## API Usage
-- **Current Status**: Mock / Static
-- **Backend Service**: N/A (Mostly static content or redirects)
-- **Endpoints**: None currently used.
+- **Current Status**: Static / Redirect
+- **Backend Service**: N/A
+- **Endpoints**: None.
 
 ## Notes
 - Serves as the entry point.

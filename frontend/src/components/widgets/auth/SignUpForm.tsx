@@ -2,19 +2,19 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { FormMessageAlert } from "../../ui/FormMessageAlert"; // Import success message component
+import { FormMessageAlert } from "../../ui/FormMessageAlert";
 import { CustomButton } from "../../ui/CustomButton";
 import { TextField } from "../../blocks/TextField";
 import { MailIcon, LockIcon, GoogleIcon, MicrosoftIcon } from "../../icons";
-import { AuthOperation } from "@/lib/BE-library/main";
+import { identityServiceApi } from "@/lib/BE-library/identity-service-api";
+import { TokenStorage } from "@/lib/utils/tokenStorage";
 
-const auth = new AuthOperation();
 export const SignUpForm = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(""); // State for success message
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
   const router = useRouter();
@@ -30,17 +30,36 @@ export const SignUpForm = () => {
     setIsDisabled(true);
     setLoading(true);
     setError("");
-    setSuccess(""); // Clear previous success message
+    setSuccess("");
 
     try {
-      const response = await auth.signup({ username: name, email, password });
-      console.log("Signup successful:", response);
-      setSuccess(
-        response.message || "Signup successful! Redirecting to dashboard..."
-      );
-      setTimeout(() => router.push("/dashboard/home"), 2000); // Redirect after 2 seconds
+      const response = await identityServiceApi.register({
+        username: name,
+        email,
+        password,
+        roles: ["STUDENT"],
+      });
+
+      if (response.success) {
+        console.log("Signup successful:", response);
+
+        if (response.data) {
+          TokenStorage.saveTokens({
+            accessToken: response.data.accessToken,
+            refreshToken: response.data.refreshToken,
+            tokenType: response.data.tokenType || "Bearer",
+          });
+        }
+
+        setSuccess(
+          response.message || "Signup successful! Redirecting to dashboard..."
+        );
+        setTimeout(() => router.push("/dashboard/home"), 2000);
+      } else {
+        setError(response.message || "Signup failed. Please try again.");
+      }
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "An error occurred during signup.");
     }
 
     setLoading(false);
@@ -115,7 +134,7 @@ export const SignUpForm = () => {
           ))}
         </ul>
 
-        {success && <FormMessageAlert message={success} success={true}/>} {/* Display success message */}
+        {success && <FormMessageAlert message={success} success={true} />} {/* Display success message */}
         {error && <FormMessageAlert message={error} />} {/* Display error message */}
 
         {/* Submit CustomButton */}
