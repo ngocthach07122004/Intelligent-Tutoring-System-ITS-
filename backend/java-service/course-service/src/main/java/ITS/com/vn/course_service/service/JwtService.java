@@ -51,8 +51,10 @@ public class JwtService {
     public Set<String> extractRoles(String token) {
         return extractClaim(token, claims -> {
             Object rolesObj = claims.get("roles");
-            if (rolesObj instanceof Set) {
-                return ((Set<?>) rolesObj).stream()
+            log.info("Extracted roles object: {}, type: {}", rolesObj,
+                    rolesObj != null ? rolesObj.getClass().getName() : "null");
+            if (rolesObj instanceof java.util.Collection) {
+                return ((java.util.Collection<?>) rolesObj).stream()
                         .map(Object::toString)
                         .collect(Collectors.toSet());
             }

@@ -108,7 +108,7 @@ services:
       WEB_CLIENT_URL_DEV: ${WEB_CLIENT_URL_DEV}
       EUREKA_SERVER: ${EUREKA_SERVER}
       EUREKA_HOST: eureka
-      JWT_SECRET: ${JWT_SECRET}
+      JWT_SECRET: ${JWT_SECRET:-your-256-bit-secret-key-change-this-in-production-please-make-it-long-enough}
     depends_on:
       - eureka
     networks:
@@ -168,7 +168,7 @@ services:
       DB_HOST: ${POSTGRES_USER_PROFILE_HOST}
       DB_PORT: ${POSTGRES_PORT_DEFAULT}
       DB_NAME: ${POSTGRES_USER_PROFILE_DB}
-      JWT_SECRET: ${JWT_SECRET}
+      JWT_SECRET: ${JWT_SECRET:-your-256-bit-secret-key-change-this-in-production-please-make-it-long-enough}
     depends_on:
       - postgres_userProfile
       - rabbitmq
@@ -200,7 +200,7 @@ services:
       DB_PORT: ${POSTGRES_PORT_DEFAULT}
       DB_NAME: ${POSTGRES_COURSE_DB}
       USER_PROFILE_SERVICE_URL: ${USER_PROFILE_SERVICE_URL}
-      JWT_SECRET: ${JWT_SECRET}
+      JWT_SECRET: ${JWT_SECRET:-your-256-bit-secret-key-change-this-in-production-please-make-it-long-enough}
     depends_on:
       - postgres_course
       - rabbitmq
@@ -233,7 +233,7 @@ services:
       ASSESSMENT_SERVICE_URL: ${ASSESSMENT_SERVICE_URL}
       USER_PROFILE_SERVICE_URL: ${USER_PROFILE_SERVICE_URL}
       COURSE_SERVICE_URL: ${COURSE_SERVICE_URL}
-      JWT_SECRET: ${JWT_SECRET}
+      JWT_SECRET: ${JWT_SECRET:-your-256-bit-secret-key-change-this-in-production-please-make-it-long-enough}
     depends_on:
       - postgres_dashboard
       - rabbitmq
@@ -263,7 +263,7 @@ services:
       DB_HOST: ${POSTGRES_ASSESSMENT_HOST}
       DB_PORT: ${POSTGRES_PORT_DEFAULT}
       DB_NAME: ${POSTGRES_ASSESSMENT_DB}
-      JWT_SECRET: ${JWT_SECRET}
+      JWT_SECRET: ${JWT_SECRET:-your-256-bit-secret-key-change-this-in-production-please-make-it-long-enough}
     depends_on:
       - postgres_assessment
       - rabbitmq

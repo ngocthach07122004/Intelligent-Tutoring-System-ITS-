@@ -35,12 +35,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            log.warn("Missing or invalid Authorization header: {}", authHeader);
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
             final String jwt = authHeader.substring(7);
+            log.info("Validating token: {}", jwt.substring(0, Math.min(jwt.length(), 10)) + "...");
 
             if (jwtService.isTokenValid(jwt)) {
                 UUID userId = jwtService.extractUserId(jwt);
@@ -59,10 +61,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
 
-                log.debug("Authenticated user: {} with roles: {}", username, roles);
+                log.info("Authenticated user: {} with roles: {}", username, roles);
+            } else {
+                log.warn("Token validation returned false");
             }
         } catch (Exception e) {
             log.error("JWT authentication failed: {}", e.getMessage());
+            e.printStackTrace();
         }
 
         filterChain.doFilter(request, response);

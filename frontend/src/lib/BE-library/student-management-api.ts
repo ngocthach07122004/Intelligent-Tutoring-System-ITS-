@@ -29,9 +29,27 @@ const unwrap = (response: AxiosResponse) => ({
  */
 export class StudentManagementOperation {
     private baseUrl: string;
+    private authToken?: string;
 
     constructor() {
         this.baseUrl = USER_PROFILE_BASE_URL;
+    }
+
+    setAuthToken(token?: string) {
+        this.authToken = token;
+    }
+
+    private config(params?: Record<string, unknown>) {
+        const headers = this.authToken
+            ? { Authorization: `Bearer ${this.authToken}` }
+            : undefined;
+
+        return {
+            params,
+            headers,
+            withCredentials: true,
+            validateStatus: (status: number) => status >= 200 && status < 300,
+        };
     }
 
     // ==========================================
@@ -46,10 +64,7 @@ export class StudentManagementOperation {
         try {
             const response: AxiosResponse<UserProfileResponse> = await axios.get(
                 `${this.baseUrl}/profile/me`,
-                {
-                    withCredentials: true,
-                    validateStatus: (status) => status >= 200 && status < 300,
-                }
+                this.config()
             );
             return unwrap(response);
         } catch (error: any) {
@@ -72,10 +87,7 @@ export class StudentManagementOperation {
             const response: AxiosResponse<UserProfileResponse> = await axios.put(
                 `${this.baseUrl}/profile/me`,
                 payload,
-                {
-                    withCredentials: true,
-                    validateStatus: (status) => status >= 200 && status < 300,
-                }
+                this.config()
             );
             return unwrap(response);
         } catch (error: any) {
@@ -101,10 +113,7 @@ export class StudentManagementOperation {
         try {
             const response: AxiosResponse<Student> = await axios.get(
                 `${this.baseUrl}/students/${id}`,
-                {
-                    withCredentials: true,
-                    validateStatus: (status) => status >= 200 && status < 300,
-                }
+                this.config()
             );
             return unwrap(response);
         } catch (error: any) {
@@ -127,10 +136,7 @@ export class StudentManagementOperation {
             const response: AxiosResponse<Student> = await axios.put(
                 `${this.baseUrl}/students/${id}`,
                 payload,
-                {
-                    withCredentials: true,
-                    validateStatus: (status) => status >= 200 && status < 300,
-                }
+                this.config()
             );
             return unwrap(response);
         } catch (error: any) {
@@ -152,10 +158,7 @@ export class StudentManagementOperation {
         try {
             const response: AxiosResponse<AcademicRecord[]> = await axios.get(
                 `${this.baseUrl}/students/${id}/academic-history`,
-                {
-                    withCredentials: true,
-                    validateStatus: (status) => status >= 200 && status < 300,
-                }
+                this.config()
             );
             return unwrap(response);
         } catch (error: any) {
@@ -178,11 +181,7 @@ export class StudentManagementOperation {
             const params = timeframe ? { timeframe } : {};
             const response: AxiosResponse<LearningAnalytics> = await axios.get(
                 `${this.baseUrl}/students/${id}/analytics`,
-                {
-                    params,
-                    withCredentials: true,
-                    validateStatus: (status) => status >= 200 && status < 300,
-                }
+                this.config(params)
             );
             return unwrap(response);
         } catch (error: any) {
@@ -204,10 +203,7 @@ export class StudentManagementOperation {
         try {
             const response: AxiosResponse<CurrentSubject[]> = await axios.get(
                 `${this.baseUrl}/students/${id}/subjects`,
-                {
-                    withCredentials: true,
-                    validateStatus: (status) => status >= 200 && status < 300,
-                }
+                this.config()
             );
             return unwrap(response);
         } catch (error: any) {
@@ -229,10 +225,7 @@ export class StudentManagementOperation {
         try {
             const response: AxiosResponse<CurrentSubject> = await axios.get(
                 `${this.baseUrl}/students/${id}/subjects/${subjectId}`,
-                {
-                    withCredentials: true,
-                    validateStatus: (status) => status >= 200 && status < 300,
-                }
+                this.config()
             );
             return unwrap(response);
         } catch (error: any) {
@@ -254,10 +247,7 @@ export class StudentManagementOperation {
         try {
             const response: AxiosResponse<Achievement[]> = await axios.get(
                 `${this.baseUrl}/students/${id}/achievements`,
-                {
-                    withCredentials: true,
-                    validateStatus: (status) => status >= 200 && status < 300,
-                }
+                this.config()
             );
             return unwrap(response);
         } catch (error: any) {
@@ -283,10 +273,7 @@ export class StudentManagementOperation {
         try {
             const response: AxiosResponse<PerformanceSummary> = await axios.get(
                 `${this.baseUrl}/performance/summary`,
-                {
-                    withCredentials: true,
-                    validateStatus: (status) => status >= 200 && status < 300,
-                }
+                this.config()
             );
             return unwrap(response);
         } catch (error: any) {
@@ -308,10 +295,7 @@ export class StudentManagementOperation {
         try {
             const response: AxiosResponse<SemesterPerformance[]> = await axios.get(
                 `${this.baseUrl}/performance/semesters`,
-                {
-                    withCredentials: true,
-                    validateStatus: (status) => status >= 200 && status < 300,
-                }
+                this.config()
             );
             return unwrap(response);
         } catch (error: any) {
@@ -333,10 +317,7 @@ export class StudentManagementOperation {
         try {
             const response: AxiosResponse<PerformanceSkill[]> = await axios.get(
                 `${this.baseUrl}/performance/skills`,
-                {
-                    withCredentials: true,
-                    validateStatus: (status) => status >= 200 && status < 300,
-                }
+                this.config()
             );
             return unwrap(response);
         } catch (error: any) {

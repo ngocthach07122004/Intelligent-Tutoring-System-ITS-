@@ -53,14 +53,19 @@ const handleError = (error: any, fallback: string) => {
 
 export class IdentityServiceApi {
     private baseUrl: string;
+    private authToken?: string;
 
     constructor(baseUrl = IDENTITY_SERVICE_BASE_URL) {
         this.baseUrl = baseUrl;
     }
 
+    setAuthToken(token?: string) {
+        this.authToken = token;
+    }
+
     private config(token?: string) {
-        const headers = token
-            ? { Authorization: `Bearer ${token}` }
+        const headers = (token || this.authToken)
+            ? { Authorization: `Bearer ${token || this.authToken}` }
             : undefined;
 
         return {

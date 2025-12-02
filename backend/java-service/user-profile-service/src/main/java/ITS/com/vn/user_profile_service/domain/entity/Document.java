@@ -1,7 +1,6 @@
 package ITS.com.vn.user_profile_service.domain.entity;
 
 import ITS.com.vn.user_profile_service.domain.enums.DocumentCategory;
-import ITS.com.vn.user_profile_service.util.StringListJsonConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -53,7 +52,7 @@ public class Document {
     @Column(length = 100)
     private String course;
 
-    @Convert(converter = StringListJsonConverter.class)
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     @Builder.Default
     private List<String> tags = new ArrayList<>();

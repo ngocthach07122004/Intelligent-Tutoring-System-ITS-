@@ -7,6 +7,11 @@ import { CustomButton } from "../../ui/CustomButton";
 import { TextField } from "../../blocks/TextField";
 import { MailIcon, LockIcon, GoogleIcon, MicrosoftIcon } from "../../icons";
 import { identityServiceApi } from "@/lib/BE-library/identity-service-api";
+import { courseServiceApi } from "@/lib/BE-library/course-service-api";
+import { assessmentServiceApi } from "@/lib/BE-library/assessment-service-api";
+import { dashboardServiceApi } from "@/lib/BE-library/dashboard-service-api";
+import { userProfileServiceApi } from "@/lib/BE-library/user-profile-service-api";
+import { studentManagementOps } from "@/lib/BE-library/student-management-api";
 import { TokenStorage } from "@/lib/utils/tokenStorage";
 
 export const AuthForm = () => {
@@ -36,6 +41,15 @@ export const AuthForm = () => {
           refreshToken: response.data.refreshToken,
           tokenType: response.data.tokenType || "Bearer",
         });
+
+        // Set tokens on all API services
+        const token = response.data.accessToken;
+        identityServiceApi.setAuthToken(token);
+        courseServiceApi.setAuthToken(token);
+        assessmentServiceApi.setAuthToken(token);
+        dashboardServiceApi.setAuthToken(token);
+        userProfileServiceApi.setAuthToken(token);
+        studentManagementOps.setAuthToken(token);
 
         // Get user info
         const userResponse = await identityServiceApi.getCurrentUser(response.data.accessToken);
