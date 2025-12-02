@@ -1,35 +1,8 @@
 "use client";
 
+import { useRouter } from 'next/navigation';
 import { ArrowLeft, BookOpen, Clock, Award, Users, Calendar, CheckCircle2, PlayCircle, FileText, Download, Star } from "lucide-react";
-
-interface CourseModule {
-  id: string;
-  title: string;
-  duration: string;
-  lessons: {
-    id: string;
-    title: string;
-    type: 'video' | 'reading' | 'quiz' | 'assignment';
-    duration: string;
-    completed: boolean;
-  }[];
-}
-
-interface Course {
-  id: string;
-  name: string;
-  code: string;
-  instructor: string;
-  semester: string;
-  credits: number;
-  schedule: string;
-  status: 'active' | 'completed' | 'upcoming';
-  enrollmentDate: string;
-  progress: number;
-  students: number;
-  maxStudents: number;
-  description: string;
-}
+import type { Course, CourseModule } from '@/lib/BE-library/interfaces';
 
 interface CourseDetailModalProps {
   course: Course;
@@ -37,6 +10,25 @@ interface CourseDetailModalProps {
 }
 
 export const CourseDetailModal = ({ course, onClose }: CourseDetailModalProps) => {
+  const router = useRouter();
+  
+  // Use modules from course prop if available, otherwise use mock data
+  const courseModules = course.modules && course.modules.length > 0 
+    ? course.modules 
+    : [
+        {
+          id: "module1",
+          title: "Chương 1: Giới thiệu và Khái niệm cơ bản",
+          duration: "2 tuần",
+          lessons: [
+            { id: "1.1", title: "Giới thiệu về khóa học", type: "video" as const, duration: "15:30", completed: true },
+            { id: "1.2", title: "Các khái niệm cơ bản", type: "video" as const, duration: "25:45", completed: true },
+            { id: "1.3", title: "Bài đọc: Tài liệu tham khảo", type: "reading" as const, duration: "10 phút", completed: true },
+            { id: "1.4", title: "Bài tập thực hành 1", type: "assignment" as const, duration: "30 phút", completed: false },
+          ]
+        },
+      ];
+  
   // Mock data for course details
   const courseDetails = {
     fullDescription: `${course.description}. Khóa học này được thiết kế để cung cấp nền tảng vững chắc về các khái niệm cơ bản và nâng cao trong lĩnh vực này. Bạn sẽ được học từ những giảng viên giàu kinh nghiệm với phương pháp giảng dạy thực tế và dễ hiểu.`,
@@ -66,42 +58,7 @@ export const CourseDetailModal = ({ course, onClose }: CourseDetailModalProps) =
       bio: "Giảng viên với hơn 10 năm kinh nghiệm giảng dạy, chuyên sâu về lĩnh vực này. Đã hướng dẫn hàng trăm sinh viên thành công trong học tập và nghề nghiệp."
     },
 
-    modules: [
-      {
-        id: "module1",
-        title: "Chương 1: Giới thiệu và Khái niệm cơ bản",
-        duration: "2 tuần",
-        lessons: [
-          { id: "1.1", title: "Giới thiệu về khóa học", type: "video" as const, duration: "15:30", completed: true },
-          { id: "1.2", title: "Các khái niệm cơ bản", type: "video" as const, duration: "25:45", completed: true },
-          { id: "1.3", title: "Bài đọc: Tài liệu tham khảo", type: "reading" as const, duration: "10 phút", completed: true },
-          { id: "1.4", title: "Bài tập thực hành 1", type: "assignment" as const, duration: "30 phút", completed: false },
-          { id: "1.5", title: "Kiểm tra trắc nghiệm", type: "quiz" as const, duration: "15 phút", completed: false }
-        ]
-      },
-      {
-        id: "module2",
-        title: "Chương 2: Kiến thức nâng cao",
-        duration: "3 tuần",
-        lessons: [
-          { id: "2.1", title: "Đi sâu vào các khái niệm", type: "video" as const, duration: "35:20", completed: false },
-          { id: "2.2", title: "Thực hành nâng cao", type: "video" as const, duration: "40:15", completed: false },
-          { id: "2.3", title: "Case study thực tế", type: "reading" as const, duration: "20 phút", completed: false },
-          { id: "2.4", title: "Dự án nhóm", type: "assignment" as const, duration: "2 giờ", completed: false }
-        ]
-      },
-      {
-        id: "module3",
-        title: "Chương 3: Ứng dụng thực tế",
-        duration: "2 tuần",
-        lessons: [
-          { id: "3.1", title: "Dự án thực tế", type: "video" as const, duration: "45:00", completed: false },
-          { id: "3.2", title: "Workshop và thảo luận", type: "video" as const, duration: "30:00", completed: false },
-          { id: "3.3", title: "Bài tập tổng hợp", type: "assignment" as const, duration: "1 giờ", completed: false },
-          { id: "3.4", title: "Kiểm tra cuối khóa", type: "quiz" as const, duration: "45 phút", completed: false }
-        ]
-      }
-    ],
+    modules: courseModules,
 
     ratings: {
       average: 4.7,
@@ -225,16 +182,17 @@ export const CourseDetailModal = ({ course, onClose }: CourseDetailModalProps) =
                           
                           <div className="divide-y divide-gray-100">
                             {module.lessons.map((lesson) => (
-                              <div
+                              <button
                                 key={lesson.id}
-                                className={`p-4 flex items-center justify-between hover:bg-blue-50/50 transition-colors ${
-                                  lesson.completed ? 'bg-green-50/30' : ''
+                                onClick={() => router.push(`/dashboard/courses/${course.id}/lessons/${lesson.id}`)}
+                                className={`w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors text-left ${
+                                  lesson.completed ? 'bg-gray-50/50' : ''
                                 }`}
                               >
                                 <div className="flex items-center gap-3 flex-1">
                                   <div className={`p-2 rounded-lg ${
                                     lesson.completed 
-                                      ? 'bg-green-100 text-green-600' 
+                                      ? 'bg-gray-900 text-white' 
                                       : 'bg-gray-100 text-gray-600'
                                   }`}>
                                     {getLessonIcon(lesson.type)}
@@ -242,19 +200,19 @@ export const CourseDetailModal = ({ course, onClose }: CourseDetailModalProps) =
                                   <div className="flex-1">
                                     <div className="flex items-center gap-2">
                                       <span className={`font-medium ${
-                                        lesson.completed ? 'text-gray-700' : 'text-gray-800'
+                                        lesson.completed ? 'text-gray-600' : 'text-gray-900'
                                       }`}>
                                         {lesson.title}
                                       </span>
                                       {lesson.completed && (
-                                        <CheckCircle2 className="w-4 h-4 text-green-600" />
+                                        <CheckCircle2 className="w-4 h-4 text-gray-900" />
                                       )}
                                     </div>
                                     <div className="text-sm text-gray-500 capitalize">{lesson.type}</div>
                                   </div>
                                 </div>
                                 <span className="text-sm text-gray-600">{lesson.duration}</span>
-                              </div>
+                              </button>
                             ))}
                           </div>
                         </div>

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { CustomButton } from "@/components/ui/CustomButton";
 import { CourseDetailModal } from "./CourseDetailModal";
+import { mockCourses } from "@/lib/mockData/courses";
+import type { Course } from "@/lib/BE-library/interfaces";
 import { 
   BookOpen, 
   Clock, 
@@ -17,73 +19,8 @@ import {
   BarChart3
 } from "lucide-react";
 
-interface Course {
-  id: string;
-  name: string;
-  code: string;
-  instructor: string;
-  semester: string;
-  credits: number;
-  schedule: string;
-  status: 'active' | 'completed' | 'upcoming';
-  enrollmentDate: string;
-  progress: number;
-  students: number;
-  maxStudents: number;
-  description: string;
-}
-
-// Mock data
-const mockCourses: Course[] = [
-  {
-    id: "CS101",
-    name: "Lập trình căn bản",
-    code: "CS101",
-    instructor: "Nguyễn Văn A",
-    semester: "HK1 2024-2025",
-    credits: 4,
-    schedule: "Thứ 2, 4 - 7:00-9:00",
-    status: 'active',
-    enrollmentDate: "2024-08-15",
-    progress: 65,
-    students: 45,
-    maxStudents: 50,
-    description: "Khóa học giới thiệu về lập trình với Python"
-  },
-  {
-    id: "MATH201",
-    name: "Toán cao cấp",
-    code: "MATH201",
-    instructor: "Trần Thị B",
-    semester: "HK1 2024-2025",
-    credits: 3,
-    schedule: "Thứ 3, 5 - 9:00-11:00",
-    status: 'active',
-    enrollmentDate: "2024-08-15",
-    progress: 45,
-    students: 50,
-    maxStudents: 50,
-    description: "Giải tích và đại số tuyến tính"
-  },
-  {
-    id: "ENG102",
-    name: "Tiếng Anh giao tiếp",
-    code: "ENG102",
-    instructor: "Smith John",
-    semester: "HK1 2024-2025",
-    credits: 2,
-    schedule: "Thứ 6 - 13:00-15:00",
-    status: 'active',
-    enrollmentDate: "2024-08-15",
-    progress: 80,
-    students: 30,
-    maxStudents: 35,
-    description: "Phát triển kỹ năng giao tiếp tiếng Anh"
-  }
-];
-
 export const CourseManagement = () => {
-  const [courses] = useState<Course[]>(mockCourses);
+  const [courses] = useState<Course[]>(Object.values(mockCourses));
   const [filter, setFilter] = useState<'all' | 'active' | 'completed' | 'upcoming'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);

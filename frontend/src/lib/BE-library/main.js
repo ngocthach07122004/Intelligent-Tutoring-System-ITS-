@@ -9,8 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
+    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserOperation = exports.AuthOperation = void 0;
+exports.CourseOperation = exports.UserOperation = exports.AuthOperation = void 0;
 var axios_1 = require("axios");
 /*
   HƯỚNG DẪN LẮP API (DEV / INTEGRATION)
@@ -44,7 +44,9 @@ var axios_1 = require("axios");
   1) Tải tsc và tạo file env cho NEXT_PUBLIC_IDENTITY_API_BASE_URL
   2) Viết code theo mẫu trong class AuthOperation bên dưới
   4) Viết type cho payload request và response trong file interfaces.ts
-  5) Chạy lệnh: tsc frontend/src/lib/BE-library/main.ts
+  5) Chạy lệnh:
+    cd frontend/src/lib/BE-library
+    tsc main.ts
   6) Import và sử dụng class đã viết trong codebase frontend (tham khảo file signup/page.tsx)
 */
 var BASE_URL = "http://localhost:8080/api/v1";
@@ -287,3 +289,118 @@ var UserOperation = /** @class */ (function () {
     return UserOperation;
 }());
 exports.UserOperation = UserOperation;
+var CourseOperation = /** @class */ (function () {
+    function CourseOperation() {
+        this.baseUrl = BASE_URL + "/courses";
+    }
+    CourseOperation.prototype.getCourseById = function (courseId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var response, error_9;
+            var _a, _b, _c;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
+                        _d.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, axios_1.default.get("".concat(this.baseUrl, "/").concat(courseId), {
+                                withCredentials: true,
+                                validateStatus: function (status) { return status >= 200 && status < 300; },
+                            })];
+                    case 1:
+                        response = _d.sent();
+                        return [2 /*return*/, unwrap(response)];
+                    case 2:
+                        error_9 = _d.sent();
+                        console.error("Error fetching course: ", (_a = error_9 === null || error_9 === void 0 ? void 0 : error_9.response) === null || _a === void 0 ? void 0 : _a.data);
+                        return [2 /*return*/, {
+                                success: false,
+                                message: ((_c = (_b = error_9 === null || error_9 === void 0 ? void 0 : error_9.response) === null || _b === void 0 ? void 0 : _b.data) === null || _c === void 0 ? void 0 : _c.message) || "An error occurred",
+                            }];
+                    case 3: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    CourseOperation.prototype.getLessonById = function (courseId, lessonId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var response, error_10;
+            var _a, _b, _c;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
+                        _d.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, axios_1.default.get("".concat(this.baseUrl, "/").concat(courseId, "/lessons/").concat(lessonId), {
+                                withCredentials: true,
+                                validateStatus: function (status) { return status >= 200 && status < 300; },
+                            })];
+                    case 1:
+                        response = _d.sent();
+                        return [2 /*return*/, unwrap(response)];
+                    case 2:
+                        error_10 = _d.sent();
+                        console.error("Error fetching lesson: ", (_a = error_10 === null || error_10 === void 0 ? void 0 : error_10.response) === null || _a === void 0 ? void 0 : _a.data);
+                        return [2 /*return*/, {
+                                success: false,
+                                message: ((_c = (_b = error_10 === null || error_10 === void 0 ? void 0 : error_10.response) === null || _b === void 0 ? void 0 : _b.data) === null || _c === void 0 ? void 0 : _c.message) || "An error occurred",
+                            }];
+                    case 3: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    CourseOperation.prototype.markLessonComplete = function (courseId, lessonId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var response, error_11;
+            var _a, _b, _c;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
+                        _d.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, axios_1.default.post("".concat(this.baseUrl, "/").concat(courseId, "/lessons/").concat(lessonId, "/complete"), {}, {
+                                withCredentials: true,
+                                validateStatus: function (status) { return status >= 200 && status < 300; },
+                            })];
+                    case 1:
+                        response = _d.sent();
+                        return [2 /*return*/, unwrap(response)];
+                    case 2:
+                        error_11 = _d.sent();
+                        console.error("Error marking lesson complete: ", (_a = error_11 === null || error_11 === void 0 ? void 0 : error_11.response) === null || _a === void 0 ? void 0 : _a.data);
+                        return [2 /*return*/, {
+                                success: false,
+                                message: ((_c = (_b = error_11 === null || error_11 === void 0 ? void 0 : error_11.response) === null || _b === void 0 ? void 0 : _b.data) === null || _c === void 0 ? void 0 : _c.message) || "An error occurred",
+                            }];
+                    case 3: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    CourseOperation.prototype.updateProgress = function (courseId, progress) {
+        return __awaiter(this, void 0, void 0, function () {
+            var response, error_12;
+            var _a, _b, _c;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
+                        _d.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, axios_1.default.put("".concat(this.baseUrl, "/").concat(courseId, "/progress"), { progress: progress }, {
+                                withCredentials: true,
+                                validateStatus: function (status) { return status >= 200 && status < 300; },
+                            })];
+                    case 1:
+                        response = _d.sent();
+                        return [2 /*return*/, unwrap(response)];
+                    case 2:
+                        error_12 = _d.sent();
+                        console.error("Error updating progress: ", (_a = error_12 === null || error_12 === void 0 ? void 0 : error_12.response) === null || _a === void 0 ? void 0 : _a.data);
+                        return [2 /*return*/, {
+                                success: false,
+                                message: ((_c = (_b = error_12 === null || error_12 === void 0 ? void 0 : error_12.response) === null || _b === void 0 ? void 0 : _b.data) === null || _c === void 0 ? void 0 : _c.message) || "An error occurred",
+                            }];
+                    case 3: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    return CourseOperation;
+}());
+exports.CourseOperation = CourseOperation;

@@ -193,3 +193,89 @@ export class UserOperation {
     }
   }
 }
+
+export class CourseOperation {
+  private baseUrl: string;
+
+  constructor() {
+    this.baseUrl = BASE_URL + "/courses";
+  }
+
+  async getCourseById(courseId: string) {
+    try {
+      const response: AxiosResponse = await axios.get(
+        `${this.baseUrl}/${courseId}`,
+        {
+          withCredentials: true,
+          validateStatus: (status) => status >= 200 && status < 300,
+        }
+      );
+      return unwrap(response);
+    } catch (error: any) {
+      console.error("Error fetching course: ", error?.response?.data);
+      return {
+        success: false,
+        message: error?.response?.data?.message || "An error occurred",
+      };
+    }
+  }
+
+  async getLessonById(courseId: string, lessonId: string) {
+    try {
+      const response: AxiosResponse = await axios.get(
+        `${this.baseUrl}/${courseId}/lessons/${lessonId}`,
+        {
+          withCredentials: true,
+          validateStatus: (status) => status >= 200 && status < 300,
+        }
+      );
+      return unwrap(response);
+    } catch (error: any) {
+      console.error("Error fetching lesson: ", error?.response?.data);
+      return {
+        success: false,
+        message: error?.response?.data?.message || "An error occurred",
+      };
+    }
+  }
+
+  async markLessonComplete(courseId: string, lessonId: string) {
+    try {
+      const response: AxiosResponse = await axios.post(
+        `${this.baseUrl}/${courseId}/lessons/${lessonId}/complete`,
+        {},
+        {
+          withCredentials: true,
+          validateStatus: (status) => status >= 200 && status < 300,
+        }
+      );
+      return unwrap(response);
+    } catch (error: any) {
+      console.error("Error marking lesson complete: ", error?.response?.data);
+      return {
+        success: false,
+        message: error?.response?.data?.message || "An error occurred",
+      };
+    }
+  }
+
+  async updateProgress(courseId: string, progress: number) {
+    try {
+      const response: AxiosResponse = await axios.put(
+        `${this.baseUrl}/${courseId}/progress`,
+        { progress },
+        {
+          withCredentials: true,
+          validateStatus: (status) => status >= 200 && status < 300,
+        }
+      );
+      return unwrap(response);
+    } catch (error: any) {
+      console.error("Error updating progress: ", error?.response?.data);
+      return {
+        success: false,
+        message: error?.response?.data?.message || "An error occurred",
+      };
+    }
+  }
+}
