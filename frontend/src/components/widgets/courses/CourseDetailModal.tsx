@@ -2,7 +2,35 @@
 
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, BookOpen, Clock, Award, Users, Calendar, CheckCircle2, PlayCircle, FileText, Download, Star } from "lucide-react";
-import type { Course, CourseModule } from '@/lib/BE-library/interfaces';
+import type { CourseResponse, ChapterResponse, LessonResponse } from '@/lib/BE-library/course-service-interfaces';
+
+interface Course {
+  id: string;
+  name: string;
+  code: string;
+  instructor: string;
+  semester: string;
+  credits: number;
+  schedule: string;
+  status: 'active' | 'completed' | 'upcoming';
+  enrollmentDate: string;
+  progress: number;
+  students: number;
+  maxStudents: number;
+  description: string;
+  modules?: Array<{
+    id: string;
+    title: string;
+    duration: string;
+    lessons: Array<{
+      id: string;
+      title: string;
+      type: 'video' | 'reading' | 'quiz' | 'assignment';
+      duration: string;
+      completed: boolean;
+    }>;
+  }>;
+}
 
 interface CourseDetailModalProps {
   course: Course;
@@ -83,9 +111,9 @@ export const CourseDetailModal = ({ course, onClose }: CourseDetailModalProps) =
     }
   };
 
-  const totalLessons = courseDetails.modules.reduce((sum, module) => sum + module.lessons.length, 0);
+  const totalLessons = courseDetails.modules.reduce((sum: number, module: any) => sum + module.lessons.length, 0);
   const completedLessons = courseDetails.modules.reduce(
-    (sum, module) => sum + module.lessons.filter(l => l.completed).length, 
+    (sum: number, module: any) => sum + module.lessons.filter((l: any) => l.completed).length, 
     0
   );
 
@@ -167,7 +195,7 @@ export const CourseDetailModal = ({ course, onClose }: CourseDetailModalProps) =
                     </div>
 
                     <div className="space-y-3">
-                      {courseDetails.modules.map((module, moduleIndex) => (
+                      {courseDetails.modules.map((module: any, moduleIndex: number) => (
                         <div key={module.id} className="border border-gray-200 rounded-lg overflow-hidden">
                           <div className="bg-gray-100 p-4 border-b border-gray-200">
                             <div className="flex items-center justify-between">
@@ -176,12 +204,12 @@ export const CourseDetailModal = ({ course, onClose }: CourseDetailModalProps) =
                             </div>
                             <div className="mt-2 text-sm text-gray-600">
                               {module.lessons.length} bài học • 
-                              {module.lessons.filter(l => l.completed).length} hoàn thành
+                              {module.lessons.filter((l: any) => l.completed).length} hoàn thành
                             </div>
                           </div>
                           
                           <div className="divide-y divide-gray-100">
-                            {module.lessons.map((lesson) => (
+                            {module.lessons.map((lesson: any) => (
                               <button
                                 key={lesson.id}
                                 onClick={() => router.push(`/dashboard/courses/${course.id}/lessons/${lesson.id}`)}

@@ -13,7 +13,8 @@ import {
   User,
   CreditCard,
   Command,
-  LogOut
+  LogOut,
+  GraduationCap
 } from "lucide-react";
 import { LogoIcon } from "../../icons";
 import {
@@ -37,6 +38,7 @@ export default function Sidebar() {
     { title: "Home", route: "/dashboard/home", icon: <Home size={18} /> },
     { title: "Student Management", route: "/dashboard/student-management", icon: <Users size={18} /> },
     { title: "Courses", route: "/dashboard/courses", icon: <BookOpen size={18} /> },
+    { title: "Learning", route: "/dashboard/learning", icon: <GraduationCap size={18} /> },
     { title: "Documents", route: "/dashboard/documents", icon: <FileText size={18} /> },
     { title: "Performance", route: "/dashboard/performance", icon: <BarChart3 size={18} /> },
     { title: "Chat", route: "/dashboard/chat", icon: <Users size={18} /> },

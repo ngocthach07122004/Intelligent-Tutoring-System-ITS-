@@ -3,7 +3,24 @@
 import { useState, useEffect } from 'react';
 import { CourseDetailModal } from './CourseDetailModal';
 import { mockCourses } from '@/lib/mockData/courses';
-import type { Course } from '@/lib/BE-library/interfaces';
+
+// Local interface for component props (matches mock data structure)
+interface Course {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  instructor: string;
+  semester: string;
+  credits: number;
+  schedule: string;
+  status: 'active' | 'completed' | 'upcoming';
+  enrollmentDate: string;
+  progress: number;
+  students: number;
+  maxStudents: number;
+  modules?: any[];
+}
 
 interface CourseDetailWrapperProps {
   courseId: string;
