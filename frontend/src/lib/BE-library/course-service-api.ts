@@ -525,4 +525,4 @@ export class CourseServiceApi {
     }
 }
 
-export const courseServiceApi = new CourseServiceApi();s
+export const courseServiceApi = new CourseServiceApi();
