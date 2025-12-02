@@ -6,9 +6,13 @@ import { FormMessageAlert } from "../../ui/FormMessageAlert";
 import { CustomButton } from "../../ui/CustomButton";
 import { TextField } from "../../blocks/TextField";
 import { MailIcon, LockIcon, GoogleIcon, MicrosoftIcon } from "../../icons";
-import { AuthOperation } from "@/lib/BE-library/main";
-
-const auth = new AuthOperation();
+import { identityServiceApi } from "@/lib/BE-library/identity-service-api";
+import { courseServiceApi } from "@/lib/BE-library/course-service-api";
+import { assessmentServiceApi } from "@/lib/BE-library/assessment-service-api";
+import { dashboardServiceApi } from "@/lib/BE-library/dashboard-service-api";
+import { userProfileServiceApi } from "@/lib/BE-library/user-profile-service-api";
+import { studentManagementOps } from "@/lib/BE-library/student-management-api";
+import { TokenStorage } from "@/lib/utils/tokenStorage";
 
 export const AuthForm = () => {
   const [username, setEmail] = useState("");
@@ -24,16 +28,45 @@ export const AuthForm = () => {
     setIsDisabled(true);
     setLoading(true);
     setError("");
-    setSuccess(""); // Clear previous success message
+    setSuccess("");
 
-    // Simulate API call
     try {
-      const response = await auth.signin({ username, password });
-      console.log("Signin successful:", response);
-      setSuccess(
-        response.message || "Login successful! Redirecting to dashboard..."
-      );
-      setTimeout(() => router.push("/dashboard/home"), 2000); // Redirect after 2 seconds
+      // Login with new identity service
+      const response = await identityServiceApi.login({ username, password });
+
+      if (response.success && response.data) {
+        // Save tokens
+        TokenStorage.saveTokens({
+          accessToken: response.data.accessToken,
+          refreshToken: response.data.refreshToken,
+          tokenType: response.data.tokenType || "Bearer",
+        });
+
+        // Set tokens on all API services
+        const token = response.data.accessToken;
+        identityServiceApi.setAuthToken(token);
+        courseServiceApi.setAuthToken(token);
+        assessmentServiceApi.setAuthToken(token);
+        dashboardServiceApi.setAuthToken(token);
+        userProfileServiceApi.setAuthToken(token);
+        studentManagementOps.setAuthToken(token);
+
+        // Get user info
+        const userResponse = await identityServiceApi.getCurrentUser(response.data.accessToken);
+        if (userResponse.success && userResponse.data) {
+          TokenStorage.saveUser({
+            id: userResponse.data.id,
+            username: userResponse.data.username,
+            email: userResponse.data.email,
+            roles: userResponse.data.roles,
+          });
+        }
+
+        setSuccess("Login successful! Redirecting to dashboard...");
+        setTimeout(() => router.push("/dashboard/home"), 1500);
+      } else {
+        setError(response.message || "Login failed. Please try again.");
+      }
     } catch (err: any) {
       setError(err.message);
     }

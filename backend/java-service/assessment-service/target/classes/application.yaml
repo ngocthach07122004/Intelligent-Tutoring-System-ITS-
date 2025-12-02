@@ -7,7 +7,7 @@ spring:
     password: ${SPRING_DATASOURCE_PASSWORD:12345678}
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     show-sql: true
   flyway:
     enabled: true

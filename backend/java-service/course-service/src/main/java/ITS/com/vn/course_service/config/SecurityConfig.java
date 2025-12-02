@@ -45,19 +45,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-        if (mockAuthEnabled) {
-            http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
-            http.addFilterBefore(mockAuthenticationFilter(), AnonymousAuthenticationFilter.class);
-        } else {
-            http.authorizeHttpRequests(auth -> auth
-                            .requestMatchers("/health", "/actuator/**").permitAll()
-                            .requestMatchers("/api/v1/**").authenticated()
-                            .anyRequest().authenticated())
-                    .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder())));
-        }
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/actuator/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/error").permitAll()
+                        .anyRequest().authenticated())
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

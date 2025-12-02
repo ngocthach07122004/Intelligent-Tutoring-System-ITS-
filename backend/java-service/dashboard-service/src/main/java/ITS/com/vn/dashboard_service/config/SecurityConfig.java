@@ -33,31 +33,19 @@ import jakarta.servlet.http.HttpServletResponse;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri:}")
-    private String issuerUri;
-
-    @Value("${app.security.mock.enabled:false}")
-    private boolean mockAuthEnabled;
-
-    @Value("${app.security.mock.user-id:00000000-0000-0000-0000-000000000001}")
-    private String mockUserId;
+    //private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-        if (mockAuthEnabled) {
-            http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
-            http.addFilterBefore(mockAuthenticationFilter(), AnonymousAuthenticationFilter.class);
-        } else {
-            http.authorizeHttpRequests(auth -> auth
-                            .requestMatchers("/health", "/actuator/**").permitAll()
-                            .requestMatchers("/api/v1/**").authenticated()
-                            .anyRequest().authenticated())
-                    .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder())));
-        }
+                // .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/actuator/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/error").permitAll()
+                        .anyRequest().authenticated())
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
