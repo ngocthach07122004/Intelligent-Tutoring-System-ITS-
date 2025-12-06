@@ -8,8 +8,12 @@ import {
     StudentAnalyticsResponse,
     StudentDashboardResponse,
 } from "./dashboard-service-interfaces";
+import {
+    mockDashboardSummary,
+    mockStudentAnalytics,
+} from "../mockData/dashboard.mock";
 
-const DASHBOARD_SERVICE_BASE_URL = "http://localhost:8181";
+const DASHBOARD_SERVICE_BASE_URL = process.env.NEXT_PUBLIC_DASHBOARD_SERVICE_URL || "http://localhost:8181";
 const DASHBOARD_API_PREFIX = "/api/v1/dashboard";
 
 const unwrap = (response: AxiosResponse) => ({
@@ -102,9 +106,16 @@ export class DashboardServiceApi {
                 `${this.apiUrl}/student/summary`,
                 this.config(),
             );
+            console.log("[Dashboard API] Successfully fetched student summary");
             return unwrap(response);
         } catch (error: any) {
-            return handleError(error, "Failed to fetch student dashboard summary");
+            console.warn("[Dashboard API] Using mock data for student summary");
+            return {
+                success: true,
+                message: "Using mock data (BE offline)",
+                data: mockDashboardSummary,
+                status: 200,
+            };
         }
     }
 
@@ -114,9 +125,16 @@ export class DashboardServiceApi {
                 `${this.apiUrl}/student/analytics`,
                 this.config(),
             );
+            console.log("[Dashboard API] Successfully fetched student analytics");
             return unwrap(response);
         } catch (error: any) {
-            return handleError(error, "Failed to fetch student analytics");
+            console.warn("[Dashboard API] Using mock data for student analytics");
+            return {
+                success: true,
+                message: "Using mock data (BE offline)",
+                data: mockStudentAnalytics,
+                status: 200,
+            };
         }
     }
 

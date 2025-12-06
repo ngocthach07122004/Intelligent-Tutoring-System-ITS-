@@ -39,9 +39,7 @@ export default function Sidebar() {
     { title: "Courses", route: "/dashboard/courses", icon: <BookOpen size={18} /> },
     { title: "Documents", route: "/dashboard/documents", icon: <FileText size={18} /> },
     { title: "Performance", route: "/dashboard/performance", icon: <BarChart3 size={18} /> },
-    { title: "Chat", route: "/dashboard/chat", icon: <Users size={18} /> },
-    { title: "Forum", route: "/dashboard/forum", icon: <Users size={18} /> },
-    { title: "Settings", route: "/dashboard/settings", icon: <Settings size={18} /> },
+    // { title: "Chat", route: "/dashboard/chat", icon: <Users size={18} /> },
   ];
 
   return (
