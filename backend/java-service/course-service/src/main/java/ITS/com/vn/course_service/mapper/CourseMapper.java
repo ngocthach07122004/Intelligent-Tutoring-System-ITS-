@@ -38,6 +38,9 @@ public interface CourseMapper {
     @Mapping(target = "instructorAvatarUrl", ignore = true)
     @Mapping(target = "currentStudents", ignore = true)
     @Mapping(target = "instructor", ignore = true)
+    @Mapping(target = "syllabus", ignore = true)
+    @Mapping(target = "assignments", ignore = true)
+    @Mapping(target = "resources", ignore = true)
     CourseResponse toResponse(Course course);
 
     List<CourseResponse> toResponseList(List<Course> courses);

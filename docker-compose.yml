@@ -1,21 +1,6 @@
 version: "3.9"
 
 services:
-  postgres_keycloak:
-    image: postgres:14
-    container_name: keycloak_postgres
-    restart: always
-    environment:
-      POSTGRES_DB: ${POSTGRES_KEYCLOAK_DB}
-      POSTGRES_USER: ${POSTGRES_KEYCLOAK_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_KEYCLOAK_PASSWORD}
-    ports:
-      - "${POSTGRES_KEYCLOAK_PORT}:5432"
-    volumes:
-      - postgres_keycloak_data:/var/lib/postgresql/data
-    networks:
-      - idnet
-
   postgres_identity:
     image: postgres:14
     container_name: postgres_identity
@@ -110,26 +95,6 @@ services:
     networks:
       - idnet
 
-  keycloak:
-    image: quay.io/keycloak/keycloak:26.4
-    container_name: keycloak_server
-    environment:
-      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-      KC_DB: ${KEYCLOAK_DB}
-      KC_DB_URL: ${KEYCLOAK_DB_URL}
-      KC_DB_USERNAME: ${KEYCLOAK_DB_USERNAME}
-      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
-    command: ["start-dev", "--import-realm"]
-    ports:
-      - "${KEYCLOAK_EXTERNAL_PORT}:${KEYCLOAK_INTERNAL_PORT}"
-    volumes:
-      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
-    depends_on:
-      - postgres_keycloak
-    networks:
-      - idnet
-
   gateway:
     build:
       context: .
@@ -162,22 +127,25 @@ services:
       SPRING_DATASOURCE_URL: ${DATASOURCE_URL_IDENTITY}
       SPRING_DATASOURCE_USERNAME: ${DATASOURCE_USERNAME_IDENTITY}
       SPRING_DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD_IDENTITY}
-      KEYCLOAK_SERVER_URL: ${KEYCLOAK_SERVER_URL}
-      KEYCLOAK_REALM: ${KEYCLOAK_REALM}
-      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
-      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
-      KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
       EUREKA_SERVER: ${EUREKA_SERVER}
       DB_HOST: ${POSTGRES_IDENTITY_HOST}
       DB_PORT: ${POSTGRES_PORT_DEFAULT}
       DB_NAME: ${POSTGRES_IDENTITY_DB}
       JWT_ISSUER_URI: ${JWT_ISSUER_URI}
+      JWT_SECRET: ${JWT_SECRET:-your-256-bit-secret-key-change-this-in-production-please-make-it-long-enough}
+      JWT_ACCESS_TOKEN_EXPIRATION: ${JWT_ACCESS_TOKEN_EXPIRATION:-3600000}
+      JWT_REFRESH_TOKEN_EXPIRATION: ${JWT_REFRESH_TOKEN_EXPIRATION:-604800000}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
     depends_on:
       - postgres_identity
-      - keycloak
       - eureka
+      - rabbitmq
     networks:
       - idnet
+      
   user-profile-service:
     build:
       context: .
@@ -205,7 +173,6 @@ services:
       - postgres_userProfile
       - rabbitmq
       - eureka
-      - keycloak
     networks:
       - idnet
 
@@ -238,7 +205,6 @@ services:
       - postgres_course
       - rabbitmq
       - eureka
-      - keycloak
     networks:
       - idnet
 
@@ -272,7 +238,6 @@ services:
       - postgres_dashboard
       - rabbitmq
       - eureka
-      - keycloak
     networks:
       - idnet
 
@@ -303,9 +268,16 @@ services:
       - postgres_assessment
       - rabbitmq
       - eureka
-      - keycloak
     networks:
       - idnet
+
+volumes:
+  postgres_identity_data:
+  postgres_userProfile_data:
+  postgres_course_data:
+  postgres_dashboard_data:
+  postgres_assessment_data:
+  rabbitmq_data:
 
   # gateway_dev:
   #   image: its-gateway
@@ -318,15 +290,6 @@ services:
   #   restart: always
   #   networks:
   #     - idnet
-
-volumes:
-  postgres_keycloak_data:
-  postgres_identity_data:
-  postgres_userProfile_data:
-  postgres_course_data:
-  postgres_dashboard_data:
-  postgres_assessment_data:
-  rabbitmq_data:
 
 networks:
   idnet:

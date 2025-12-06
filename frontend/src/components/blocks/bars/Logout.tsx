@@ -1,8 +1,7 @@
 "use client";
 
-import { AuthOperation } from "@/lib/BE-library/main"; // Import the AuthOperation class
-
-const auth = new AuthOperation();
+import { identityServiceApi } from "@/lib/BE-library/identity-service-api";
+import { TokenStorage } from "@/lib/utils/tokenStorage";
 import { useRouter } from "next/navigation";
 
 export const Logout = () => {
@@ -10,10 +9,14 @@ export const Logout = () => {
 
   const handleLogout = async () => {
     try {
-      await auth.logout(); // Call the logout API
+      await identityServiceApi.logout(); // Call the logout API
+      TokenStorage.clearAuth(); // Clear tokens from local storage
       router.push("/auth/login"); // Redirect to the login page
     } catch (error) {
       console.error("Logout failed:", error);
+      // Even if API call fails, we should probably clear tokens and redirect
+      TokenStorage.clearAuth();
+      router.push("/auth/login");
     }
   };
 

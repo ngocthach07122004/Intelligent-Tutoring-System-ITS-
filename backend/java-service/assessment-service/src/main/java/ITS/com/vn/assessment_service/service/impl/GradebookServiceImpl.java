@@ -48,6 +48,12 @@ public class GradebookServiceImpl implements GradebookService {
     }
 
     @Override
+    public Page<GradebookResponse> getStudentCourseGrades(Long courseId, UUID studentId, Pageable pageable) {
+        return gradebookRepository.findByCourseIdAndStudentId(courseId, studentId, pageable)
+                .map(attemptMapper::toGradebookResponse);
+    }
+
+    @Override
     @Transactional
     public void createGradebookForEnrollment(Long courseId, Long studentId, LocalDateTime enrolledAt) {
         log.info("Creating gradebook for student {} in course {}", studentId, courseId);
@@ -96,7 +102,7 @@ public class GradebookServiceImpl implements GradebookService {
         List<Gradebook> gradebooks = gradebookRepository.findByStudentId(userId);
 
         // Calculate statistics
-        int totalCourses = gradebooks.size();
+
         int completedCourses = 0;
         int inProgressCourses = 0;
         double totalGpaPoints = 0.0;
@@ -123,7 +129,7 @@ public class GradebookServiceImpl implements GradebookService {
             details.add(GradebookSummaryResponse.CourseGradeDetail.builder()
                     .courseId(gb.getCourseId())
                     .courseName("Course " + gb.getCourseId()) // Placeholder until Feign client
-                    .courseCode("CODE" + gb.getCourseId())   // Placeholder
+                    .courseCode("CODE" + gb.getCourseId()) // Placeholder
                     .finalScore(gb.getFinalScore())
                     .grade(gb.getGrade())
                     .gpa(gpa)
@@ -134,7 +140,15 @@ public class GradebookServiceImpl implements GradebookService {
         Double overallGpa = gradedCoursesCount > 0 ? totalGpaPoints / gradedCoursesCount : 0.0;
 
         // Mock rank calculation (would normally require comparing with all students)
-        Integer rank = 1; 
+        Integer rank = 1;
+
+        // Calculate achievements (e.g., score >= 8.0)
+        int totalAchievements = (int) gradebooks.stream()
+                .filter(gb -> gb.getFinalScore() != null && gb.getFinalScore() >= 8.0)
+                .count();
+
+        // Get total students (cohort size)
+        Integer totalStudents = gradebookRepository.countDistinctStudentId().intValue();
 
         return GradebookSummaryResponse.builder()
                 .overallGpa(Math.round(overallGpa * 100.0) / 100.0) // Round to 2 decimals
@@ -142,6 +156,8 @@ public class GradebookServiceImpl implements GradebookService {
                 .completedCourses(completedCourses)
                 .inProgressCourses(inProgressCourses)
                 .rank(rank)
+                .totalStudents(totalStudents)
+                .totalAchievements(totalAchievements)
                 .semester(semester != null ? semester : "Current")
                 .courseGrades(details)
                 .build();
@@ -164,7 +180,8 @@ public class GradebookServiceImpl implements GradebookService {
         double overallGpa = gpaCount > 0 ? gpaSum / gpaCount : 0d;
         int totalCredits = gradebooks.size() * 3;
 
-        GradebookSummaryV2Response.SemesterSummary semesterSummary = GradebookSummaryV2Response.SemesterSummary.builder()
+        GradebookSummaryV2Response.SemesterSummary semesterSummary = GradebookSummaryV2Response.SemesterSummary
+                .builder()
                 .semester(semesterLabel)
                 .gpa(Math.round(overallGpa * 100.0) / 100.0)
                 .totalCredits(totalCredits)
@@ -204,12 +221,21 @@ public class GradebookServiceImpl implements GradebookService {
         }
         double semesterGpa = gpaCount > 0 ? gpaSum / gpaCount : 0d;
 
+        // Calculate achievements for this semester/record
+        int achievements = (int) gradebooks.stream()
+                .filter(gb -> gb.getFinalScore() != null && gb.getFinalScore() >= 8.0)
+                .count();
+
+        Integer totalStudents = gradebookRepository.countDistinctStudentId().intValue();
+
         GradebookHistoryResponse.AcademicRecord record = GradebookHistoryResponse.AcademicRecord.builder()
                 .semester("Hiện tại")
                 .gpa(Math.round(semesterGpa * 100.0) / 100.0)
                 .totalCredits(gradebooks.size() * 3)
                 .rank(1)
-                .totalStudents(Math.max(gradebooks.size(), 1) * 2)
+                .totalStudents(totalStudents)
+                .achievements(achievements)
+                .attendance(98.5) // Mock attendance
                 .subjects(subjects)
                 .build();
 
@@ -220,8 +246,10 @@ public class GradebookServiceImpl implements GradebookService {
     }
 
     @Override
-    public AnalyticsResponse getAnalytics(UUID userId) {
-        // For now, return safe sample data aligned with FE mock; will be replaced with real aggregation.
+    public AnalyticsResponse getAnalytics(UUID userId, String timeframe) {
+        // For now, return safe sample data aligned with FE mock; will be replaced with
+        // real aggregation.
+        log.info("Getting analytics for user {} with timeframe: {}", userId, timeframe);
         return AnalyticsResponse.builder()
                 .examScores(List.of(
                         new AnalyticsResponse.ExamScorePoint("T9", 8.2, 7.8),
@@ -229,25 +257,21 @@ public class GradebookServiceImpl implements GradebookService {
                         new AnalyticsResponse.ExamScorePoint("T11", 8.8, 8.1),
                         new AnalyticsResponse.ExamScorePoint("T12", 8.7, 8.0),
                         new AnalyticsResponse.ExamScorePoint("T1", 9.0, 8.2),
-                        new AnalyticsResponse.ExamScorePoint("T2", 8.9, 8.3)
-                ))
+                        new AnalyticsResponse.ExamScorePoint("T2", 8.9, 8.3)))
                 .learningTime(List.of(
                         new AnalyticsResponse.LearningTimePoint("T1", 25),
                         new AnalyticsResponse.LearningTimePoint("T2", 28),
                         new AnalyticsResponse.LearningTimePoint("T3", 22),
                         new AnalyticsResponse.LearningTimePoint("T4", 30),
                         new AnalyticsResponse.LearningTimePoint("T5", 27),
-                        new AnalyticsResponse.LearningTimePoint("T6", 32)
-                ))
+                        new AnalyticsResponse.LearningTimePoint("T6", 32)))
                 .strengths(List.of(
                         "Toán học - Tư duy logic tốt",
                         "Hóa học - Hiểu bản chất phản ứng",
-                        "Tiếng Anh - Giao tiếp tự tin"
-                ))
+                        "Tiếng Anh - Giao tiếp tự tin"))
                 .improvements(List.of(
                         "Vật lý - Cần cải thiện kỹ năng giải bài tập",
-                        "Quản lý thời gian học tập"
-                ))
+                        "Quản lý thời gian học tập"))
                 .build();
     }
 
@@ -285,13 +309,20 @@ public class GradebookServiceImpl implements GradebookService {
     }
 
     private String deriveLetter(Double score) {
-        if (score == null) return null;
-        if (score >= 9.0) return "A";
-        if (score >= 8.0) return "B+";
-        if (score >= 7.0) return "B";
-        if (score >= 6.5) return "C+";
-        if (score >= 5.5) return "C";
-        if (score >= 5.0) return "D";
+        if (score == null)
+            return null;
+        if (score >= 9.0)
+            return "A";
+        if (score >= 8.0)
+            return "B+";
+        if (score >= 7.0)
+            return "B";
+        if (score >= 6.5)
+            return "C+";
+        if (score >= 5.5)
+            return "C";
+        if (score >= 5.0)
+            return "D";
         return "F";
     }
 }

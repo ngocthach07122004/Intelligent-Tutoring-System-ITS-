@@ -43,7 +43,7 @@ public class Course {
     private CourseVisibility visibility = CourseVisibility.PRIVATE;
 
     @Column(nullable = false)
-    private Long instructorId;
+    private String instructorId;
 
     @Column(length = 500)
     private String thumbnailUrl;

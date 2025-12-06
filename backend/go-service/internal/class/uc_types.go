@@ -30,8 +30,7 @@ type Filter struct {
 	Name      string
 	Code      string
 	CreatedBy string
-	MemberID  string // Added: Filter classes by member ID
-	Archived  *bool  // Nullable to allow filtering by archived status
+	Archived  *bool // Nullable to allow filtering by archived status
 }
 
 // ListInput for listing classes

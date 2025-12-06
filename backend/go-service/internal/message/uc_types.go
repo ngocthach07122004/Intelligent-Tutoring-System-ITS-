@@ -37,13 +37,13 @@ type SearchGlobalInput struct {
 
 // GetOutput contains the result of Get operation
 type GetOutput struct {
-	Messages []MessageWithSender
+	Messages []models.Message
 	Pagin    paginator.Paginator
 }
 
 // GetOneOutput contains the result of GetOne operation
 type GetOneOutput struct {
-	Message MessageWithSender
+	Message models.Message
 }
 
 // Filter contains query filters for messages

@@ -9,7 +9,7 @@ import (
 // MapRoutes maps the routes to the handler functions
 func MapRoutes(r *gin.RouterGroup, mw middleware.Middleware, h Handler) {
 	conversations := r.Group("/conversations")
-	conversations.Use(mw.Auth())
+	conversations.Use(mw.Auth(), mw.Authorize())
 
 	// Conversation CRUD operations
 	conversations.POST("", h.create)
@@ -23,10 +23,4 @@ func MapRoutes(r *gin.RouterGroup, mw middleware.Middleware, h Handler) {
 
 	// Mark as read
 	conversations.POST("/:id/read", h.markAsRead)
-
-	// Class channels
-	classes := r.Group("/classes")
-	classes.Use(mw.Auth())
-	classes.GET("/:id/channels", h.getClassChannels)
-	classes.POST("/:id/channels", h.createClassChannel)
 }

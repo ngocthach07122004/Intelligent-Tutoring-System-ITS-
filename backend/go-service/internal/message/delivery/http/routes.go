@@ -10,7 +10,7 @@ import (
 func MapRoutes(api *gin.RouterGroup, mw middleware.Middleware, h Handler) {
 	// Conversation-scoped message routes
 	conversations := api.Group("/conversations/:id")
-	conversations.Use(mw.Auth())
+	conversations.Use(mw.Auth(), mw.Authorize())
 	{
 		// Send message
 		conversations.POST("/messages", h.send)
@@ -29,7 +29,7 @@ func MapRoutes(api *gin.RouterGroup, mw middleware.Middleware, h Handler) {
 
 	// Global message routes
 	messages := api.Group("/messages")
-	messages.Use(mw.Auth())
+	messages.Use(mw.Auth(), mw.Authorize())
 	{
 		// Global search across all conversations
 		messages.GET("/search", h.searchGlobal)

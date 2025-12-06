@@ -31,7 +31,4 @@ type Repository interface {
 
 	// Direct conversation check
 	GetDirectConversation(ctx context.Context, user1ID string, user2ID string) (models.Conversation, error)
-
-	// Class channels
-	GetClassChannels(ctx context.Context, classID string) ([]models.Conversation, error)
 }

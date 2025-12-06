@@ -11,9 +11,8 @@ import {
   GoogleIcon,
   MicrosoftIcon,
 } from "@/components/icons";
-import { AuthOperation } from "@/lib/BE-library/main";
-
-const auth = new AuthOperation();
+import { identityServiceApi } from "@/lib/BE-library/identity-service-api";
+import { TokenStorage } from "@/lib/utils/tokenStorage";
 
 export default function SignUpPage() {
   const [username, setName] = useState("");
@@ -39,11 +38,28 @@ export default function SignUpPage() {
     setSuccess("");
 
     try {
-      const response = await auth.signup({ username, email: username, password });
-      setSuccess("Signup successful! Redirecting to dashboard...");
-      setTimeout(() => router.push("/dashboard/home"), 2000);
+      const response = await identityServiceApi.register({
+        username,
+        email: username, // Assuming username is used as email or vice versa based on original code
+        password,
+        roles: ["STUDENT"],
+      });
+
+      if (response.success) {
+        if (response.data) {
+          TokenStorage.saveTokens({
+            accessToken: response.data.accessToken,
+            refreshToken: response.data.refreshToken,
+            tokenType: response.data.tokenType || "Bearer",
+          });
+        }
+        setSuccess("Signup successful! Redirecting to dashboard...");
+        setTimeout(() => router.push("/dashboard/home"), 2000);
+      } else {
+        setError(response.message || "Signup failed. Please try again.");
+      }
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "An error occurred during signup.");
     }
 
     setLoading(false);

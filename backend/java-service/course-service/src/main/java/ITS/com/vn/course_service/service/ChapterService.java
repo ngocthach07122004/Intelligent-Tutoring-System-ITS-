@@ -38,7 +38,7 @@ public class ChapterService {
      * Create a new chapter in a course
      */
     @Transactional
-    public ChapterResponse createChapter(Long courseId, CreateChapterRequest request, Long instructorId) {
+    public ChapterResponse createChapter(Long courseId, CreateChapterRequest request, String instructorId) {
         log.info("Creating new chapter for course: {}", courseId);
 
         Course course = courseRepository.findByIdWithDetails(courseId)
@@ -112,7 +112,7 @@ public class ChapterService {
      * Update chapter
      */
     @Transactional
-    public ChapterResponse updateChapter(Long id, CreateChapterRequest request, Long instructorId) {
+    public ChapterResponse updateChapter(Long id, CreateChapterRequest request, String instructorId) {
         log.info("Updating chapter with ID: {}", id);
 
         Chapter chapter = chapterRepository.findById(id)
@@ -142,7 +142,7 @@ public class ChapterService {
      * Reorder chapters within a course
      */
     @Transactional
-    public List<ChapterResponse> reorderChapters(Long courseId, ReorderChaptersRequest request, Long instructorId) {
+    public List<ChapterResponse> reorderChapters(Long courseId, ReorderChaptersRequest request, String instructorId) {
         log.info("Reordering chapters for course: {}", courseId);
 
         Course course = courseRepository.findByIdWithDetails(courseId)
@@ -189,7 +189,7 @@ public class ChapterService {
      * Delete chapter
      */
     @Transactional
-    public void deleteChapter(Long id, Long instructorId) {
+    public void deleteChapter(Long id, String instructorId) {
         log.info("Deleting chapter with ID: {}", id);
 
         Chapter chapter = chapterRepository.findById(id)

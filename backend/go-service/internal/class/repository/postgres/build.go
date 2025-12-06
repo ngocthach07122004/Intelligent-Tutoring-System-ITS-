@@ -15,7 +15,6 @@ func (repo *implRepository) buildCreateClass(opts class.CreateOptions) (models.C
 		Name:        opts.Name,
 		Description: opts.Description,
 		Code:        opts.Code,
-		AvatarURL:   opts.AvatarURL,
 		CreatedBy:   opts.CreatedBy,
 		Archived:    false,
 	}

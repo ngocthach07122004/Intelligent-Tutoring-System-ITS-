@@ -21,7 +21,7 @@ public class StudentEnrolledEvent {
     private Long courseId;
     private String courseCode;
     private String courseTitle;
-    private Long studentId;
+    private String studentId;
     private LocalDateTime enrolledAt;
     private String eventType; // "STUDENT_ENROLLED"
     private LocalDateTime timestamp;

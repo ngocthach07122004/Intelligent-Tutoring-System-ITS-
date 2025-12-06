@@ -49,13 +49,13 @@ func GetMongoDateTimeNow() primitive.DateTime {
 func BuildScopeQuery(ctx context.Context, l log.Logger, sc models.Scope) (bson.M, error) {
 	filter := bson.M{}
 
-	if sc.UserID != "" {
-		userID, err := primitive.ObjectIDFromHex(sc.UserID)
+	if sc.ShopID != "" {
+		ShopId, err := primitive.ObjectIDFromHex(sc.ShopID)
 		if err != nil {
 			l.Errorf(ctx, "pkgmongo.BuildScopeQuery: %v", err)
 			return nil, err
 		}
-		filter["user_id"] = userID
+		filter["shop_id"] = ShopId
 	}
 
 	return filter, nil

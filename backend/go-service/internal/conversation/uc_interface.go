@@ -19,8 +19,4 @@ type Usecase interface {
 	AddParticipants(ctx context.Context, sc models.Scope, conversationID string, input AddParticipantsInput) error
 	GetParticipants(ctx context.Context, sc models.Scope, conversationID string) ([]models.ConversationParticipant, error)
 	MarkAsRead(ctx context.Context, sc models.Scope, conversationID string, seq int64) error
-
-	// Class Channel operations
-	GetClassChannels(ctx context.Context, sc models.Scope, classID string) ([]models.Conversation, error)
-	CreateClassChannel(ctx context.Context, sc models.Scope, input CreateChannelInput) (models.Conversation, error)
 }

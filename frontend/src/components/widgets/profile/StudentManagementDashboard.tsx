@@ -1,153 +1,135 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { StudentProfile } from "./StudentProfile";
 import { LearningAnalytics } from "./LearningAnalytics";
 import { SubjectCard } from "./SubjectCard";
 import { SubjectDetailModal } from "./SubjectDetailModal";
 import { AchievementGrid, AchievementBadge } from "./AchievementBadge";
 import { BookOpen, BarChart3, CheckCircle2, FileText, Trophy, Zap, Target } from "lucide-react";
+import { studentManagementOps } from "../../../lib/BE-library/student-management-api";
+import { Achievement, CurrentSubject } from "../../../lib/BE-library/student-interfaces";
+import { StudentAnalyticsResponse } from "../../../lib/BE-library/interfaces";
+import { FormMessageAlert } from "../../ui/FormMessageAlert";
 
-// Mock data
-const mockSubjects = [
-  {
-    id: "MATH12",
-    name: "Toán học",
-    code: "MATH12", 
-    teacher: "Trần Văn A",
-    currentGrade: "A",
-    currentScore: 9.0,
-    credits: 4,
-    attendance: 96.5,
-    assignments: {
-      total: 15,
-      completed: 14,
-      avgScore: 8.8
-    },
-    exams: {
-      midterm: 9.2,
-      final: 8.8,
-      quizzes: [9.0, 8.5, 9.5, 8.8]
-    },
-    progress: {
-      completed: 28,
-      total: 32
-    },
-    nextAssignment: {
-      title: "Bài tập về đạo hàm",
-      dueDate: "2024-11-15",
-      type: "assignment" as const
-    },
-    recentActivities: [
-      { date: "2024-11-01", activity: "Kiểm tra 15 phút", score: 9.0 },
-      { date: "2024-10-28", activity: "Nộp bài tập chương 3", score: 8.5 },
-      { date: "2024-10-25", activity: "Tham gia thảo luận nhóm" }
-    ]
-  },
-  {
-    id: "PHYS12",
-    name: "Vật lý",
-    code: "PHYS12",
-    teacher: "Lê Thị B", 
-    currentGrade: "B+",
-    currentScore: 8.5,
-    credits: 3,
-    attendance: 94.2,
-    assignments: {
-      total: 12,
-      completed: 11,
-      avgScore: 8.2
-    },
-    exams: {
-      midterm: 8.0,
-      quizzes: [8.5, 7.8, 8.8, 8.2]
-    },
-    progress: {
-      completed: 22,
-      total: 28
-    },
-    nextAssignment: {
-      title: "Thí nghiệm về sóng cơ",
-      dueDate: "2024-11-20",
-      type: "project" as const
-    },
-    recentActivities: [
-      { date: "2024-11-02", activity: "Bài lab thực hành", score: 8.5 },
-      { date: "2024-10-30", activity: "Kiểm tra giữa kỳ", score: 8.0 },
-      { date: "2024-10-27", activity: "Thuyết trình nhóm", score: 8.8 }
-    ]
-  }
-];
+type TabKey = "profile" | "analytics" | "subjects" | "achievements";
 
-const mockAchievements = [
-  {
-    id: "perfect_attendance",
-    title: "Chuyên cần xuất sắc",
-    description: "Đi học đầy đủ trong cả học kỳ",
-    icon: "🏆",
-    category: "attendance" as const,
-    rarity: "uncommon" as const,
-    isEarned: true,
-    earnedDate: "2024-01-15"
+const normalizeSubject = (subject: CurrentSubject): CurrentSubject => ({
+  ...subject,
+  attendance: subject.attendance ?? 0,
+  currentScore: subject.currentScore ?? 0,
+  currentGrade: subject.currentGrade ?? "--",
+  credits: subject.credits ?? 0,
+  assignments: {
+    total: subject.assignments?.total ?? 0,
+    completed: subject.assignments?.completed ?? 0,
+    avgScore: subject.assignments?.avgScore ?? 0,
   },
-  {
-    id: "top_student",
-    title: "Học sinh giỏi",
-    description: "Đạt GPA >= 8.5 trong học kỳ",
-    icon: "⭐",
-    category: "academic" as const,
-    rarity: "rare" as const,
-    isEarned: true,
-    earnedDate: "2024-06-20"
+  exams: {
+    midterm: subject.exams?.midterm,
+    finalExam: subject.exams?.finalExam ?? subject.exams?.final,
+    final: subject.exams?.final ?? subject.exams?.finalExam,
+    quizzes: subject.exams?.quizzes ?? [],
   },
-  {
-    id: "math_master",
-    title: "Bậc thầy Toán học",
-    description: "Đạt điểm 9+ trong tất cả bài kiểm tra Toán",
-    icon: "🧮",
-    category: "academic" as const,
-    rarity: "legendary" as const,
-    isEarned: false,
-    progress: {
-      current: 3,
-      target: 5
+  progress: {
+    completed: subject.progress?.completed ?? 0,
+    total: subject.progress?.total ?? 1,
+  },
+  nextAssignment: subject.nextAssignment
+    ? {
+      title: subject.nextAssignment.title ?? "Next assignment",
+      dueDate: subject.nextAssignment.dueDate ?? "",
+      type: subject.nextAssignment.type ?? "assignment",
     }
-  },
-  {
-    id: "participation_star",
-    title: "Ngôi sao tham gia",
-    description: "Tham gia tích cực trong 50 hoạt động lớp",
-    icon: "🌟",
-    category: "participation" as const,
-    rarity: "common" as const,
-    isEarned: true,
-    earnedDate: "2024-03-10"
-  },
-  {
-    id: "science_explorer",
-    title: "Nhà khám phá khoa học",
-    description: "Hoàn thành 10 thí nghiệm khoa học",
-    icon: "🔬",
-    category: "academic" as const,
-    rarity: "uncommon" as const,
-    isEarned: false,
-    progress: {
-      current: 7,
-      target: 10
-    }
-  }
-];
+    : undefined,
+  recentActivities: subject.recentActivities ?? [],
+});
 
 export const StudentManagementDashboard = () => {
-  const [activeTab, setActiveTab] = useState<'profile' | 'analytics' | 'subjects' | 'achievements'>('profile');
-  const [selectedSubject, setSelectedSubject] = useState<typeof mockSubjects[0] | null>(null);
+  const [activeTab, setActiveTab] = useState<TabKey>("profile");
+  const [selectedSubject, setSelectedSubject] = useState<CurrentSubject | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleSubjectDetails = (subjectId: string) => {
-    const subject = mockSubjects.find(s => s.id === subjectId);
+  const [studentId, setStudentId] = useState<string | undefined>();
+  const [subjects, setSubjects] = useState<CurrentSubject[]>([]);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [analytics, setAnalytics] = useState<StudentAnalyticsResponse | null>(null);
+
+  const [loadingSubjects, setLoadingSubjects] = useState(true);
+  const [loadingAchievements, setLoadingAchievements] = useState(true);
+  const [loadingAnalytics, setLoadingAnalytics] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const loadAll = async () => {
+      setError("");
+      setLoadingSubjects(true);
+      setLoadingAchievements(true);
+      setLoadingAnalytics(true);
+
+      try {
+        const profileRes = await studentManagementOps.getMyProfile();
+        if (!profileRes?.success || !profileRes.data?.userId) {
+          setError(profileRes?.message || "Could not load profile.");
+          setLoadingSubjects(false);
+          setLoadingAchievements(false);
+          setLoadingAnalytics(false);
+          return;
+        }
+
+        const id = profileRes.data.userId;
+        setStudentId(id);
+
+        const [subjectsRes, achievementsRes, analyticsRes] = await Promise.all([
+          studentManagementOps.getSubjects(id),
+          studentManagementOps.getAchievements(id),
+          studentManagementOps.getAnalytics(id),
+        ]);
+
+        if (subjectsRes?.success && Array.isArray(subjectsRes.data)) {
+          setSubjects(subjectsRes.data.map(normalizeSubject));
+        } else if (subjectsRes?.message) {
+          setError((prev) => prev || subjectsRes.message);
+        }
+        if (achievementsRes?.success && Array.isArray(achievementsRes.data)) {
+          setAchievements(achievementsRes.data);
+        } else if (achievementsRes?.message) {
+          setError((prev) => prev || achievementsRes.message);
+        }
+        if (analyticsRes?.success && analyticsRes.data) {
+          setAnalytics(analyticsRes.data as StudentAnalyticsResponse);
+        } else if (analyticsRes?.message) {
+          setError((prev) => prev || analyticsRes.message);
+        }
+      } catch (err: any) {
+        setError(err?.message ?? "Failed to load dashboard data.");
+      } finally {
+        setLoadingSubjects(false);
+        setLoadingAchievements(false);
+        setLoadingAnalytics(false);
+      }
+    };
+
+    loadAll();
+  }, []);
+
+  const handleSubjectDetails = async (subjectId: string) => {
+    if (!studentId) return;
+    const subject = subjects.find((s) => s.id === subjectId);
     if (subject) {
       setSelectedSubject(subject);
       setIsModalOpen(true);
+    }
+
+    try {
+      const detailRes = await studentManagementOps.getSubjectDetail(studentId, subjectId);
+      if (detailRes?.success && detailRes.data) {
+        const updated = normalizeSubject(detailRes.data);
+        setSelectedSubject(updated);
+        setSubjects((prev) => prev.map((s) => (s.id === subjectId ? updated : s)));
+      }
+    } catch (err) {
+      // best effort; ignore detail errors
     }
   };
 
@@ -156,56 +138,75 @@ export const StudentManagementDashboard = () => {
     setSelectedSubject(null);
   };
 
-  const handleTabClick = (tab: 'profile' | 'analytics' | 'subjects' | 'achievements') => {
-    console.log("Switching to tab:", tab);
+  const handleTabClick = (tab: TabKey) => {
     setActiveTab(tab);
   };
 
+  const stats = useMemo(() => {
+    const totalSubjects = subjects.length;
+    const avgScore =
+      totalSubjects === 0
+        ? 0
+        : subjects.reduce((sum, s) => sum + (s.currentScore ?? 0), 0) / totalSubjects;
+    const avgAttendance =
+      totalSubjects === 0
+        ? 0
+        : subjects.reduce((sum, s) => sum + (s.attendance ?? 0), 0) / totalSubjects;
+    const avgAssignmentCompletion =
+      totalSubjects === 0
+        ? 0
+        : subjects.reduce((sum, s) => {
+          const total = s.assignments?.total ?? 0;
+          const completed = s.assignments?.completed ?? 0;
+          return sum + (total === 0 ? 0 : completed / total);
+        }, 0) / totalSubjects;
+
+    return { totalSubjects, avgScore, avgAttendance, avgAssignmentCompletion };
+  }, [subjects]);
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      {error && <FormMessageAlert message={error} />}
+
       {/* Navigation Header - Fixed */}
       <div className="bg-white shadow-md border-b border-gray-200 flex-shrink-0">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex space-x-8">
             <button
-              onClick={() => handleTabClick('profile')}
-              className={`py-4 px-2 border-b-2 font-semibold text-sm transition-all duration-200 ${
-                activeTab === 'profile'
-                  ? 'border-gray-900 text-gray-900'
-                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
-              }`}
+              onClick={() => handleTabClick("profile")}
+              className={`py-4 px-2 border-b-2 font-semibold text-sm transition-all duration-200 ${activeTab === "profile"
+                  ? "border-gray-900 text-gray-900"
+                  : "border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300"
+                }`}
             >
-              Hồ sơ học sinh
+              Ho so hoc sinh
             </button>
             <button
-              onClick={() => handleTabClick('analytics')}
-              className={`py-4 px-2 border-b-2 font-semibold text-sm transition-all duration-200 ${
-                activeTab === 'analytics'
-                  ? 'border-gray-900 text-gray-900'
-                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
-              }`}
+              onClick={() => handleTabClick("analytics")}
+              className={`py-4 px-2 border-b-2 font-semibold text-sm transition-all duration-200 ${activeTab === "analytics"
+                  ? "border-gray-900 text-gray-900"
+                  : "border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300"
+                }`}
             >
-              Phân tích học tập
+              Phan tich hoc tap
             </button>
             <button
-              onClick={() => handleTabClick('subjects')}
-              className={`py-4 px-2 border-b-2 font-semibold text-sm transition-all duration-200 ${
-                activeTab === 'subjects'
-                  ? 'border-gray-900 text-gray-900'
-                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
-              }`}
+              onClick={() => handleTabClick("subjects")}
+              className={`py-4 px-2 border-b-2 font-semibold text-sm transition-all duration-200 ${activeTab === "subjects"
+                  ? "border-gray-900 text-gray-900"
+                  : "border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300"
+                }`}
             >
-              Môn học ({mockSubjects.length})
+              Mon hoc ({stats.totalSubjects})
             </button>
             <button
-              onClick={() => handleTabClick('achievements')}
-              className={`py-4 px-2 border-b-2 font-semibold text-sm transition-all duration-200 ${
-                activeTab === 'achievements'
-                  ? 'border-gray-900 text-gray-900'
-                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
-              }`}
+              onClick={() => handleTabClick("achievements")}
+              className={`py-4 px-2 border-b-2 font-semibold text-sm transition-all duration-200 ${activeTab === "achievements"
+                  ? "border-gray-900 text-gray-900"
+                  : "border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300"
+                }`}
             >
-              Thành tích ({mockAchievements.filter(a => a.isEarned).length}/{mockAchievements.length})
+              Thanh tich ({achievements.filter((a) => a.isEarned).length}/{achievements.length})
             </button>
           </div>
         </div>
@@ -214,75 +215,69 @@ export const StudentManagementDashboard = () => {
       {/* Tab Content - Scrollable */}
       <div className="flex-1 overflow-y-auto">
         <div className="py-6">
-          {activeTab === 'profile' && (
+          {activeTab === "profile" && (
             <div className="max-w-7xl mx-auto px-6">
               <StudentProfile />
             </div>
           )}
-          
-          {activeTab === 'analytics' && (
+
+          {activeTab === "analytics" && (
             <div className="max-w-7xl mx-auto px-6">
-              <LearningAnalytics />
+              <LearningAnalytics data={analytics} loading={loadingAnalytics} />
             </div>
           )}
-          
-          {activeTab === 'subjects' && (
+
+          {activeTab === "subjects" && (
             <div className="max-w-7xl mx-auto px-6">
               <div className="mb-6">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Môn học</h1>
-                <p className="text-gray-600">Theo dõi tiến độ và kết quả học tập từng môn</p>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Mon hoc</h1>
+                <p className="text-gray-600">Theo doi tien do va ket qua hoc tap tung mon</p>
               </div>
-              
+
               {/* Subject Statistics */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                 <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-200">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Tổng môn học</p>
-                      <p className="text-3xl font-bold text-gray-900">
-                        {mockSubjects.length}
-                      </p>
+                      <p className="text-sm font-medium text-gray-600">Tong mon hoc</p>
+                      <p className="text-3xl font-bold text-gray-900">{stats.totalSubjects}</p>
                     </div>
                     <div className="p-3 bg-gray-100 rounded-lg">
                       <BookOpen className="w-8 h-8 text-gray-700" />
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-200">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">GPA trung bình</p>
-                      <p className="text-3xl font-bold text-gray-900">
-                        {(mockSubjects.reduce((sum, s) => sum + s.currentScore, 0) / mockSubjects.length).toFixed(1)}
-                      </p>
+                      <p className="text-sm font-medium text-gray-600">GPA trung binh</p>
+                      <p className="text-3xl font-bold text-gray-900">{stats.avgScore.toFixed(1)}</p>
                     </div>
                     <div className="p-3 bg-gray-100 rounded-lg">
                       <BarChart3 className="w-8 h-8 text-gray-700" />
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-200">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Điểm danh TB</p>
-                      <p className="text-3xl font-bold text-gray-900">
-                        {(mockSubjects.reduce((sum, s) => sum + s.attendance, 0) / mockSubjects.length).toFixed(1)}%
-                      </p>
+                      <p className="text-sm font-medium text-gray-600">Diem danh TB</p>
+                      <p className="text-3xl font-bold text-gray-900">{stats.avgAttendance.toFixed(1)}%</p>
                     </div>
                     <div className="p-3 bg-gray-100 rounded-lg">
                       <CheckCircle2 className="w-8 h-8 text-gray-700" />
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-200">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Bài tập hoàn thành</p>
+                      <p className="text-sm font-medium text-gray-600">Bai tap hoan thanh</p>
                       <p className="text-3xl font-bold text-gray-900">
-                        {Math.round((mockSubjects.reduce((sum, s) => sum + (s.assignments.completed / s.assignments.total), 0) / mockSubjects.length) * 100)}%
+                        {Math.round(stats.avgAssignmentCompletion * 100)}%
                       </p>
                     </div>
                     <div className="p-3 bg-gray-100 rounded-lg">
@@ -291,57 +286,63 @@ export const StudentManagementDashboard = () => {
                   </div>
                 </div>
               </div>
-              
+
               {/* Subject Cards */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {mockSubjects.map((subject) => (
-                  <SubjectCard
-                    key={subject.id}
-                    subject={subject}
-                    onViewDetails={handleSubjectDetails}
-                  />
-                ))}
-              </div>
+              {loadingSubjects ? (
+                <div className="bg-white rounded-lg p-6 text-gray-600 border border-gray-200">Dang tai mon hoc...</div>
+              ) : subjects.length === 0 ? (
+                <div className="bg-white rounded-lg p-6 text-gray-600 border border-dashed border-gray-300">
+                  Chua co du lieu mon hoc
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {subjects.map((subject) => (
+                    <SubjectCard key={subject.id || subject.code} subject={subject} onViewDetails={handleSubjectDetails} />
+                  ))}
+                </div>
+              )}
             </div>
           )}
-          
-          {activeTab === 'achievements' && (
+
+          {activeTab === "achievements" && (
             <div className="max-w-7xl mx-auto px-6">
               <div className="mb-6">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Hệ thống thành tích</h1>
-                <p className="text-gray-600">Các huy hiệu và thành tích đã đạt được trong quá trình học tập</p>
-                
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">He thong thanh tich</h1>
+                <p className="text-gray-600">Theo doi cac huy hieu va thanh tich da dat duoc</p>
+
                 {/* Achievement Overview */}
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="bg-gray-900 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 text-white">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm opacity-90 font-medium">Đã đạt được</p>
-                        <p className="text-3xl font-bold">{mockAchievements.filter(a => a.isEarned).length}</p>
+                        <p className="text-sm opacity-90 font-medium">Da dat duoc</p>
+                        <p className="text-3xl font-bold">{achievements.filter((a) => a.isEarned).length}</p>
                       </div>
                       <div className="p-3 bg-white/20 rounded-lg">
                         <Trophy className="w-8 h-8" />
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 text-white">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm opacity-90 font-medium">Đang tiến bộ</p>
-                        <p className="text-3xl font-bold">{mockAchievements.filter(a => !a.isEarned && a.progress).length}</p>
+                        <p className="text-sm opacity-90 font-medium">Dang tien bo</p>
+                        <p className="text-3xl font-bold">
+                          {achievements.filter((a) => !a.isEarned && a.progress).length}
+                        </p>
                       </div>
                       <div className="p-3 bg-white/20 rounded-lg">
                         <Zap className="w-8 h-8" />
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="bg-gray-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 text-white">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm opacity-90 font-medium">Tổng cộng</p>
-                        <p className="text-3xl font-bold">{mockAchievements.length}</p>
+                        <p className="text-sm opacity-90 font-medium">Tong cong</p>
+                        <p className="text-3xl font-bold">{achievements.length}</p>
                       </div>
                       <div className="p-3 bg-white/20 rounded-lg">
                         <Target className="w-8 h-8" />
@@ -350,34 +351,30 @@ export const StudentManagementDashboard = () => {
                   </div>
                 </div>
               </div>
-              
-              {/* Featured Achievement Badges - Hiển thị AchievementBadge riêng lẻ */}
-              <div className="mb-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Thành tích nổi bật</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {(() => {
-                    // Lấy thành tích hiếm đã đạt được trước
-                    const rareEarned = mockAchievements.filter(a => a.isEarned && (a.rarity === 'rare' || a.rarity === 'legendary'));
-                    // Nếu không có, lấy bất kỳ thành tích đã đạt được nào
-                    const featured = rareEarned.length > 0 ? rareEarned : mockAchievements.filter(a => a.isEarned);
-                    return featured.slice(0, 3).map((achievement) => (
-                      <AchievementBadge
-                        key={achievement.id}
-                        achievement={achievement}
-                        size="large"
-                        showProgress={false}
-                      />
-                    ));
-                  })()}
+
+              {/* Featured Achievement Badges */}
+              {achievements.length > 0 && (
+                <div className="mb-8">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Noi bat</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {(achievements
+                      .filter((a) => a.isEarned && (a.rarity === "rare" || a.rarity === "legendary"))
+                      .concat(achievements.filter((a) => a.isEarned))
+                      .slice(0, 3) as Achievement[]
+                    ).map((achievement) => (
+                      <AchievementBadge key={achievement.id} achievement={achievement} size="large" showProgress={false} />
+                    ))}
+                  </div>
                 </div>
-              </div>
-              
-              {/* Achievement Grid Component - Tổng hợp tất cả AchievementBadge */}
-              {mockAchievements && mockAchievements.length > 0 ? (
-                <AchievementGrid achievements={mockAchievements} />
+              )}
+
+              {loadingAchievements ? (
+                <div className="bg-white rounded-lg p-6 text-gray-600 border border-gray-200">Dang tai thanh tich...</div>
+              ) : achievements.length > 0 ? (
+                <AchievementGrid achievements={achievements} />
               ) : (
-                <div className="bg-white rounded-lg p-8 text-center">
-                  <p className="text-gray-500">Không có dữ liệu thành tích</p>
+                <div className="bg-white rounded-lg p-8 text-center border border-dashed border-gray-300">
+                  <p className="text-gray-500">Chua co du lieu thanh tich</p>
                 </div>
               )}
             </div>
@@ -387,11 +384,7 @@ export const StudentManagementDashboard = () => {
 
       {/* Subject Detail Modal */}
       {selectedSubject && (
-        <SubjectDetailModal
-          subject={selectedSubject}
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-        />
+        <SubjectDetailModal subject={selectedSubject} isOpen={isModalOpen} onClose={handleCloseModal} />
       )}
     </div>
   );

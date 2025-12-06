@@ -14,8 +14,6 @@ func (repo *implRepository) buildCreateConversation(opts conversation.CreateOpti
 		ID:        uuid.New(),
 		Type:      opts.Type,
 		Name:      opts.Name,
-		Topic:     opts.Topic,
-		Avatar:    opts.Avatar,
 		CreatedBy: opts.CreatedBy,
 	}
 

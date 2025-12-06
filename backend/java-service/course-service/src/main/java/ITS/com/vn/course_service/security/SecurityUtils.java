@@ -3,7 +3,6 @@ package ITS.com.vn.course_service.security;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.jwt.Jwt;
 
 /**
  * Utility helpers for extracting user context from Authentication/JWT.
@@ -21,11 +20,9 @@ public final class SecurityUtils {
 
     public static String getUserId(Authentication authentication, boolean required) {
         if (authentication != null) {
-            if (authentication.getPrincipal() instanceof Jwt jwt) {
-                String userId = jwt.getClaimAsString("sub");
-                if (userId != null && !userId.isBlank()) {
-                    return userId;
-                }
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof String userIdStr) {
+                return userIdStr;
             }
             String name = authentication.getName();
             if (name != null && !name.isBlank()) {
@@ -39,10 +36,12 @@ public final class SecurityUtils {
         return null;
     }
 
+    // Deprecated: Use getUserId instead as User IDs are now UUID strings
     public static Long getUserIdAsLong(Authentication authentication) {
         return getUserIdAsLong(authentication, false);
     }
 
+    // Deprecated: Use getUserId instead as User IDs are now UUID strings
     public static Long getUserIdAsLong(Authentication authentication, boolean required) {
         String userId = getUserId(authentication, required);
         if (userId == null) {
@@ -52,8 +51,14 @@ public final class SecurityUtils {
             return Long.parseLong(userId);
         } catch (NumberFormatException ex) {
             log.warn("User id in JWT is not numeric: {}", userId);
+            // Fallback for legacy support or return null if not numeric
             if (required) {
-                throw new RuntimeException("User ID in token is not numeric");
+                // If required and not numeric, we might want to throw exception OR
+                // if we are transitioning, maybe we should just return null and let the caller
+                // handle it?
+                // But for now, let's throw to be safe if it's strictly required as Long.
+                // However, since we are migrating to String, callers should stop using this.
+                throw new RuntimeException("User ID in token is not numeric: " + userId);
             }
             return null;
         }

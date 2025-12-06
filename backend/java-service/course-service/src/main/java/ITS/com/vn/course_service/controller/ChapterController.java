@@ -37,7 +37,7 @@ public class ChapterController {
             @Valid @RequestBody CreateChapterRequest request,
             Authentication authentication) {
 
-        Long instructorId = SecurityUtils.getUserIdAsLong(authentication, true);
+        String instructorId = SecurityUtils.getUserId(authentication, true);
         ChapterResponse response = chapterService.createChapter(courseId, request, instructorId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -73,7 +73,7 @@ public class ChapterController {
             @Valid @RequestBody CreateChapterRequest request,
             Authentication authentication) {
 
-        Long instructorId = SecurityUtils.getUserIdAsLong(authentication, true);
+        String instructorId = SecurityUtils.getUserId(authentication, true);
         ChapterResponse response = chapterService.updateChapter(id, request, instructorId);
 
         return ResponseEntity.ok(response);
@@ -89,7 +89,7 @@ public class ChapterController {
             @Valid @RequestBody ReorderChaptersRequest request,
             Authentication authentication) {
 
-        Long instructorId = SecurityUtils.getUserIdAsLong(authentication, true);
+        String instructorId = SecurityUtils.getUserId(authentication, true);
         List<ChapterResponse> response = chapterService.reorderChapters(courseId, request, instructorId);
 
         return ResponseEntity.ok(response);
@@ -104,7 +104,7 @@ public class ChapterController {
             @PathVariable Long id,
             Authentication authentication) {
 
-        Long instructorId = SecurityUtils.getUserIdAsLong(authentication, true);
+        String instructorId = SecurityUtils.getUserId(authentication, true);
         chapterService.deleteChapter(id, instructorId);
 
         return ResponseEntity.noContent().build();

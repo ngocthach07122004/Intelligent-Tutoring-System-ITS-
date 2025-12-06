@@ -16,4 +16,7 @@ public interface GradebookRepository extends JpaRepository<Gradebook, Long> {
     Page<Gradebook> findByCourseIdAndStudentId(Long courseId, UUID studentId, Pageable pageable);
 
     List<Gradebook> findByStudentId(UUID studentId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT COUNT(DISTINCT g.studentId) FROM Gradebook g")
+    Long countDistinctStudentId();
 }

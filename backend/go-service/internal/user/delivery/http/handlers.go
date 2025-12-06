@@ -1,74 +1,254 @@
 package http
 
 import (
-	"net/http"
-
-	pkgErrors "init-src/pkg/errors"
+	"init-src/internal/models"
 	"init-src/pkg/response"
 
 	"github.com/gin-gonic/gin"
 )
 
-func (h *handler) List(c *gin.Context) {
-	users, err := h.repo.List(c.Request.Context())
+// @Summary signup
+// @Description Register a new user account
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param body body SignupRequest true "User signup info"
+// @Success 200 {object} SignUpResponse
+// @Failure 400 {object} response.Resp "Bad Request"
+// @Failure 500 {object} response.Resp "Internal Server Error"
+// @Router /api/v1/signup [POST]
+func (h handler) SignUp(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	req, err := h.processSignupRequest(c)
 	if err != nil {
-		response.Error(c, pkgErrors.NewHTTPError(http.StatusInternalServerError, "failed to list users"))
+		h.l.Warnf(ctx, "Failed to process signup request: %v", err)
+		mapErr := h.mapError(err)
+		response.Error(c, mapErr)
 		return
 	}
 
-	response.OK(c, gin.H{"users": newUserListResponse(users)})
+	b, err := h.uc.SignUp(ctx, models.Scope{}, req.toInput())
+	if err != nil {
+		h.l.Warnf(ctx, "Failed to sign up user: %v", err)
+		mapErr := h.mapError(err)
+		response.Error(c, mapErr)
+		return
+	}
+
+	response.OK(c, h.newSignUpResponse(b))
 }
 
-func (h *handler) Get(c *gin.Context) {
-	id := c.Param("id")
-	userModel, err := h.repo.GetUser(c.Request.Context(), id)
+// @Summary User login
+// @Description Login with user credentials
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param body body LoginRequest true "User login info"
+// @Success 200 {object} LoginResponse
+// @Failure 400 {object} response.Resp "Bad Request"
+// @Failure 401 {object} response.Resp "Unauthorized"
+// @Failure 500 {object} response.Resp "Internal Server Error"
+// @Router /api/v1/login [POST]
+func (h handler) Login(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	req, err := h.processLoginRequest(c)
 	if err != nil {
-		response.Error(c, pkgErrors.NewHTTPError(http.StatusNotFound, "user not found"))
+		h.l.Warnf(ctx, "Failed to process login request: %v", err)
+		mapErr := h.mapError(err)
+		response.Error(c, mapErr)
 		return
 	}
 
-	response.OK(c, newUserResponse(userModel))
+	token, err := h.uc.Login(ctx, req.toInput())
+	if err != nil {
+		h.l.Warnf(ctx, "Failed to login user: %v", err)
+		mapErr := h.mapError(err)
+		response.Error(c, mapErr)
+		return
+	}
+
+	response.OK(c, h.newLoginResponse(token))
 }
 
-func (h *handler) Create(c *gin.Context) {
-	var req userRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, pkgErrors.NewHTTPError(http.StatusBadRequest, "invalid request body"))
-		return
-	}
+// @Summary Get users list
+// @Description Get list of users with pagination and related data
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer JWT token"
+// @Param page query int false "Page number" default(1)
+// @Param limit query int false "Items per page" default(15)
+// @Param shop_id query string false "Filter by shop ID"
+// @Param region_id query string false "Filter by region ID"
+// @Param branch_id query string false "Filter by branch ID"
+// @Param department_id query string false "Filter by department ID"
+// @Success 200 {object} GetResponse
+// @Failure 400 {object} response.Resp "Bad Request"
+// @Failure 401 {object} response.Resp "Unauthorized"
+// @Failure 403 {object} response.Resp "Forbidden"
+// @Failure 500 {object} response.Resp "Internal Server Error"
+// @Router /api/v1/users [GET]
+func (h handler) Get(c *gin.Context) {
+	ctx := c.Request.Context()
 
-	created, err := h.repo.Create(c.Request.Context(), req.toCreateInput())
+	req, sc, err := h.processGetRequest(c)
 	if err != nil {
-		response.Error(c, pkgErrors.NewHTTPError(http.StatusBadRequest, err.Error()))
+		h.l.Warnf(ctx, "user.handlers.Get: %v", err)
+		mapErr := h.mapError(err)
+		response.Error(c, mapErr)
 		return
 	}
 
-	response.OK(c, newUserResponse(created))
+	output, err := h.uc.Get(ctx, sc, req)
+	if err != nil {
+		h.l.Warnf(ctx, "user.handlers.us.Get: %v", err)
+		mapErr := h.mapError(err)
+		response.Error(c, mapErr)
+		return
+	}
+
+	response.OK(c, h.newGetResponse(output))
 }
 
-func (h *handler) Update(c *gin.Context) {
-	id := c.Param("id")
-	var req updateUserRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, pkgErrors.NewHTTPError(http.StatusBadRequest, "invalid request body"))
-		return
-	}
-
-	updated, err := h.repo.Update(c.Request.Context(), id, req.toUpdateInput())
+// @Summary Get user by ID
+// @Description Get user details by ID with related data
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer JWT token"
+// @Param id path string true "User ID"
+// @Success 200 {object} GetByIDResponse
+// @Failure 400 {object} response.Resp "Bad Request"
+// @Failure 401 {object} response.Resp "Unauthorized"
+// @Failure 403 {object} response.Resp "Forbidden"
+// @Failure 404 {object} response.Resp "Not Found"
+// @Failure 500 {object} response.Resp "Internal Server Error"
+// @Router /api/v1/users/{id} [GET]
+func (h handler) GetByID(c *gin.Context) {
+	ctx := c.Request.Context()
+	sc, id, err := h.processGetByIDRequest(c)
 	if err != nil {
-		response.Error(c, pkgErrors.NewHTTPError(http.StatusNotFound, err.Error()))
+		h.l.Warnf(ctx, "user.handlers.GetByID: %v", err)
+		mapErr := h.mapError(err)
+		response.Error(c, mapErr)
 		return
 	}
 
-	response.OK(c, newUserResponse(updated))
+	output, err := h.uc.GetByID(ctx, sc, id)
+	if err != nil {
+		h.l.Warnf(ctx, "user.handlers.us.GetByID: %v", err)
+		mapErr := h.mapError(err)
+		response.Error(c, mapErr)
+		return
+	}
+
+	response.OK(c, h.newGetByIDResponse(output))
 }
 
-func (h *handler) Delete(c *gin.Context) {
-	id := c.Param("id")
-	if err := h.repo.Delete(c.Request.Context(), id); err != nil {
-		response.Error(c, pkgErrors.NewHTTPError(http.StatusNotFound, err.Error()))
+// @Summary Update user
+// @Description Update user details
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer JWT token"
+// @Param id path string true "User ID"
+// @Param body body UpdateRequest true "User info"
+// @Success 200 {object} UpdateResponse
+// @Failure 400 {object} response.Resp "Bad Request"
+// @Failure 401 {object} response.Resp "Unauthorized"
+// @Failure 403 {object} response.Resp "Forbidden"
+// @Failure 404 {object} response.Resp "Not Found"
+// @Failure 500 {object} response.Resp "Internal Server Error"
+// @Router /api/v1/users/{id} [PUT]
+func (h handler) Update(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	req, sc, id, err := h.processUpdateRequest(c)
+	if err != nil {
+		h.l.Warnf(ctx, "Failed to process update request: %v", err)
+		mapErr := h.mapError(err)
+		response.Error(c, mapErr)
 		return
 	}
 
-	response.OK(c, gin.H{"deleted_id": id})
+	user, err := h.uc.Update(ctx, sc, id, req.toInput())
+	if err != nil {
+		h.l.Warnf(ctx, "Failed to update user: %v", err)
+		mapErr := h.mapError(err)
+		response.Error(c, mapErr)
+		return
+	}
+
+	response.OK(c, h.newUpdateResponse(user))
+}
+
+// @Summary Delete user
+// @Description Delete a user
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer JWT token"
+// @Param id path string true "User ID"
+// @Success 200 {object} DeleteResponse
+// @Failure 400 {object} response.Resp "Bad Request"
+// @Failure 401 {object} response.Resp "Unauthorized"
+// @Failure 403 {object} response.Resp "Forbidden"
+// @Failure 404 {object} response.Resp "Not Found"
+// @Failure 500 {object} response.Resp "Internal Server Error"
+// @Router /api/v1/users/{id} [DELETE]
+func (h handler) Delete(c *gin.Context) {
+	ctx := c.Request.Context()
+	id, sc, err := h.processDeleteRequest(c)
+	if err != nil {
+		h.l.Warnf(ctx, "Failed to process delete request: %v", err)
+		mapErr := h.mapError(err)
+		response.Error(c, mapErr)
+		return
+	}
+
+	res, err := h.uc.Delete(ctx, sc, id)
+	if err != nil {
+		h.l.Warnf(ctx, "Failed to delete user: %v", err)
+		mapErr := h.mapError(err)
+		response.Error(c, mapErr)
+		return
+	}
+
+	response.OK(c, h.newDeleteResponse(res))
+}
+
+// @Summary Create user
+// @Description Create a new user
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer JWT token"
+// @Param body body CreateRequest true "User info"
+// @Success 200 {object} SignUpResponse
+// @Failure 400 {object} response.Resp "Bad Request"
+// @Failure 401 {object} response.Resp "Unauthorized"
+// @Failure 403 {object} response.Resp "Forbidden"
+// @Failure 500 {object} response.Resp "Internal Server Error"
+// @Router /api/v1/users [POST]
+func (h handler) Create(c *gin.Context) {
+	ctx := c.Request.Context()
+	req, sc, err := h.processCreateRequest(c)
+	if err != nil {
+		h.l.Warnf(ctx, "user.handlers.Create: %v", err)
+		mapErr := h.mapError(err)
+		response.Error(c, mapErr)
+		return
+	}
+
+	b, err := h.uc.Create(ctx, sc, req.toInput())
+	if err != nil {
+		h.l.Warnf(ctx, "user.handlers.Create: %v", err)
+		mapErr := h.mapError(err)
+		response.Error(c, mapErr)
+		return
+	}
+
+	response.OK(c, h.newCreateResponse(b))
 }

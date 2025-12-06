@@ -9,8 +9,6 @@ import (
 type CreateOptions struct {
 	Type      models.ConversationType
 	Name      *string // Optional for direct chats
-	Topic     *string
-	Avatar    *string
 	ClassID   *string // For class conversations
 	CreatedBy string  // MongoDB User ID
 }

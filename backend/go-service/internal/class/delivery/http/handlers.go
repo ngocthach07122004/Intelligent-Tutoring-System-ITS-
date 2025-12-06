@@ -41,8 +41,8 @@ func (h handler) create(c *gin.Context) {
 	response.OK(c, h.newDetailResp(cls))
 }
 
-// @Summary List user's classes
-// @Description Get list of classes where the authenticated user is a member, with pagination
+// @Summary List classes
+// @Description Get list of classes with pagination
 // @Tags Classes
 // @Accept json
 // @Produce json
@@ -332,48 +332,4 @@ func (h handler) joinByCode(c *gin.Context) {
 	}
 
 	response.OK(c, h.newDetailResp(cls))
-}
-
-// @Summary List current user's classes
-// @Description Get list of classes where the authenticated user is a member
-// @Tags Classes
-// @Accept json
-// @Produce json
-// @Param Authorization header string true "Bearer JWT token"
-// @Success 200 {object} GetResponse
-// @Failure 400 {object} response.Resp "Bad Request"
-// @Failure 401 {object} response.Resp "Unauthorized"
-// @Failure 500 {object} response.Resp "Internal Server Error"
-// @Router /users/me/classes [GET]
-func (h handler) listUserClasses(c *gin.Context) {
-	ctx := c.Request.Context()
-
-	// Get user ID from context (set by auth middleware)
-	userID := c.GetString("userId")
-	if userID == "" {
-		response.Unauthorized(c)
-		return
-	}
-
-	// Reuse processListRequest but override MemberID
-	req, pagin, sc, err := h.processListRequest(c)
-	if err != nil {
-		h.l.Warnf(ctx, "class.handler.listUserClasses.processListRequest: %s", err)
-		mapErr := h.mapError(err)
-		response.Error(c, mapErr)
-		return
-	}
-
-	input := req.toInput(pagin)
-	input.Filter.MemberID = userID
-
-	result, err := h.uc.Get(ctx, sc, input)
-	if err != nil {
-		h.l.Warnf(ctx, "class.handler.listUserClasses.uc.Get: %s", err)
-		mapErr := h.mapError(err)
-		response.Error(c, mapErr)
-		return
-	}
-
-	response.OK(c, h.newGetResponse(result.Classes, result.Pagin))
 }

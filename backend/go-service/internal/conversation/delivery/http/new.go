@@ -15,8 +15,6 @@ type Handler interface {
 	addParticipants(c *gin.Context)
 	getParticipants(c *gin.Context)
 	markAsRead(c *gin.Context)
-	getClassChannels(c *gin.Context)
-	createClassChannel(c *gin.Context)
 }
 
 type handler struct {

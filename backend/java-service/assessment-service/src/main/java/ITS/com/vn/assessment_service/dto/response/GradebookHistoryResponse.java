@@ -30,6 +30,8 @@ public class GradebookHistoryResponse {
         private Integer totalCredits;
         private Integer rank;
         private Integer totalStudents;
+        private Integer achievements;
+        private Double attendance;
         private List<SubjectRecord> subjects;
     }
 

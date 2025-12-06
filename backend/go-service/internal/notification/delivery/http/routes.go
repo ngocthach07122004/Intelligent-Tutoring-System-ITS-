@@ -9,7 +9,7 @@ import (
 // MapRoutes maps all notification-related routes
 func MapRoutes(r *gin.RouterGroup, mw middleware.Middleware, h Handler) {
 	notifications := r.Group("/notifications")
-	notifications.Use(mw.Auth())
+	notifications.Use(mw.Auth(), mw.Authorize())
 	{
 		// List notifications
 		notifications.GET("", h.list)

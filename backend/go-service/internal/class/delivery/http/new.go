@@ -17,7 +17,6 @@ type Handler interface {
 	removeMember(c *gin.Context)
 	listMembers(c *gin.Context)
 	joinByCode(c *gin.Context)
-	listUserClasses(c *gin.Context)
 }
 
 type handler struct {

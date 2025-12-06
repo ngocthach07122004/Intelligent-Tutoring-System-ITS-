@@ -36,7 +36,7 @@ public class LessonController {
             @Valid @RequestBody CreateLessonRequest request,
             Authentication authentication) {
 
-        Long instructorId = SecurityUtils.getUserIdAsLong(authentication, true);
+        String instructorId = SecurityUtils.getUserId(authentication, true);
         LessonResponse response = lessonService.createLesson(chapterId, request, instructorId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -72,7 +72,7 @@ public class LessonController {
             @Valid @RequestBody CreateLessonRequest request,
             Authentication authentication) {
 
-        Long instructorId = SecurityUtils.getUserIdAsLong(authentication, true);
+        String instructorId = SecurityUtils.getUserId(authentication, true);
         LessonResponse response = lessonService.updateLesson(id, request, instructorId);
 
         return ResponseEntity.ok(response);
@@ -87,7 +87,7 @@ public class LessonController {
             @PathVariable Long id,
             Authentication authentication) {
 
-        Long instructorId = SecurityUtils.getUserIdAsLong(authentication, true);
+        String instructorId = SecurityUtils.getUserId(authentication, true);
         lessonService.deleteLesson(id, instructorId);
 
         return ResponseEntity.noContent().build();

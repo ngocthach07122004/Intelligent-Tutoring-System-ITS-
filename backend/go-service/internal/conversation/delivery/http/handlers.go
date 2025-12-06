@@ -1,9 +1,6 @@
 package http
 
 import (
-	pkgErrors "init-src/pkg/errors"
-	"init-src/pkg/jwt"
-	"init-src/pkg/paginator"
 	"init-src/pkg/response"
 
 	"github.com/gin-gonic/gin"
@@ -262,82 +259,4 @@ func (h handler) markAsRead(c *gin.Context) {
 	}
 
 	response.OK(c, h.newMarkAsReadResponse())
-}
-
-// @Summary Get class channels
-// @Description Get list of channels in a class
-// @Tags Classes
-// @Accept json
-// @Produce json
-// @Param Authorization header string true "Bearer JWT token"
-// @Param id path string true "Class ID"
-// @Success 200 {object} GetResponse
-// @Failure 400 {object} response.Resp "Bad Request"
-// @Failure 401 {object} response.Resp "Unauthorized"
-// @Failure 403 {object} response.Resp "Forbidden"
-// @Failure 500 {object} response.Resp "Internal Server Error"
-// @Router /api/v1/classes/{id}/channels [GET]
-func (h handler) getClassChannels(c *gin.Context) {
-	ctx := c.Request.Context()
-	payload, ok := jwt.GetPayloadFromContext(ctx)
-	if !ok {
-		response.Error(c, pkgErrors.NewUnauthorizedHTTPError())
-		return
-	}
-	sc := jwt.NewScope(payload)
-
-	classID := c.Param("id")
-
-	channels, err := h.uc.GetClassChannels(ctx, sc, classID)
-	if err != nil {
-		response.Error(c, h.mapError(err))
-		return
-	}
-
-	resp := h.newGetResponse(channels, paginator.Paginator{
-		Total:       int64(len(channels)),
-		Count:       int64(len(channels)),
-		PerPage:     int64(len(channels)),
-		CurrentPage: 1,
-	})
-	response.OK(c, resp)
-}
-
-// @Summary Create class channel
-// @Description Create a new channel in a class
-// @Tags Classes
-// @Accept json
-// @Produce json
-// @Param Authorization header string true "Bearer JWT token"
-// @Param id path string true "Class ID"
-// @Param body body createChannelReq true "Channel info"
-// @Success 200 {object} detailResp
-// @Failure 400 {object} response.Resp "Bad Request"
-// @Failure 401 {object} response.Resp "Unauthorized"
-// @Failure 403 {object} response.Resp "Forbidden"
-// @Failure 500 {object} response.Resp "Internal Server Error"
-// @Router /api/v1/classes/{id}/channels [POST]
-func (h handler) createClassChannel(c *gin.Context) {
-	ctx := c.Request.Context()
-	payload, ok := jwt.GetPayloadFromContext(ctx)
-	if !ok {
-		response.Error(c, pkgErrors.NewUnauthorizedHTTPError())
-		return
-	}
-	sc := jwt.NewScope(payload)
-
-	classID := c.Param("id")
-	var req createChannelReq
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, errWrongBody)
-		return
-	}
-
-	conv, err := h.uc.CreateClassChannel(ctx, sc, req.toInput(classID))
-	if err != nil {
-		response.Error(c, h.mapError(err))
-		return
-	}
-
-	response.OK(c, h.newDetailResp(conv))
 }

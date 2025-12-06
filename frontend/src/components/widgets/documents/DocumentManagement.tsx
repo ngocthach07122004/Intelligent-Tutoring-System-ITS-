@@ -1,15 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CustomButton } from "../../ui/CustomButton";
-import { 
-  FileText, 
-  BookOpen, 
-  FileCheck, 
-  FolderOpen, 
-  Star, 
-  Search, 
-  Tag, 
+import {
+  FileText,
+  BookOpen,
+  FileCheck,
+  FolderOpen,
+  Star,
+  Search,
+  Tag,
   Calendar,
   User,
   Eye,
@@ -21,108 +21,145 @@ import {
   Share2,
   X
 } from "lucide-react";
+import { assessmentServiceApi } from "@/lib/BE-library/assessment-service-api";
+import {
+  DocumentResponse,
+  DocumentCategory,
+  DocumentStatisticsResponse
+} from "@/lib/BE-library/assessment-service-interfaces";
 
-interface Document {
-  id: string;
-  title: string;
-  content: string;
-  category: 'note' | 'assignment' | 'reference' | 'project';
-  course?: string;
-  createdAt: string;
-  updatedAt: string;
-  tags: string[];
-  isFavorite: boolean;
-}
-
-// Mock data
-const mockDocuments: Document[] = [
-  {
-    id: "1",
-    title: "Ghi chú Lập trình Python - Buổi 1",
-    content: "Các khái niệm cơ bản về biến, kiểu dữ liệu...",
-    category: 'note',
-    course: "CS101",
-    createdAt: "2024-09-01",
-    updatedAt: "2024-09-15",
-    tags: ["python", "programming", "basics"],
-    isFavorite: true
-  },
-  {
-    id: "2",
-    title: "Bài tập Toán cao cấp - Chapter 1",
-    content: "Giải các bài tập về ma trận và định thức...",
-    category: 'assignment',
-    course: "MATH201",
-    createdAt: "2024-09-05",
-    updatedAt: "2024-09-10",
-    tags: ["math", "homework", "matrices"],
-    isFavorite: false
-  },
-  {
-    id: "3",
-    title: "Tài liệu tham khảo - Data Structures",
-    content: "Sách và tài liệu về cấu trúc dữ liệu...",
-    category: 'reference',
-    course: "CS101",
-    createdAt: "2024-08-20",
-    updatedAt: "2024-08-20",
-    tags: ["reference", "data-structures"],
-    isFavorite: true
+// Helper to map category to label
+const getCategoryLabel = (category?: DocumentCategory) => {
+  switch (category) {
+    case 'NOTE': return '📝 Ghi chú';
+    case 'ASSIGNMENT': return '📋 Bài tập';
+    case 'REFERENCE': return '📚 Tài liệu';
+    case 'PROJECT': return '🎯 Dự án';
+    default: return '📄 Tài liệu';
   }
-];
+};
+
+const getCategoryColor = (category?: DocumentCategory) => {
+  switch (category) {
+    case 'NOTE': return 'bg-blue-100 text-blue-800 border-blue-200';
+    case 'ASSIGNMENT': return 'bg-orange-100 text-orange-800 border-orange-200';
+    case 'REFERENCE': return 'bg-green-100 text-green-800 border-green-200';
+    case 'PROJECT': return 'bg-purple-100 text-purple-800 border-purple-200';
+    default: return 'bg-gray-100 text-gray-800 border-gray-200';
+  }
+};
 
 export const DocumentManagement = () => {
-  const [documents, setDocuments] = useState<Document[]>(mockDocuments);
-  const [filter, setFilter] = useState<'all' | 'note' | 'assignment' | 'reference' | 'project'>('all');
+  const [documents, setDocuments] = useState<DocumentResponse[]>([]);
+  const [stats, setStats] = useState<DocumentStatisticsResponse | null>(null);
+  const [filter, setFilter] = useState<DocumentCategory | 'ALL'>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [showFavorites, setShowFavorites] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<DocumentResponse | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [newDocument, setNewDocument] = useState({
     title: '',
     content: '',
-    category: 'note' as 'note' | 'assignment' | 'reference' | 'project',
+    category: 'NOTE' as DocumentCategory,
     course: '',
     tags: [] as string[],
     tagInput: ''
   });
 
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'note': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'assignment': return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'reference': return 'bg-green-100 text-green-800 border-green-200';
-      case 'project': return 'bg-purple-100 text-purple-800 border-purple-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const [docsRes, statsRes] = await Promise.all([
+        assessmentServiceApi.listDocuments({
+          category: filter !== 'ALL' ? filter : undefined,
+          isFavorite: showFavorites ? true : undefined,
+          q: searchTerm || undefined
+        }),
+        assessmentServiceApi.getDocumentStats()
+      ]);
+
+      if (docsRes.success && docsRes.data) {
+        setDocuments(docsRes.data);
+      }
+      if (statsRes.success && statsRes.data) {
+        setStats(statsRes.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch documents", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const getCategoryLabel = (category: string) => {
-    switch (category) {
-      case 'note': return '📝 Ghi chú';
-      case 'assignment': return '📋 Bài tập';
-      case 'reference': return '📚 Tài liệu';
-      case 'project': return '🎯 Dự án';
-      default: return '';
+  useEffect(() => {
+    fetchData();
+  }, [filter, showFavorites, searchTerm]); // Debounce search in real app
+
+  const handleCreateDocument = async () => {
+    if (!newDocument.title.trim() || !newDocument.content.trim()) return;
+
+    try {
+      const res = await assessmentServiceApi.createDocument({
+        title: newDocument.title,
+        content: newDocument.content,
+        category: newDocument.category,
+        course: newDocument.course || undefined,
+        tags: newDocument.tags
+      });
+
+      if (res.success) {
+        setShowCreateModal(false);
+        setNewDocument({
+          title: '',
+          content: '',
+          category: 'NOTE',
+          course: '',
+          tags: [],
+          tagInput: ''
+        });
+        fetchData(); // Refresh list
+      }
+    } catch (error) {
+      console.error("Failed to create document", error);
     }
   };
 
-  const toggleFavorite = (id: string) => {
-    setDocuments(docs => 
-      docs.map(doc => 
+  const toggleFavorite = async (id: string, currentStatus: boolean) => {
+    // Optimistic update
+    setDocuments(docs =>
+      docs.map(doc =>
         doc.id === id ? { ...doc, isFavorite: !doc.isFavorite } : doc
       )
     );
+
+    if (selectedDocument?.id === id) {
+      setSelectedDocument(prev => prev ? { ...prev, isFavorite: !prev.isFavorite } : null);
+    }
+
+    try {
+      await assessmentServiceApi.toggleFavorite(id, { isFavorite: !currentStatus });
+      fetchData(); // Sync with server
+    } catch (error) {
+      console.error("Failed to toggle favorite", error);
+      fetchData(); // Revert on error
+    }
   };
 
-  const filteredDocuments = documents.filter(doc => {
-    const matchesFilter = filter === 'all' || doc.category === filter;
-    const matchesSearch = doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         doc.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         doc.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesFavorite = !showFavorites || doc.isFavorite;
-    return matchesFilter && matchesSearch && matchesFavorite;
-  });
+  const handleDeleteDocument = async (id: string) => {
+    if (!confirm("Bạn có chắc chắn muốn xóa tài liệu này?")) return;
+
+    try {
+      const res = await assessmentServiceApi.deleteDocument(id);
+      if (res.success) {
+        if (selectedDocument?.id === id) setSelectedDocument(null);
+        fetchData();
+      }
+    } catch (error) {
+      console.error("Failed to delete document", error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -135,7 +172,7 @@ export const DocumentManagement = () => {
             </h1>
             <p className="text-gray-600">Tổ chức và quản lý tài liệu học tập của bạn</p>
           </div>
-          <CustomButton 
+          <CustomButton
             onClick={() => setShowCreateModal(true)}
             className="bg-gray-900 hover:bg-gray-800 text-white flex items-center gap-2 shadow-md"
           >
@@ -151,7 +188,7 @@ export const DocumentManagement = () => {
               <div>
                 <p className="text-sm text-gray-600 font-medium">Tổng tài liệu</p>
                 <p className="text-3xl font-bold text-gray-900">
-                  {documents.length}
+                  {stats?.totalDocuments || 0}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
@@ -165,7 +202,7 @@ export const DocumentManagement = () => {
               <div>
                 <p className="text-sm text-gray-700 font-medium">Ghi chú</p>
                 <p className="text-3xl font-bold text-gray-900">
-                  {documents.filter(d => d.category === 'note').length}
+                  {stats?.notesCount || 0}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
@@ -179,7 +216,7 @@ export const DocumentManagement = () => {
               <div>
                 <p className="text-sm text-gray-700 font-medium">Bài tập</p>
                 <p className="text-3xl font-bold text-gray-900">
-                  {documents.filter(d => d.category === 'assignment').length}
+                  {stats?.assignmentsCount || 0}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
@@ -193,7 +230,7 @@ export const DocumentManagement = () => {
               <div>
                 <p className="text-sm text-gray-700 font-medium">Yêu thích</p>
                 <p className="text-3xl font-bold text-gray-900">
-                  {documents.filter(d => d.isFavorite).length}
+                  {stats?.favoritesCount || 0}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
@@ -220,11 +257,10 @@ export const DocumentManagement = () => {
               </div>
               <button
                 onClick={() => setShowFavorites(!showFavorites)}
-                className={`px-4 py-2.5 rounded-lg font-medium transition-all flex items-center gap-2 ${
-                  showFavorites
+                className={`px-4 py-2.5 rounded-lg font-medium transition-all flex items-center gap-2 ${showFavorites
                     ? 'bg-gray-900 text-white shadow-md'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                  }`}
               >
                 <Star className="w-4 h-4" />
                 Yêu thích
@@ -234,55 +270,50 @@ export const DocumentManagement = () => {
             {/* Filter Buttons */}
             <div className="flex gap-2 flex-wrap">
               <button
-                onClick={() => setFilter('all')}
-                className={`px-4 py-2.5 rounded-lg font-medium transition-all ${
-                  filter === 'all'
+                onClick={() => setFilter('ALL')}
+                className={`px-4 py-2.5 rounded-lg font-medium transition-all ${filter === 'ALL'
                     ? 'bg-gray-900 text-white shadow-md'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                  }`}
               >
                 Tất cả
               </button>
               <button
-                onClick={() => setFilter('note')}
-                className={`px-4 py-2.5 rounded-lg font-medium transition-all flex items-center gap-2 ${
-                  filter === 'note'
+                onClick={() => setFilter('NOTE')}
+                className={`px-4 py-2.5 rounded-lg font-medium transition-all flex items-center gap-2 ${filter === 'NOTE'
                     ? 'bg-gray-900 text-white shadow-md'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                  }`}
               >
                 <FileText className="w-4 h-4" />
                 Ghi chú
               </button>
               <button
-                onClick={() => setFilter('assignment')}
-                className={`px-4 py-2.5 rounded-lg font-medium transition-all flex items-center gap-2 ${
-                  filter === 'assignment'
+                onClick={() => setFilter('ASSIGNMENT')}
+                className={`px-4 py-2.5 rounded-lg font-medium transition-all flex items-center gap-2 ${filter === 'ASSIGNMENT'
                     ? 'bg-gray-900 text-white shadow-md'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                  }`}
               >
                 <FileCheck className="w-4 h-4" />
                 Bài tập
               </button>
               <button
-                onClick={() => setFilter('reference')}
-                className={`px-4 py-2.5 rounded-lg font-medium transition-all flex items-center gap-2 ${
-                  filter === 'reference'
+                onClick={() => setFilter('REFERENCE')}
+                className={`px-4 py-2.5 rounded-lg font-medium transition-all flex items-center gap-2 ${filter === 'REFERENCE'
                     ? 'bg-gray-900 text-white shadow-md'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                  }`}
               >
                 <BookOpen className="w-4 h-4" />
                 Tài liệu
               </button>
               <button
-                onClick={() => setFilter('project')}
-                className={`px-4 py-2.5 rounded-lg font-medium transition-all flex items-center gap-2 ${
-                  filter === 'project'
+                onClick={() => setFilter('PROJECT')}
+                className={`px-4 py-2.5 rounded-lg font-medium transition-all flex items-center gap-2 ${filter === 'PROJECT'
                     ? 'bg-gray-900 text-white shadow-md'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                  }`}
               >
                 <FolderOpen className="w-4 h-4" />
                 Dự án
@@ -293,7 +324,7 @@ export const DocumentManagement = () => {
 
         {/* Document Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredDocuments.map((doc) => (
+          {documents.map((doc) => (
             <div key={doc.id} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all cursor-pointer border border-gray-200">
               {/* Document Header */}
               <div className="p-6 border-b border-slate-100">
@@ -302,7 +333,10 @@ export const DocumentManagement = () => {
                     {getCategoryLabel(doc.category)}
                   </span>
                   <button
-                    onClick={() => toggleFavorite(doc.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFavorite(doc.id!, !!doc.isFavorite);
+                    }}
                     className={`hover:scale-110 transition-transform ${doc.isFavorite ? 'text-rose-500' : 'text-slate-400'}`}
                   >
                     <Star className={`w-5 h-5 ${doc.isFavorite ? 'fill-rose-500' : ''}`} />
@@ -320,7 +354,7 @@ export const DocumentManagement = () => {
               <div className="p-6">
                 {/* Tags */}
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {doc.tags.map((tag, index) => (
+                  {doc.tags?.map((tag, index) => (
                     <span
                       key={index}
                       className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full flex items-center gap-1"
@@ -335,11 +369,11 @@ export const DocumentManagement = () => {
                 <div className="text-xs text-gray-500 mb-4 space-y-1">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-3 h-3" />
-                    <span>Tạo: {new Date(doc.createdAt).toLocaleDateString('vi-VN')}</span>
+                    <span>Tạo: {doc.createdAt ? new Date(doc.createdAt).toLocaleDateString('vi-VN') : 'N/A'}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="w-3 h-3" />
-                    <span>Cập nhật: {new Date(doc.updatedAt).toLocaleDateString('vi-VN')}</span>
+                    <span>Cập nhật: {doc.updatedAt ? new Date(doc.updatedAt).toLocaleDateString('vi-VN') : 'N/A'}</span>
                   </div>
                   {doc.course && (
                     <div className="flex items-center gap-2">
@@ -361,7 +395,13 @@ export const DocumentManagement = () => {
                   <button className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700">
                     <Edit className="w-4 h-4" />
                   </button>
-                  <button className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (doc.id) handleDeleteDocument(doc.id);
+                    }}
+                    className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700"
+                  >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -371,7 +411,7 @@ export const DocumentManagement = () => {
         </div>
 
         {/* Empty State */}
-        {filteredDocuments.length === 0 && (
+        {documents.length === 0 && !isLoading && (
           <div className="bg-white rounded-xl shadow-lg p-12 text-center border border-gray-200">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <FileText className="w-8 h-8 text-gray-700" />
@@ -382,7 +422,7 @@ export const DocumentManagement = () => {
             <p className="text-gray-600 mb-4">
               Thử thay đổi bộ lọc hoặc tạo tài liệu mới
             </p>
-            <CustomButton 
+            <CustomButton
               onClick={() => setShowCreateModal(true)}
               className="bg-gray-900 hover:bg-gray-800 text-white flex items-center gap-2 mx-auto shadow-md"
             >
@@ -406,7 +446,7 @@ export const DocumentManagement = () => {
                 <ArrowLeft className="w-5 h-5" />
                 Quay lại
               </button>
-              
+
               <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
@@ -415,14 +455,12 @@ export const DocumentManagement = () => {
                         {getCategoryLabel(selectedDocument.category)}
                       </span>
                       <button
-                        onClick={() => toggleFavorite(selectedDocument.id)}
-                        className={`hover:scale-110 transition-transform ${
-                          selectedDocument.isFavorite ? 'text-rose-500' : 'text-gray-400'
-                        }`}
+                        onClick={() => toggleFavorite(selectedDocument.id!, !!selectedDocument.isFavorite)}
+                        className={`hover:scale-110 transition-transform ${selectedDocument.isFavorite ? 'text-rose-500' : 'text-gray-400'
+                          }`}
                       >
-                        <Star className={`w-5 h-5 ${
-                          selectedDocument.isFavorite ? 'fill-rose-500' : ''
-                        }`} />
+                        <Star className={`w-5 h-5 ${selectedDocument.isFavorite ? 'fill-rose-500' : ''
+                          }`} />
                       </button>
                     </div>
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -431,11 +469,11 @@ export const DocumentManagement = () => {
                     <div className="flex flex-wrap gap-4 text-sm text-gray-600">
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4" />
-                        <span>Tạo: {new Date(selectedDocument.createdAt).toLocaleDateString('vi-VN')}</span>
+                        <span>Tạo: {selectedDocument.createdAt ? new Date(selectedDocument.createdAt).toLocaleDateString('vi-VN') : 'N/A'}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4" />
-                        <span>Cập nhật: {new Date(selectedDocument.updatedAt).toLocaleDateString('vi-VN')}</span>
+                        <span>Cập nhật: {selectedDocument.updatedAt ? new Date(selectedDocument.updatedAt).toLocaleDateString('vi-VN') : 'N/A'}</span>
                       </div>
                       {selectedDocument.course && (
                         <div className="flex items-center gap-2">
@@ -463,7 +501,7 @@ export const DocumentManagement = () => {
 
                 {/* Tags */}
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {selectedDocument.tags.map((tag, index) => (
+                  {selectedDocument.tags?.map((tag, index) => (
                     <span
                       key={index}
                       className="px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded-full flex items-center gap-1 font-medium"
@@ -487,7 +525,7 @@ export const DocumentManagement = () => {
             </div>
 
             {/* Additional Sections based on Category */}
-            {selectedDocument.category === 'assignment' && (
+            {selectedDocument.category === 'ASSIGNMENT' && (
               <div className="mt-6 bg-white rounded-xl shadow-lg p-6 border border-gray-200">
                 <h2 className="text-xl font-bold text-gray-900 mb-4">Thông tin bài tập</h2>
                 <div className="grid grid-cols-2 gap-4">
@@ -503,7 +541,7 @@ export const DocumentManagement = () => {
               </div>
             )}
 
-            {selectedDocument.category === 'project' && (
+            {selectedDocument.category === 'PROJECT' && (
               <div className="mt-6 bg-white rounded-xl shadow-lg p-6 border border-gray-200">
                 <h2 className="text-xl font-bold text-gray-900 mb-4">Chi tiết dự án</h2>
                 <div className="space-y-4">
@@ -535,7 +573,7 @@ export const DocumentManagement = () => {
                   setNewDocument({
                     title: '',
                     content: '',
-                    category: 'note',
+                    category: 'NOTE',
                     course: '',
                     tags: [],
                     tagInput: ''
@@ -570,45 +608,41 @@ export const DocumentManagement = () => {
                 </label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <button
-                    onClick={() => setNewDocument({ ...newDocument, category: 'note' })}
-                    className={`p-3 rounded-lg border-2 transition-all ${
-                      newDocument.category === 'note'
+                    onClick={() => setNewDocument({ ...newDocument, category: 'NOTE' })}
+                    className={`p-3 rounded-lg border-2 transition-all ${newDocument.category === 'NOTE'
                         ? 'border-gray-900 bg-gray-50'
                         : 'border-gray-200 hover:border-gray-300'
-                    }`}
+                      }`}
                   >
                     <FileText className="w-5 h-5 mx-auto mb-1 text-gray-700" />
                     <span className="text-sm font-medium text-gray-900">Ghi chú</span>
                   </button>
                   <button
-                    onClick={() => setNewDocument({ ...newDocument, category: 'assignment' })}
-                    className={`p-3 rounded-lg border-2 transition-all ${
-                      newDocument.category === 'assignment'
+                    onClick={() => setNewDocument({ ...newDocument, category: 'ASSIGNMENT' })}
+                    className={`p-3 rounded-lg border-2 transition-all ${newDocument.category === 'ASSIGNMENT'
                         ? 'border-gray-900 bg-gray-50'
                         : 'border-gray-200 hover:border-gray-300'
-                    }`}
+                      }`}
                   >
                     <FileCheck className="w-5 h-5 mx-auto mb-1 text-gray-700" />
                     <span className="text-sm font-medium text-gray-900">Bài tập</span>
                   </button>
                   <button
-                    onClick={() => setNewDocument({ ...newDocument, category: 'reference' })}
-                    className={`p-3 rounded-lg border-2 transition-all ${
-                      newDocument.category === 'reference'
+                    onClick={() => setNewDocument({ ...newDocument, category: 'REFERENCE' })}
+                    className={`p-3 rounded-lg border-2 transition-all ${newDocument.category === 'REFERENCE'
                         ? 'border-gray-900 bg-gray-50'
                         : 'border-gray-200 hover:border-gray-300'
-                    }`}
+                      }`}
                   >
                     <BookOpen className="w-5 h-5 mx-auto mb-1 text-gray-700" />
                     <span className="text-sm font-medium text-gray-900">Tài liệu</span>
                   </button>
                   <button
-                    onClick={() => setNewDocument({ ...newDocument, category: 'project' })}
-                    className={`p-3 rounded-lg border-2 transition-all ${
-                      newDocument.category === 'project'
+                    onClick={() => setNewDocument({ ...newDocument, category: 'PROJECT' })}
+                    className={`p-3 rounded-lg border-2 transition-all ${newDocument.category === 'PROJECT'
                         ? 'border-gray-900 bg-gray-50'
                         : 'border-gray-200 hover:border-gray-300'
-                    }`}
+                      }`}
                   >
                     <FolderOpen className="w-5 h-5 mx-auto mb-1 text-gray-700" />
                     <span className="text-sm font-medium text-gray-900">Dự án</span>
@@ -719,7 +753,7 @@ export const DocumentManagement = () => {
                   setNewDocument({
                     title: '',
                     content: '',
-                    category: 'note',
+                    category: 'NOTE',
                     course: '',
                     tags: [],
                     tagInput: ''
@@ -730,31 +764,7 @@ export const DocumentManagement = () => {
                 Hủy
               </button>
               <button
-                onClick={() => {
-                  if (newDocument.title.trim() && newDocument.content.trim()) {
-                    const newDoc: Document = {
-                      id: Date.now().toString(),
-                      title: newDocument.title,
-                      content: newDocument.content,
-                      category: newDocument.category,
-                      course: newDocument.course || undefined,
-                      createdAt: new Date().toISOString().split('T')[0],
-                      updatedAt: new Date().toISOString().split('T')[0],
-                      tags: newDocument.tags,
-                      isFavorite: false
-                    };
-                    setDocuments([newDoc, ...documents]);
-                    setShowCreateModal(false);
-                    setNewDocument({
-                      title: '',
-                      content: '',
-                      category: 'note',
-                      course: '',
-                      tags: [],
-                      tagInput: ''
-                    });
-                  }
-                }}
+                onClick={handleCreateDocument}
                 disabled={!newDocument.title.trim() || !newDocument.content.trim()}
                 className="flex-1 px-6 py-2.5 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-lg font-medium text-white transition-colors"
               >

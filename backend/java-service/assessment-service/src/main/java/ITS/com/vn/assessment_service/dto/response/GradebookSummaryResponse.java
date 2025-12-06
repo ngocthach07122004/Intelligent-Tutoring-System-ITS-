@@ -22,6 +22,8 @@ public class GradebookSummaryResponse {
     private Integer completedCourses;
     private Integer inProgressCourses;
     private Integer rank; // Thứ hạng (optional)
+    private Integer totalStudents; // Tổng số sinh viên trong khóa/lớp (cho rank)
+    private Integer totalAchievements; // Tổng số thành tích đạt được
     private String semester; // Học kỳ hiện tại
 
     private List<CourseGradeDetail> courseGrades;

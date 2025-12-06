@@ -11,6 +11,7 @@ import (
 func NewScope(payload Payload) models.Scope {
 	return models.Scope{
 		UserID: payload.UserID,
+		ShopID: payload.ShopID,
 	}
 }
 

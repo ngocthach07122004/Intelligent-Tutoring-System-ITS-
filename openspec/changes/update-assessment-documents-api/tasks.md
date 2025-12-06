@@ -1,0 +1,14 @@
+- [x] **1. Persistence & model**
+  - [x] Add/replace the documents table with UUID id, user_id, title, content, category enum (note|assignment|reference|project), optional course, tags array/jsonb, is_favorite flag, created_at/updated_at timestamps, and indexes for user/category/favorite/updated_at.
+  - [x] Update the JPA entity/DTOs to the new shape (content, category, course, tags, isFavorite) and drop reliance on url/type fields.
+- [x] **2. Service logic & validation**
+  - [x] Implement per-user ownership enforcement via JWT subject on all document operations.
+  - [x] Add filtering/search for category, isFavorite, and q across title/content/tags; default sort by updatedAt desc; compute stats counts per category and favorites.
+- [x] **3. API layer**
+  - [x] Move controller base path to `/api/v1/documents` and add endpoints for stats, list with filters, create, get, update, favorite toggle, and delete with request/response bodies per spec.
+  - [x] Apply validation for required fields and respond with 404/403 for non-owned resources without leaking existence.
+- [x] **4. Integration surfaces**
+  - [x] Update API docs and gateway routing (if needed) to point `/api/v1/documents/**` to the assessment-service.
+- [x] **5. Testing**
+  - [x] Add unit tests for service filtering/stats/ownership and controller contract tests for all endpoints.
+  - [x] Add integration tests covering create/list filters/get/update/favorite/delete and authorization behavior.

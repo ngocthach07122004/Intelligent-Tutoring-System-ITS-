@@ -60,31 +60,25 @@ func (r editReq) toInput(conversationID, messageID string) message.EditMessageIn
 
 // detailResp represents a single message in responses
 type detailResp struct {
-	// ID Unique identifier of the message
+	// Unique identifier of the message
 	ID string `json:"id"`
-	// ConversationID Conversation ID
+	// Conversation ID
 	ConversationID string `json:"conversation_id"`
-	// SenderID Sender User ID
-	SenderID   string `json:"sender_id"`
-	// SenderName Name of the message sender
-	SenderName string `json:"sender_name"`
-	// SenderAvatar Avatar URL of the message sender
-	SenderAvatar string `json:"sender_avatar"`
-	// SenderRole Role of the message sender (e.g., "Teacher", "Student")
-	SenderRole string `json:"sender_role"`
-	// Seq Sequence number in conversation
+	// Sender User ID (MongoDB ObjectID)
+	SenderID string `json:"sender_id"`
+	// Sequence number in conversation
 	Seq int64 `json:"seq"`
-	// Type Type of message (text, system)
+	// Type of message (text, system)
 	Type models.MessageType `json:"type"`
-	// Content Content of the message
+	// Content of the message
 	Content string `json:"content"`
-	// Attachments Attachments (JSON array)
+	// Attachments (JSON array)
 	Attachments *string `json:"attachments,omitempty"`
-	// ReplyToID Reply to message ID
+	// Reply to message ID
 	ReplyToID *string `json:"reply_to_id,omitempty"`
-	// EditedAt When the message was edited (null if not edited)
+	// When the message was edited (null if not edited)
 	EditedAt *response.DateTime `json:"edited_at,omitempty"`
-	// CreatedAt Creation timestamp
+	// Creation timestamp
 	CreatedAt response.DateTime `json:"created_at"`
 }
 
@@ -100,14 +94,11 @@ func (h handler) newDeleteResp(d string) deleteResp {
 	}
 }
 
-func (h handler) newDetailResp(d message.MessageWithSender) detailResp {
+func (h handler) newDetailResp(d models.Message) detailResp {
 	resp := detailResp{
 		ID:             d.ID.String(),
 		ConversationID: d.ConversationID.String(),
-		SenderID:       d.Sender.ID,
-		SenderName:     d.Sender.Name,
-		SenderAvatar:   d.Sender.Avatar,
-		SenderRole:     d.Sender.Role,
+		SenderID:       d.SenderID,
 		Seq:            d.Seq,
 		Type:           d.Type,
 		Content:        d.Content,
@@ -197,7 +188,7 @@ type GetResponse struct {
 	Pagin    paginator.PaginatorResponse `json:"pagin"`
 }
 
-func (h handler) newGetResponse(d []message.MessageWithSender, pagin paginator.Paginator) GetResponse {
+func (h handler) newGetResponse(d []models.Message, pagin paginator.Paginator) GetResponse {
 	var resp GetResponse
 	for _, v := range d {
 		resp.Messages = append(resp.Messages, h.newDetailResp(v))
@@ -212,7 +203,7 @@ type GetByIDResponse struct {
 	Message detailResp `json:"message"`
 }
 
-func (h handler) newGetByIDResponse(d message.MessageWithSender) GetByIDResponse {
+func (h handler) newGetByIDResponse(d models.Message) GetByIDResponse {
 	return GetByIDResponse{
 		Message: h.newDetailResp(d),
 	}
@@ -223,7 +214,7 @@ type SearchResponse struct {
 	Total    int          `json:"total"`
 }
 
-func (h handler) newSearchResponse(messages []message.MessageWithSender) SearchResponse {
+func (h handler) newSearchResponse(messages []models.Message) SearchResponse {
 	var resp SearchResponse
 	for _, m := range messages {
 		resp.Messages = append(resp.Messages, h.newDetailResp(m))

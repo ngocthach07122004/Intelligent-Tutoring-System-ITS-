@@ -15,10 +15,10 @@ import { studentManagementOps } from "@/lib/BE-library/student-management-api";
 import { TokenStorage } from "@/lib/utils/tokenStorage";
 
 export const AuthForm = () => {
-  const [username, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(""); // State for success message
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
   const router = useRouter();
@@ -68,16 +68,13 @@ export const AuthForm = () => {
         setError(response.message || "Login failed. Please try again.");
       }
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "An error occurred during login.");
+    } finally {
+      setLoading(false);
+      setIsDisabled(false);
     }
-
-    if (!username.includes("@") || password.length < 4) {
-      setError("Email or password is not correct.");
-    }
-
-    setLoading(false);
-    setIsDisabled(false);
   };
+
   return (
     <div>
       <div className="flex flex-col space-y-1.5 p-6">
@@ -93,14 +90,14 @@ export const AuthForm = () => {
         noValidate
         className="p-6 pt-0 flex flex-col gap-4"
       >
-        {/* Email Field */}
+        {/* Username/Email Field */}
         <TextField
-          label="Email"
-          type="email"
-          id="email"
+          label="Username or Email"
+          type="text"
+          id="username"
           icon={<MailIcon />}
           value={username}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => setUsername(e.target.value)}
         />
         {/* Password Field */}
         <TextField
@@ -118,10 +115,8 @@ export const AuthForm = () => {
             Forgot your password?
           </a>
         </TextField>
-        {success && <FormMessageAlert message={success} success={true} />}{" "}
-        {/* Display success message */}
-        {error && <FormMessageAlert message={error} />}{" "}
-        {/* Display error message */}
+        {success && <FormMessageAlert message={success} success={true} />}
+        {error && <FormMessageAlert message={error} />}
         {/* Submit Button */}
         <CustomButton
           type="submit"
@@ -154,7 +149,7 @@ export const AuthForm = () => {
         </div>
       </form>
       <p className="items-center p-6 pt-0 flex justify-center gap-1 text-sm text-muted-foreground">
-        Don’t have an account?{" "}
+        Don't have an account?{" "}
         <a
           href="/auth/signup"
           className="underline font-semibold text-gray-700"

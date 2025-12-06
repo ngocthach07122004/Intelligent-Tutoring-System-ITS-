@@ -10,20 +10,16 @@ import (
 type ConversationType string
 
 const (
-	ConversationDirect  ConversationType = "direct"  // 1-1 chat
-	ConversationGroup   ConversationType = "group"   // Group chat
-	ConversationClass   ConversationType = "class"   // Class discussion (General)
-	ConversationChannel ConversationType = "channel" // Class Channel
+	ConversationDirect ConversationType = "direct" // 1-1 chat
+	ConversationGroup  ConversationType = "group"  // Group chat
+	ConversationClass  ConversationType = "class"  // Class discussion
 )
 
 // Conversation represents a chat conversation
 type Conversation struct {
 	ID        uuid.UUID        `db:"id" json:"id"`
 	Type      ConversationType `db:"type" json:"type"`
-	Name      *string          `db:"name" json:"name,omitempty"`     // Nullable for direct chats
-	Topic     *string          `db:"topic" json:"topic,omitempty"`   // Channel Topic
-	Avatar    *string          `db:"avatar" json:"avatar,omitempty"` // For DM/Group/Channel
-	Role      *string          `json:"role,omitempty"`               // For DM: Role of the other participant
+	Name      *string          `db:"name" json:"name,omitempty"` // Nullable for direct chats
 	ClassID   *uuid.UUID       `db:"class_id" json:"class_id,omitempty"`
 	CreatedBy string           `db:"created_by" json:"created_by"` // MongoDB User ID
 	CreatedAt time.Time        `db:"created_at" json:"created_at"`

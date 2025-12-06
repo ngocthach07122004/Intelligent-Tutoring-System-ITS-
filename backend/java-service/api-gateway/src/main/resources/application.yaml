@@ -43,7 +43,7 @@ spring:
         - id: user-profile-service
           uri: lb://user-profile-service
           predicates:
-            - Path=${app.api-prefix}/profiles/**,${app.api-prefix}/groups/**,${app.api-prefix}/schedules/**
+            - Path=${app.api-prefix}/profiles/**,${app.api-prefix}/profile/**,${app.api-prefix}/groups/**,${app.api-prefix}/schedules/**,${app.api-prefix}/students/**,${app.api-prefix}/documents/**,${app.api-prefix}/performance/**
 
         - id: course-service
           uri: lb://course-service
@@ -76,3 +76,10 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka/}
+
+logging:
+  level:
+    com.netflix.discovery.shared.resolver.aws.ConfigClusterResolver: WARN
+
+jwt:
+  secret: ${JWT_SECRET:your-256-bit-secret-key-change-this-in-production-please-make-it-long-enough}

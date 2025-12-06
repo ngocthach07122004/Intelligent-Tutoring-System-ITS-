@@ -21,9 +21,9 @@ func (repo *implRepository) Create(ctx context.Context, tx postgres.Tx, opts con
 	}
 
 	query := `
-		INSERT INTO conversations (id, type, name, topic, avatar, class_id, created_by, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-		RETURNING id, type, name, topic, avatar, class_id, created_by, created_at, updated_at, deleted_at
+		INSERT INTO conversations (id, type, name, class_id, created_by, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		RETURNING id, type, name, class_id, created_by, created_at, updated_at, deleted_at
 	`
 
 	now := time.Now()
@@ -31,8 +31,6 @@ func (repo *implRepository) Create(ctx context.Context, tx postgres.Tx, opts con
 		conv.ID,
 		conv.Type,
 		conv.Name,
-		conv.Topic,
-		conv.Avatar,
 		conv.ClassID,
 		conv.CreatedBy,
 		now,
@@ -41,8 +39,6 @@ func (repo *implRepository) Create(ctx context.Context, tx postgres.Tx, opts con
 		&conv.ID,
 		&conv.Type,
 		&conv.Name,
-		&conv.Topic,
-		&conv.Avatar,
 		&conv.ClassID,
 		&conv.CreatedBy,
 		&conv.CreatedAt,
@@ -367,52 +363,6 @@ func (repo *implRepository) GetParticipants(ctx context.Context, conversationID 
 		return nil, fmt.Errorf("invalid conversation ID: %w", err)
 	}
 
-	// Check conversation type
-	var cType models.ConversationType
-	var classID *uuid.UUID
-	err = repo.db.QueryRow(ctx, "SELECT type, class_id FROM conversations WHERE id = $1", convID).Scan(&cType, &classID)
-	if err != nil {
-		repo.l.Errorf(ctx, "conversation.postgres.GetParticipants.CheckType", err)
-		return nil, err
-	}
-
-	if cType == models.ConversationChannel {
-		if classID == nil {
-			return nil, fmt.Errorf("channel has no class_id")
-		}
-		query := `
-			SELECT id, $1::uuid, user_id, 0, NULL, joined_at, created_at
-			FROM class_members
-			WHERE class_id = $2 AND deleted_at IS NULL
-		`
-		rows, err := repo.db.Query(ctx, query, convID, classID)
-		if err != nil {
-			repo.l.Errorf(ctx, "conversation.postgres.GetParticipants.QueryChannel", err)
-			return nil, err
-		}
-		defer rows.Close()
-
-		var participants []models.ConversationParticipant
-		for rows.Next() {
-			var participant models.ConversationParticipant
-			err := rows.Scan(
-				&participant.ID,
-				&participant.ConversationID,
-				&participant.UserID,
-				&participant.LastReadSeq,
-				&participant.LeftAt,
-				&participant.JoinedAt,
-				&participant.CreatedAt,
-			)
-			if err != nil {
-				repo.l.Errorf(ctx, "conversation.postgres.GetParticipants.ScanChannel", err)
-				return nil, err
-			}
-			participants = append(participants, participant)
-		}
-		return participants, nil
-	}
-
 	query := `
 		SELECT id, conversation_id, user_id, last_read_seq, left_at, joined_at, created_at
 		FROM conversation_participants
@@ -496,16 +446,8 @@ func (repo *implRepository) IsParticipant(ctx context.Context, conversationID st
 
 	query := `
 		SELECT EXISTS(
-			SELECT 1 
-            FROM conversations c
-            LEFT JOIN conversation_participants cp ON cp.conversation_id = c.id AND cp.user_id = $2 AND cp.left_at IS NULL
-            LEFT JOIN class_members cm ON cm.class_id = c.class_id AND cm.user_id = $2 AND cm.deleted_at IS NULL
-			WHERE c.id = $1
-            AND (
-                (c.type = 'channel' AND cm.id IS NOT NULL)
-                OR
-                (c.type != 'channel' AND cp.id IS NOT NULL)
-            )
+			SELECT 1 FROM conversation_participants
+			WHERE conversation_id = $1 AND user_id = $2 AND left_at IS NULL
 		)
 	`
 
@@ -580,55 +522,3 @@ func (repo *implRepository) GetDirectConversation(ctx context.Context, user1ID s
 
 	return conv, nil
 }
-
-func (repo *implRepository) GetClassChannels(ctx context.Context, classID string) ([]models.Conversation, error) {
-	cID, err := uuid.Parse(classID)
-	if err != nil {
-		repo.l.Errorf(ctx, "conversation.postgres.GetClassChannels.ParseID", err)
-		return nil, fmt.Errorf("invalid class ID: %w", err)
-	}
-
-	query := `
-		SELECT id, type, name, topic, avatar, class_id, created_by, created_at, updated_at, deleted_at
-		FROM conversations
-		WHERE class_id = $1 AND type = 'channel' AND deleted_at IS NULL
-		ORDER BY created_at ASC
-	`
-
-	rows, err := repo.db.Query(ctx, query, cID)
-	if err != nil {
-		repo.l.Errorf(ctx, "conversation.postgres.GetClassChannels.Query", err)
-		return nil, err
-	}
-	defer rows.Close()
-
-	var conversations []models.Conversation
-	for rows.Next() {
-		var conv models.Conversation
-		err := rows.Scan(
-			&conv.ID,
-			&conv.Type,
-			&conv.Name,
-			&conv.Topic,
-			&conv.Avatar,
-			&conv.ClassID,
-			&conv.CreatedBy,
-			&conv.CreatedAt,
-			&conv.UpdatedAt,
-			&conv.DeletedAt,
-		)
-		if err != nil {
-			repo.l.Errorf(ctx, "conversation.postgres.GetClassChannels.Scan", err)
-			return nil, err
-		}
-		conversations = append(conversations, conv)
-	}
-
-	if err := rows.Err(); err != nil {
-		repo.l.Errorf(ctx, "conversation.postgres.GetClassChannels.Err", err)
-		return nil, err
-	}
-
-	return conversations, nil
-}
-

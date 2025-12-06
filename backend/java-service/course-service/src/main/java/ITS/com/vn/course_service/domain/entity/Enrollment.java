@@ -30,7 +30,7 @@ public class Enrollment {
     private Course course;
 
     @Column(name = "student_id", nullable = false)
-    private Long studentId; // User ID từ Identity Service
+    private String studentId; // User ID từ Identity Service
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)

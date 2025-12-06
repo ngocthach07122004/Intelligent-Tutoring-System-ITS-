@@ -25,7 +25,7 @@ public class EnrollmentResponse {
     private String courseThumbnailUrl;
     private String instructorName;
     private String instructorAvatarUrl;
-    private Long studentId;
+    private String studentId;
     private EnrollmentStatus status;
     private Integer progress;
     private LocalDateTime enrolledAt;

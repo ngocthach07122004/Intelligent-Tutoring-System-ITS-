@@ -11,42 +11,40 @@ import (
 	"init-src/internal/models"
 	"init-src/internal/outbox"
 
-	// "init-src/internal/user" // Import the user package
-
 	"github.com/google/uuid"
 )
 
-func (uc *implUsecase) Send(ctx context.Context, sc models.Scope, input message.SendInput) (message.MessageWithSender, error) {
+func (uc *implUsecase) Send(ctx context.Context, sc models.Scope, input message.SendInput) (models.Message, error) {
 	// Validate input
 	if strings.TrimSpace(input.ConversationID) == "" {
-		return message.MessageWithSender{}, fmt.Errorf("conversation ID cannot be empty")
+		return models.Message{}, fmt.Errorf("conversation ID cannot be empty")
 	}
 	if strings.TrimSpace(input.Content) == "" {
-		return message.MessageWithSender{}, fmt.Errorf("message content cannot be empty")
+		return models.Message{}, fmt.Errorf("message content cannot be empty")
 	}
 
 	// Check if user is participant
 	isParticipant, err := uc.conversationRepo.IsParticipant(ctx, input.ConversationID, sc.UserID)
 	if err != nil {
 		uc.l.Warnf(ctx, "message.Usecase.Send.IsParticipant error: %v", err)
-		return message.MessageWithSender{}, err
+		return models.Message{}, err
 	}
 	if !isParticipant {
-		return message.MessageWithSender{}, ErrNotParticipant
+		return models.Message{}, ErrNotParticipant
 	}
 
 	// Get conversation participants for event
 	participants, err := uc.conversationRepo.GetParticipants(ctx, input.ConversationID)
 	if err != nil {
 		uc.l.Warnf(ctx, "message.Usecase.Send.GetParticipants error: %v", err)
-		return message.MessageWithSender{}, err
+		return models.Message{}, err
 	}
 
 	// Begin transaction
 	tx, err := uc.db.BeginTx(ctx)
 	if err != nil {
 		uc.l.Warnf(ctx, "message.Usecase.Send.BeginTx error: %v", err)
-		return message.MessageWithSender{}, err
+		return models.Message{}, err
 	}
 	defer tx.Rollback(ctx)
 
@@ -61,7 +59,7 @@ func (uc *implUsecase) Send(ctx context.Context, sc models.Scope, input message.
 	})
 	if err != nil {
 		uc.l.Warnf(ctx, "message.Usecase.Send.Create error: %v", err)
-		return message.MessageWithSender{}, err
+		return models.Message{}, err
 	}
 
 	// Build participant user IDs list
@@ -88,32 +86,19 @@ func (uc *implUsecase) Send(ctx context.Context, sc models.Scope, input message.
 	})
 	if err != nil {
 		uc.l.Warnf(ctx, "message.Usecase.Send.CreateOutbox error: %v", err)
-		return message.MessageWithSender{}, err
+		return models.Message{}, err
 	}
 
 	// Commit transaction
 	if err := tx.Commit(ctx); err != nil {
 		uc.l.Warnf(ctx, "message.Usecase.Send.Commit error: %v", err)
-		return message.MessageWithSender{}, err
+		return models.Message{}, err
 	}
 
-	// Enrich message with sender details
-	enrichedMsgs, err := uc.enrichMessagesWithSenderDetails(ctx, []models.Message{msg})
-	if err != nil {
-		uc.l.Warnf(ctx, "message.Usecase.Send.enrichMessagesWithSenderDetails error: %v", err)
-		// Return with basic sender details (ID only) if enrichment fails
-		return message.MessageWithSender{
-			Message: msg,
-			Sender: message.SenderDetails{
-				ID: sc.UserID,
-			},
-		}, nil
-	}
-
-	return enrichedMsgs[0], nil
+	return msg, nil
 }
 
-func (uc *implUsecase) List(ctx context.Context, sc models.Scope, input message.ListInput) ([]message.MessageWithSender, error) {
+func (uc *implUsecase) List(ctx context.Context, sc models.Scope, input message.ListInput) ([]models.Message, error) {
 	// Validate input
 	if strings.TrimSpace(input.Filter.ConversationID) == "" {
 		return nil, fmt.Errorf("conversation ID cannot be empty")
@@ -138,14 +123,7 @@ func (uc *implUsecase) List(ctx context.Context, sc models.Scope, input message.
 		return nil, err
 	}
 
-	// Enrich messages with sender details
-	enrichedMsgs, err := uc.enrichMessagesWithSenderDetails(ctx, messages)
-	if err != nil {
-		uc.l.Warnf(ctx, "message.Usecase.List.enrichMessagesWithSenderDetails error: %v", err)
-		return nil, err
-	}
-
-	return enrichedMsgs, nil
+	return messages, nil
 }
 
 func (uc *implUsecase) Get(ctx context.Context, sc models.Scope, input message.GetInput) (message.GetOutput, error) {
@@ -174,15 +152,8 @@ func (uc *implUsecase) Get(ctx context.Context, sc models.Scope, input message.G
 		return message.GetOutput{}, err
 	}
 
-	// Enrich messages with sender details
-	enrichedMsgs, err := uc.enrichMessagesWithSenderDetails(ctx, messages)
-	if err != nil {
-		uc.l.Warnf(ctx, "message.Usecase.Get.enrichMessagesWithSenderDetails error: %v", err)
-		return message.GetOutput{}, err
-	}
-
 	return message.GetOutput{
-		Messages: enrichedMsgs, // Use enriched messages
+		Messages: messages,
 		Pagin:    pag,
 	}, nil
 }
@@ -221,28 +192,21 @@ func (uc *implUsecase) GetOne(ctx context.Context, sc models.Scope, input messag
 		return message.GetOneOutput{}, ErrNotParticipant
 	}
 
-	// Enrich message with sender details
-	enrichedMsgs, err := uc.enrichMessagesWithSenderDetails(ctx, []models.Message{msg})
-	if err != nil {
-		uc.l.Warnf(ctx, "message.Usecase.GetOne.enrichMessagesWithSenderDetails error: %v", err)
-		return message.GetOneOutput{}, err
-	}
-
 	return message.GetOneOutput{
-		Message: enrichedMsgs[0], // Use enriched message
+		Message: msg,
 	}, nil
 }
 
-func (uc *implUsecase) Edit(ctx context.Context, sc models.Scope, input message.EditMessageInput) (message.MessageWithSender, error) {
+func (uc *implUsecase) Edit(ctx context.Context, sc models.Scope, input message.EditMessageInput) (models.Message, error) {
 	// Validate input
 	if strings.TrimSpace(input.Filter.ID) == "" {
-		return message.MessageWithSender{}, fmt.Errorf("message ID cannot be empty")
+		return models.Message{}, fmt.Errorf("message ID cannot be empty")
 	}
 	if strings.TrimSpace(input.Filter.ConversationID) == "" {
-		return message.MessageWithSender{}, fmt.Errorf("conversation ID cannot be empty")
+		return models.Message{}, fmt.Errorf("conversation ID cannot be empty")
 	}
 	if strings.TrimSpace(input.Content) == "" {
-		return message.MessageWithSender{}, fmt.Errorf("message content cannot be empty")
+		return models.Message{}, fmt.Errorf("message content cannot be empty")
 	}
 
 	// Get existing message
@@ -250,31 +214,31 @@ func (uc *implUsecase) Edit(ctx context.Context, sc models.Scope, input message.
 	if err != nil {
 		uc.l.Warnf(ctx, "message.Usecase.Edit.GetByID error: %v", err)
 		if strings.Contains(err.Error(), "no rows") {
-			return message.MessageWithSender{}, ErrNotFound
+			return models.Message{}, ErrNotFound
 		}
-		return message.MessageWithSender{}, err
+		return models.Message{}, err
 	}
 
 	// ⚠️ CRITICAL: Validate message belongs to the conversation in URL
 	if msg.ConversationID.String() != input.Filter.ConversationID {
-		return message.MessageWithSender{}, ErrMessageNotInConversation
+		return models.Message{}, ErrMessageNotInConversation
 	}
 
 	// Check if user is the sender
 	if msg.SenderID != sc.UserID {
-		return message.MessageWithSender{}, ErrNotSender
+		return models.Message{}, ErrNotSender
 	}
 
 	// Cannot edit system messages
 	if msg.Type == models.MessageTypeSystem {
-		return message.MessageWithSender{}, ErrCannotEditSystemMessage
+		return models.Message{}, ErrCannotEditSystemMessage
 	}
 
 	// Begin transaction
 	tx, err := uc.db.BeginTx(ctx)
 	if err != nil {
 		uc.l.Warnf(ctx, "message.Usecase.Edit.BeginTx error: %v", err)
-		return message.MessageWithSender{}, err
+		return models.Message{}, err
 	}
 	defer tx.Rollback(ctx)
 
@@ -285,14 +249,14 @@ func (uc *implUsecase) Edit(ctx context.Context, sc models.Scope, input message.
 	})
 	if err != nil {
 		uc.l.Warnf(ctx, "message.Usecase.Edit.Update error: %v", err)
-		return message.MessageWithSender{}, err
+		return models.Message{}, err
 	}
 
 	// Get conversation participants for event
 	participants, err := uc.conversationRepo.GetParticipants(ctx, msg.ConversationID.String())
 	if err != nil {
 		uc.l.Warnf(ctx, "message.Usecase.Edit.GetParticipants error: %v", err)
-		return message.MessageWithSender{}, err
+		return models.Message{}, err
 	}
 
 	// Build participant user IDs list
@@ -319,29 +283,16 @@ func (uc *implUsecase) Edit(ctx context.Context, sc models.Scope, input message.
 	})
 	if err != nil {
 		uc.l.Warnf(ctx, "message.Usecase.Edit.CreateOutbox error: %v", err)
-		return message.MessageWithSender{}, err
+		return models.Message{}, err
 	}
 
 	// Commit transaction
 	if err := tx.Commit(ctx); err != nil {
 		uc.l.Warnf(ctx, "message.Usecase.Edit.Commit error: %v", err)
-		return message.MessageWithSender{}, err
+		return models.Message{}, err
 	}
 
-	// Enrich message with sender details
-	enrichedMsgs, err := uc.enrichMessagesWithSenderDetails(ctx, []models.Message{updated})
-	if err != nil {
-		uc.l.Warnf(ctx, "message.Usecase.Edit.enrichMessagesWithSenderDetails error: %v", err)
-		// Return with basic sender details (ID only) if enrichment fails
-		return message.MessageWithSender{
-			Message: updated,
-			Sender: message.SenderDetails{
-				ID: sc.UserID,
-			},
-		}, nil
-	}
-
-	return enrichedMsgs[0], nil
+	return updated, nil
 }
 
 func (uc *implUsecase) Delete(ctx context.Context, sc models.Scope, input message.DeleteInput) (string, error) {
@@ -433,7 +384,7 @@ func (uc *implUsecase) Delete(ctx context.Context, sc models.Scope, input messag
 	return result, nil
 }
 
-func (uc *implUsecase) Search(ctx context.Context, sc models.Scope, input message.SearchInput) ([]message.MessageWithSender, error) {
+func (uc *implUsecase) Search(ctx context.Context, sc models.Scope, input message.SearchInput) ([]models.Message, error) {
 	// Validate input
 	if strings.TrimSpace(input.ConversationID) == "" {
 		return nil, fmt.Errorf("conversation ID cannot be empty")
@@ -459,66 +410,10 @@ func (uc *implUsecase) Search(ctx context.Context, sc models.Scope, input messag
 		return nil, err
 	}
 
-	// Enrich messages with sender details
-	enrichedMsgs, err := uc.enrichMessagesWithSenderDetails(ctx, messages)
-	if err != nil {
-		uc.l.Warnf(ctx, "message.Usecase.Search.enrichMessagesWithSenderDetails error: %v", err)
-		return nil, err
-	}
-
-	return enrichedMsgs, nil
+	return messages, nil
 }
 
-// enrichMessagesWithSenderDetails fetches sender details for a slice of messages
-// and maps them to MessageWithSender DTOs.
-func (uc *implUsecase) enrichMessagesWithSenderDetails(ctx context.Context, msgs []models.Message) ([]message.MessageWithSender, error) {
-	// Collect unique sender IDs
-	senderIDs := make([]string, 0)
-	senderIDMap := make(map[string]struct{})
-	for _, msg := range msgs {
-		if _, ok := senderIDMap[msg.SenderID]; !ok {
-			senderIDs = append(senderIDs, msg.SenderID)
-			senderIDMap[msg.SenderID] = struct{}{}
-		}
-	}
-
-	// Fetch sender details
-	users, err := uc.userRepo.GetUsers(ctx, senderIDs)
-	if err != nil {
-		uc.l.Warnf(ctx, "message.Usecase.enrichMessagesWithSenderDetails.GetUsers error: %v", err)
-		return nil, err
-	}
-
-	userMap := make(map[string]models.User)
-	for _, user := range users {
-		userMap[user.ID.Hex()] = user
-	}
-
-	// Map messages to MessageWithSender DTOs
-	enrichedMsgs := make([]message.MessageWithSender, 0, len(msgs))
-	for _, msg := range msgs {
-		senderDetails := message.SenderDetails{
-			ID: msg.SenderID,
-			// Default values in case user not found
-			Name:   "Unknown",
-			Avatar: "",
-			Role:   "Unknown",
-		}
-		if user, ok := userMap[msg.SenderID]; ok {
-			senderDetails.Name = user.Name
-			senderDetails.Avatar = user.Avatar // Assuming Avatar field exists in models.User
-			senderDetails.Role = user.Role     // Assuming Role field exists in models.User
-		}
-
-		enrichedMsgs = append(enrichedMsgs, message.MessageWithSender{
-			Message: msg,
-			Sender:  senderDetails,
-		})
-	}
-	return enrichedMsgs, nil
-}
-
-func (uc *implUsecase) SearchGlobal(ctx context.Context, sc models.Scope, input message.SearchGlobalInput) ([]message.MessageWithSender, error) {
+func (uc *implUsecase) SearchGlobal(ctx context.Context, sc models.Scope, input message.SearchGlobalInput) ([]models.Message, error) {
 	// Validate input
 	if strings.TrimSpace(input.Query) == "" {
 		return nil, fmt.Errorf("search query cannot be empty")
@@ -531,12 +426,5 @@ func (uc *implUsecase) SearchGlobal(ctx context.Context, sc models.Scope, input 
 		return nil, err
 	}
 
-	// Enrich messages with sender details
-	enrichedMsgs, err := uc.enrichMessagesWithSenderDetails(ctx, messages)
-	if err != nil {
-		uc.l.Warnf(ctx, "message.Usecase.SearchGlobal.enrichMessagesWithSenderDetails error: %v", err)
-		return nil, err
-	}
-
-	return enrichedMsgs, nil
+	return messages, nil
 }

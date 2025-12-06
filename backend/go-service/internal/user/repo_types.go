@@ -1,17 +1,26 @@
 package user
 
-// CreateInput captures the minimum information for creating a mock user.
-type CreateInput struct {
-	Username string
-	Name     string
-	Avatar   string
-	Role     string
+import models "init-src/internal/models"
+
+type CreateOptions struct {
+	Username     string
+	Email        string
+	Password     string
+	Role         string
+	ShopID       string
+	RegionID     string
+	BranchID     string
+	DepartmentID string
 }
 
-// UpdateInput captures optional fields for updating a mock user.
-type UpdateInput struct {
-	Username *string
-	Name     *string
-	Avatar   *string
-	Role     *string
+type UpdateOptions struct {
+	User         models.User
+	Username     string
+	Email        string
+	Password     string
+	Role         string
+	ShopID       string
+	RegionID     string
+	BranchID     string
+	DepartmentID string
 }
