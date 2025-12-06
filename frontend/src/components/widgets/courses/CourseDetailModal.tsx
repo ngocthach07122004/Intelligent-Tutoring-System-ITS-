@@ -21,6 +21,40 @@ import {
   LessonResponse,
   LessonType,
 } from "@/lib/BE-library/course-service-interfaces";
+// fallback chapters
+const fallbackChapters: ChapterResponse[] = [
+  {
+    id: 1,
+    title: "Chương 1: Giới thiệu",
+    lessons: [
+      {
+        id: 1,
+        title: "Làm quen khoá học",
+        type: "VIDEO",
+        content: "https://www.youtube.com/watch?v=Mkif3AqLBCQ",
+        isCompleted: false,
+      },
+      {
+        id: 2,
+        title: "Tài liệu hướng dẫn",
+        type: "TEXT",
+        isCompleted: false,
+      },
+    ],
+  },
+  {
+    id: 2,
+    title: "Chương 2: Nội dung chính",
+    lessons: [
+      {
+        id: 3,
+        title: "Bài học nền tảng",
+        type: "QUIZ",
+        isCompleted: false,
+      },
+    ],
+  },
+];
 
 interface CourseDetailModalProps {
   course: EnrollmentResponse;
@@ -48,7 +82,79 @@ const formatDuration = (minutes?: number) => {
   return mins ? `${hours}g ${mins}p` : `${hours}g`;
 };
 
+const LessonVideoView = ({ lesson, onClose }: { lesson: LessonResponse; onClose: () => void }) => {
+  const [embedError, setEmbedError] = useState(false);
+
+  const extractYoutubeId = (input?: string): string | null => {
+    if (!input) return null;
+    const s = input.trim();
+
+    if (/^[A-Za-z0-9_-]{11}$/.test(s)) return s;
+
+    const patterns = [
+      /(?:v=)([A-Za-z0-9_-]{11})/,            
+      /(?:youtu\.be\/)([A-Za-z0-9_-]{11})/,    
+      /(?:embed\/)([A-Za-z0-9_-]{11})/,       
+      /([A-Za-z0-9_-]{11})/                  
+    ];
+
+    for (const p of patterns) {
+      const m = s.match(p);
+      if (m && m[1]) return m[1];
+    }
+    return null;
+  };
+
+  const rawUrl = lesson.content;
+  const videoId = extractYoutubeId(rawUrl);
+  const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1` : null;
+
+  return (
+    <div className="fixed inset-0 bg-black/70 z-[999] flex items-center justify-center p-4">
+      <div className="bg-white rounded-xl max-w-3xl w-full overflow-hidden">
+        <div className="flex justify-between items-center p-4 border-b">
+          <h2 className="font-semibold text-lg">{lesson.title}</h2>
+          <div className="flex items-center gap-3">
+            <button onClick={onClose} className="text-gray-600 hover:text-black">✕</button>
+          </div>
+        </div>
+
+        {embedUrl && !embedError ? (
+          <div className="aspect-video w-full bg-black">
+            <iframe
+              className="w-full h-full"
+              src={embedUrl}
+              title={lesson.title}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              onError={() => {
+                console.warn("Iframe error for", embedUrl);
+                setEmbedError(true);
+              }}
+            />
+          </div>
+        ) : (
+          <div className="p-6">
+            <div className="mb-4 text-gray-700">
+              Không thể nhúng video — có thể link không hợp lệ hoặc video không cho phép nhúng.
+            </div>
+            <div className="flex gap-3">
+              <a href={rawUrl || "#"} target="_blank" rel="noreferrer" className="px-4 py-2 bg-gray-900 text-white rounded-md">
+                Mở video trên YouTube
+              </a>
+              <button onClick={() => setEmbedError(false)} className="px-4 py-2 border rounded-md">
+                Thử lại
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 export const CourseDetailModal = ({ course, onClose }: CourseDetailModalProps) => {
+  const [selectedLesson, setSelectedLesson] = useState<LessonResponse | null>(null);
   const [detail, setDetail] = useState<CourseResponse | null>(null);
   const [chapters, setChapters] = useState<ChapterResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,6 +188,9 @@ export const CourseDetailModal = ({ course, onClose }: CourseDetailModalProps) =
 
         if (chaptersRes.success && Array.isArray(chaptersRes.data)) {
           setChapters(chaptersRes.data as ChapterResponse[]);
+        }
+        else {
+          setChapters(fallbackChapters);
         }
       } catch (err) {
         if (!cancelled) {
@@ -247,15 +356,16 @@ export const CourseDetailModal = ({ course, onClose }: CourseDetailModalProps) =
                         {(module.lessons ?? []).map((lesson) => (
                           <div
                             key={lesson.id}
-                            className={`p-4 flex items-center justify-between hover:bg-gray-50 transition-colors ${
-                              lesson.isCompleted ? "bg-green-50/60" : ""
-                            }`}
+                            onClick={() => {
+                              if (lesson.type === "VIDEO") setSelectedLesson(lesson);
+                            }}
+                            className="p-4 flex items-center justify-between hover:bg-gray-50 cursor-pointer transition-colors 
+                              ${lesson.isCompleted ? 'bg-green-50/60' : ''}"
                           >
                             <div className="flex items-center gap-3 flex-1">
                               <div
-                                className={`p-2 rounded-lg ${
-                                  lesson.isCompleted ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-600"
-                                }`}
+                                className={`p-2 rounded-lg ${lesson.isCompleted ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-600"
+                                  }`}
                               >
                                 {lessonTypeIcon(lesson.type)}
                               </div>
@@ -280,7 +390,23 @@ export const CourseDetailModal = ({ course, onClose }: CourseDetailModalProps) =
                   ))}
                 </div>
               </div>
+              {selectedLesson?.content && (
+                <div className="mt-8 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                  <h2 className="text-xl font-semibold mb-4 text-gray-800">
+                    {selectedLesson.title}
+                  </h2>
 
+                  <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${selectedLesson.content.split("v=")[1]}`}
+                      className="w-full h-full"
+                      title="YouTube video"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+                </div>
+              )}
               <div>
                 <h2 className="text-2xl font-bold text-gray-800 mb-4">Yeu cau / Prerequisites</h2>
                 {detail?.prerequisites?.length ? (
@@ -361,7 +487,12 @@ export const CourseDetailModal = ({ course, onClose }: CourseDetailModalProps) =
                     )}
                   </div>
                 </div>
-
+                {selectedLesson && (
+                  <LessonVideoView
+                    lesson={selectedLesson}
+                    onClose={() => setSelectedLesson(null)}
+                  />
+                )}
                 <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
                   <h3 className="font-semibold text-gray-800 mb-4">Thong tin khac</h3>
                   <div className="space-y-2 text-sm text-gray-700">
