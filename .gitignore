@@ -141,3 +141,5 @@ compile-log.txt
 .pytest_cache
 .vscode
 .idea
+
+**/target/
