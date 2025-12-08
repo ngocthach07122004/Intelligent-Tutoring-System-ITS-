@@ -21,7 +21,7 @@ import {
     EnrollmentStatusResponse,
 } from "./course-service-interfaces";
 
-const COURSE_SERVICE_BASE_URL = process.env.NEXT_PUBLIC_COURSE_API_BASE_URL ?? "http://localhost:8084/api/v1";
+const COURSE_SERVICE_BASE_URL = process.env.NEXT_PUBLIC_COURSE_API_BASE_URL ?? "http://localhost:8181/api/v1";
 
 const unwrap = (response: AxiosResponse) => ({
     success: response?.data?.success ??
@@ -53,7 +53,7 @@ export class CourseServiceApi {
         this.authToken = token;
     }
 
-    private config(params?: Record<string, unknown>) {
+    private config(params?: any) {
         const headers = this.authToken
             ? { Authorization: `Bearer ${this.authToken}` }
             : undefined;

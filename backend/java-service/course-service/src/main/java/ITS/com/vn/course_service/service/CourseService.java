@@ -525,6 +525,15 @@ public class CourseService {
         if (instructorId == null) {
             return;
         }
+
+        // Validate UUID format to avoid 500 errors from user-profile-service
+        try {
+            java.util.UUID.fromString(instructorId);
+        } catch (IllegalArgumentException e) {
+            log.warn("Skipping profile fetch for invalid instructor ID: {}", instructorId);
+            return;
+        }
+
         try {
             UserProfileResponse profile = profileClient.getProfile(String.valueOf(instructorId));
             if (profile != null) {
