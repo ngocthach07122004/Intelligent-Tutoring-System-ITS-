@@ -61,7 +61,7 @@ export default function Sidebar() {
         {isOpen ? (
           <div className="flex items-center gap-2">
             <LogoIcon className="text-foreground p-2 border rounded-md w-fit h-fit" />
-            <span className="font-bold text-lg">Acme</span>
+            <span className="font-bold text-lg">SmartEDU</span>
           </div>
         ) : (
           <button
